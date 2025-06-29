@@ -52,4 +52,10 @@ class CentroDistribuicaoOrchestrationService(
         eventPublisherPort.publish(CentroDistribuicaoDeletadoEvent(id))
     }
 
+    override fun synchronizeAll(): Map<String, Int> {
+        return this.centroDistribuicaoQueryRepositoryPort.synchronizeFromWriteRepository(
+            this.centroDistribuicaoPersistRepositoryPort.findAllForSync()
+        )
+    }
+
 }

@@ -6,4 +6,5 @@ import java.util.*
 interface CentroDistribuicaoPersistRepositoryPort {
     fun salvar(centroDistribuicaoModel: CentroDistribuicaoModel): CentroDistribuicaoModel
     fun deletarPorId(id: UUID)
+    fun findAllForSync(): List<CentroDistribuicaoModel>
 }

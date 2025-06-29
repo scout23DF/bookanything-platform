@@ -28,4 +28,14 @@ class CentroDistribuicaoJpaAdapter(
     override fun deletarPorId(id: UUID) {
         repository.deleteById(id)
     }
+
+    override fun findAllForSync(): List<CentroDistribuicaoModel> {
+        return repository.findAll().map { entity ->
+            CentroDistribuicaoModel(
+                id = entity.id!!,
+                nome = entity.nome!!,
+                localizacao = entity.localizacao!!
+            )
+        }
+    }
 }

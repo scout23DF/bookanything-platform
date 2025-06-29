@@ -8,4 +8,5 @@ interface CentroDistribuicaoQueryRepositoryPort {
     fun buscarPorId(id: UUID): CentroDistribuicaoModel?
     fun buscarTodos(): List<CentroDistribuicaoModel>
     fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<CentroDistribuicaoModel>
+    fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList : List<CentroDistribuicaoModel>?): Map<String, Int>
 }

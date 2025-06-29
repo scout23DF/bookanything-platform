@@ -65,4 +65,10 @@ class CentroDistribuicaoController(
         centroDistribuicaoOrchestrationService.deletarPorId(id)
         return ResponseEntity.noContent().build()
     }
+
+    @PostMapping("/synchronize")
+    fun synchronize(): ResponseEntity<Map<String, Int>> {
+        val resultSyncMap : Map<String, Int> = centroDistribuicaoOrchestrationService.synchronizeAll()
+        return ResponseEntity.ok().body(resultSyncMap)
+    }
 }

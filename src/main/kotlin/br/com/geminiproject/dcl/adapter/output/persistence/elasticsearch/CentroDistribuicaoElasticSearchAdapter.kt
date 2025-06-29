@@ -5,6 +5,7 @@ import br.com.geminiproject.dcl.domain.ports.CentroDistribuicaoQueryRepositoryPo
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
+import org.springframework.data.elasticsearch.core.geo.GeoPoint
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -52,4 +53,34 @@ class CentroDistribuicaoElasticSearchAdapter(
 
     }
 
+    override fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList : List<CentroDistribuicaoModel>?): Map<String, Int> {
+        val resultMap: MutableMap<String, Int> = HashMap()
+
+        resultMap["before.records-in-writeable-repository.count"] = sourceCentroDistribuicaoList?.size ?: 0
+        resultMap["before.entries-in-queryable-repository.count"] = centroDistribuicaoElasticRepository.count().toInt()
+
+        // 1. Limpar todos os dados existentes no Elasticsearch
+        centroDistribuicaoElasticRepository.deleteAll()
+
+        // 3. Indexar os dados do PostgreSQL no Elasticsearch
+        sourceCentroDistribuicaoList?.let { centrosDistFromDBList ->
+            val elasticEntitiesList = centrosDistFromDBList.map { oneCentroDistFromDB ->
+                CentroDistribuicaoElasticEntity(
+                    id = oneCentroDistFromDB.id,
+                    nome = oneCentroDistFromDB.nome,
+                    localizacao = GeoPoint(
+                        oneCentroDistFromDB.localizacao.y,
+                        oneCentroDistFromDB.localizacao.x
+                    )
+                )
+            }
+            val savedEntriesInReadRepository = this.centroDistribuicaoElasticRepository.saveAll(elasticEntitiesList)
+            resultMap["after.entries-in-queryable-repository.count"] = savedEntriesInReadRepository.count().toInt()
+
+        }
+
+        println("Sincronização concluída: ${resultMap}")
+
+        return resultMap
+    }
 }
