@@ -1,7 +1,7 @@
 package br.com.geminiproject.dcl
 
-import br.com.geminiproject.dcl.adapter.output.persistence.CentroDistribuicaoEntity
-import br.com.geminiproject.dcl.adapter.output.persistence.CentroDistribuicaoRepository
+import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaEntity
+import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,7 +12,6 @@ import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
@@ -34,7 +33,7 @@ class BuscarCentrosProximosIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var centroDistribuicaoRepository: CentroDistribuicaoRepository
+    private lateinit var centroDistribuicaoJpaRepository: CentroDistribuicaoJpaRepository
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -60,28 +59,28 @@ class BuscarCentrosProximosIntegrationTest {
 
     @AfterEach
     fun tearDown() {
-        centroDistribuicaoRepository.deleteAll()
+        centroDistribuicaoJpaRepository.deleteAll()
     }
 
     @Test
     fun `should find distribution centers within a given radius`() {
         // Given
-        val cd1 = CentroDistribuicaoEntity(
+        val cd1 = CentroDistribuicaoJpaEntity(
             id = UUID.randomUUID(),
             nome = "CD Proximo 1",
             localizacao = geometryFactory.createPoint(Coordinate(-46.633308, -23.55052)) // São Paulo
         )
-        val cd2 = CentroDistribuicaoEntity(
+        val cd2 = CentroDistribuicaoJpaEntity(
             id = UUID.randomUUID(),
             nome = "CD Proximo 2",
             localizacao = geometryFactory.createPoint(Coordinate(-46.633308, -23.55052)) // Same as São Paulo
         )
-        val cd3 = CentroDistribuicaoEntity(
+        val cd3 = CentroDistribuicaoJpaEntity(
             id = UUID.randomUUID(),
             nome = "CD Longe",
             localizacao = geometryFactory.createPoint(Coordinate(-43.1729, -22.9068)) // Rio de Janeiro
         )
-        centroDistribuicaoRepository.saveAll(listOf(cd1, cd2, cd3))
+        centroDistribuicaoJpaRepository.saveAll(listOf(cd1, cd2, cd3))
 
         val targetLatitude = -23.55052
         val targetLongitude = -46.633308

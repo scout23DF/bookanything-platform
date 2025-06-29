@@ -1,23 +1,19 @@
 package br.com.geminiproject.dcl.adapter.input.web
 
-import br.com.geminiproject.dcl.domain.BuscarCentroDistribuicaoQueryPort
-import br.com.geminiproject.dcl.domain.BuscarCentrosProximosUseCase
-import br.com.geminiproject.dcl.domain.CadastrarCentroDistribuicaoUseCase
+import br.com.geminiproject.dcl.application.CentroDistribuicaoOrchestrationService
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.util.UUID
+import java.util.*
 
 
 @RestController
 @RequestMapping("/cds")
 class CentroDistribuicaoController(
-    private val cadastrarCentroDistribuicaoUseCase: CadastrarCentroDistribuicaoUseCase,
-    private val buscarCentroDistribuicaoQueryPort: BuscarCentroDistribuicaoQueryPort,
-    private val buscarCentrosProximosUseCase: BuscarCentrosProximosUseCase
+    private val centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService
 ) {
 
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
@@ -25,7 +21,7 @@ class CentroDistribuicaoController(
     @PostMapping
     fun cadastrar(@RequestBody request: CadastrarCentroDistribuicaoRequest): ResponseEntity<CentroDistribuicaoResponse> {
         val localizacao = geometryFactory.createPoint(Coordinate(request.longitude, request.latitude))
-        val centroDistribuicao = cadastrarCentroDistribuicaoUseCase.cadastrar(request.nome, localizacao)
+        val centroDistribuicao = centroDistribuicaoOrchestrationService.cadastrar(request.nome, localizacao)
         val response = CentroDistribuicaoResponse.fromDomain(centroDistribuicao)
         val uri = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -36,7 +32,7 @@ class CentroDistribuicaoController(
 
     @GetMapping("/{id}")
     fun buscarPorId(@PathVariable id: UUID): ResponseEntity<CentroDistribuicaoResponse> {
-        val centroDistribuicao = buscarCentroDistribuicaoQueryPort.buscarPorId(id)
+        val centroDistribuicao = centroDistribuicaoOrchestrationService.buscarPorId(id)
         return if (centroDistribuicao != null) {
             ResponseEntity.ok(CentroDistribuicaoResponse.fromDomain(centroDistribuicao))
         } else {
@@ -44,12 +40,6 @@ class CentroDistribuicaoController(
         }
     }
 
-    @GetMapping
-    fun buscarTodos(): ResponseEntity<List<CentroDistribuicaoResponse>> {
-        val centrosDistribuicao = buscarCentroDistribuicaoQueryPort.buscarTodos()
-        val responseList = centrosDistribuicao.map { CentroDistribuicaoResponse.fromDomain(it) }
-        return ResponseEntity.ok(responseList)
-    }
 
     @GetMapping("/search-nearby")
     fun buscarCentrosProximos(
@@ -58,8 +48,21 @@ class CentroDistribuicaoController(
         @RequestParam raioEmKm: Double
     ): ResponseEntity<List<CentroDistribuicaoResponse>> {
         val localizacao = geometryFactory.createPoint(Coordinate(longitude, latitude))
-        val centrosProximos = buscarCentrosProximosUseCase.buscarCentrosProximos(localizacao, raioEmKm)
+        val centrosProximos = centroDistribuicaoOrchestrationService.buscarCentrosProximos(localizacao, raioEmKm)
         val responseList = centrosProximos.map { CentroDistribuicaoResponse.fromDomain(it) }
         return ResponseEntity.ok(responseList)
+    }
+
+    @GetMapping("/all")
+    fun buscarTodos(): ResponseEntity<List<CentroDistribuicaoResponse>> {
+        val todosCentros = centroDistribuicaoOrchestrationService.buscarTodos()
+        val responseList = todosCentros.map { CentroDistribuicaoResponse.fromDomain(it) }
+        return ResponseEntity.ok(responseList)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deletarPorId(@PathVariable id: UUID): ResponseEntity<Void> {
+        centroDistribuicaoOrchestrationService.deletarPorId(id)
+        return ResponseEntity.noContent().build()
     }
 }

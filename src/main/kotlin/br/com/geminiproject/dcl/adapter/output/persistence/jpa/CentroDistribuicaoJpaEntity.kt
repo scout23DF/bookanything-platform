@@ -1,4 +1,4 @@
-package br.com.geminiproject.dcl.adapter.output.persistence
+package br.com.geminiproject.dcl.adapter.output.persistence.jpa
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -9,7 +9,7 @@ import java.util.UUID
 
 @Entity
 @Table(name = "centro_distribuicao")
-data class CentroDistribuicaoEntity(
+data class CentroDistribuicaoJpaEntity(
     @Id
     var id: UUID? = null,
 

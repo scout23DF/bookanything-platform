@@ -1,10 +1,9 @@
 package br.com.geminiproject.dcl
 
-import br.com.geminiproject.dcl.adapter.output.persistence.CentroDistribuicaoRepository
+import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
 import br.com.geminiproject.dcl.domain.events.CentroDistribuicaoCadastradoEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -21,18 +20,14 @@ import org.springframework.test.web.servlet.post
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.time.Duration
 import java.util.Collections
-import java.util.Properties
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.util.UUID
 import org.testcontainers.utility.DockerImageName
 
 @SpringBootTest
@@ -46,7 +41,7 @@ class CentroDistribuicaoIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var centroDistribuicaoRepository: CentroDistribuicaoRepository
+    private lateinit var centroDistribuicaoJpaRepository: CentroDistribuicaoJpaRepository
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -64,11 +59,19 @@ class CentroDistribuicaoIntegrationTest {
             withUsername("test")
             withPassword("test")
         }
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url", postgresContainer::getJdbcUrl)
+            registry.add("spring.datasource.username", postgresContainer::getUsername)
+            registry.add("spring.datasource.password", postgresContainer::getPassword)
+        }
     }
 
     @AfterEach
     fun tearDown() {
-        centroDistribuicaoRepository.deleteAll()
+        centroDistribuicaoJpaRepository.deleteAll()
     }
 
     @Test
@@ -92,7 +95,7 @@ class CentroDistribuicaoIntegrationTest {
         assertNotNull(responseBody)
 
         // Optionally, verify if it's saved in the database
-        val savedCenters = centroDistribuicaoRepository.findAll()
+        val savedCenters = centroDistribuicaoJpaRepository.findAll()
         assert(savedCenters.size == 1)
         assert(savedCenters[0].nome == "CD Teste")
     }

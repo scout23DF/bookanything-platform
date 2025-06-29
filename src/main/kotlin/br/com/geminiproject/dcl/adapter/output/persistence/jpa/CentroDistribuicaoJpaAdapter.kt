@@ -1,0 +1,31 @@
+package br.com.geminiproject.dcl.adapter.output.persistence.jpa
+
+import br.com.geminiproject.dcl.domain.CentroDistribuicaoModel
+import br.com.geminiproject.dcl.domain.ports.CentroDistribuicaoPersistRepositoryPort
+import org.apache.kafka.common.protocol.types.Field
+import org.springframework.stereotype.Component
+import java.util.UUID
+
+@Component
+class CentroDistribuicaoJpaAdapter(
+    private val repository: CentroDistribuicaoJpaRepository
+) : CentroDistribuicaoPersistRepositoryPort {
+
+    override fun salvar(centroDistribuicaoModel: CentroDistribuicaoModel): CentroDistribuicaoModel {
+        val entity = CentroDistribuicaoJpaEntity(
+            id = centroDistribuicaoModel.id,
+            nome = centroDistribuicaoModel.nome,
+            localizacao = centroDistribuicaoModel.localizacao
+        )
+        val savedEntity = repository.save(entity)
+        return CentroDistribuicaoModel(
+            id = savedEntity.id!!,
+            nome = savedEntity.nome!!,
+            localizacao = savedEntity.localizacao!!
+        )
+    }
+
+    override fun deletarPorId(id: UUID) {
+        repository.deleteById(id)
+    }
+}

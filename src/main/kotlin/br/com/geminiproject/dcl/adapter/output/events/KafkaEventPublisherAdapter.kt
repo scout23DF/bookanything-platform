@@ -12,6 +12,7 @@ class KafkaEventPublisherAdapter(
     override fun publish(event: Any) {
         val topic = when (event) {
             is br.com.geminiproject.dcl.domain.events.CentroDistribuicaoCadastradoEvent -> "centro-distribuicao-cadastrado"
+            is br.com.geminiproject.dcl.domain.events.CentroDistribuicaoDeletadoEvent -> "centro-distribuicao-deletado"
             else -> throw IllegalArgumentException("Unknown event type: ${event.javaClass.name}")
         }
         kafkaTemplate.send(topic, event)

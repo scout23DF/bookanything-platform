@@ -1,0 +1,8 @@
+package br.com.geminiproject.dcl.adapter.output.persistence.elasticsearch
+
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+@Repository
+interface CentroDistribuicaoElasticRepository : ElasticsearchRepository<CentroDistribuicaoElasticEntity, UUID>, CentroDistribuicaoElasticRepositoryCustom
