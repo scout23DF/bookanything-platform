@@ -1,6 +1,7 @@
 package br.com.geminiproject.dcl.adapter.input.web
 
 import br.com.geminiproject.dcl.application.CentroDistribuicaoOrchestrationService
+import br.com.geminiproject.dcl.application.GeoJsonProcessingService
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
@@ -10,10 +11,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 
+import org.springframework.web.multipart.MultipartFile
+
+
 @RestController
 @RequestMapping("/cds")
 class CentroDistribuicaoController(
-    private val centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService
+    private val centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService,
+    private val geoJsonProcessingService: GeoJsonProcessingService
 ) {
 
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
@@ -70,5 +75,13 @@ class CentroDistribuicaoController(
     fun synchronize(): ResponseEntity<Map<String, Int>> {
         val resultSyncMap : Map<String, Int> = centroDistribuicaoOrchestrationService.synchronizeAll()
         return ResponseEntity.ok().body(resultSyncMap)
+    }
+
+    @PostMapping(value = ["/upload-geojson"], consumes = [org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadGeoJson(@RequestParam("contentDataType") contentDataType : String,
+                      @RequestPart("file") uploadedGeoJSONFile: MultipartFile): ResponseEntity<String> {
+
+        geoJsonProcessingService.processGeoJsonFile(contentDataType, uploadedGeoJSONFile)
+        return ResponseEntity.ok("GeoJSON file processed successfully.")
     }
 }
