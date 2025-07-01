@@ -4,6 +4,7 @@ import br.com.geminiproject.dcl.domain.CentroDistribuicaoModel
 import br.com.geminiproject.dcl.domain.EventPublisherPort
 import br.com.geminiproject.dcl.domain.events.CentroDistribuicaoCadastradoEvent
 import br.com.geminiproject.dcl.domain.events.CentroDistribuicaoDeletadoEvent
+import br.com.geminiproject.dcl.domain.events.CentrosDistribuicaoDeletadosEvent
 import br.com.geminiproject.dcl.domain.features.CentroDistribuicaoReadFeaturePort
 import br.com.geminiproject.dcl.domain.features.CentroDistribuicaoWriteFeaturePort
 import br.com.geminiproject.dcl.domain.ports.CentroDistribuicaoPersistRepositoryPort
@@ -56,6 +57,11 @@ class CentroDistribuicaoOrchestrationService(
         return this.centroDistribuicaoQueryRepositoryPort.synchronizeFromWriteRepository(
             this.centroDistribuicaoPersistRepositoryPort.findAllForSync()
         )
+    }
+
+    override fun deletarTodos() {
+        centroDistribuicaoPersistRepositoryPort.deletarTodos()
+        eventPublisherPort.publish(CentrosDistribuicaoDeletadosEvent())
     }
 
 }

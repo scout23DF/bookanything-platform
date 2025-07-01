@@ -83,4 +83,8 @@ class CentroDistribuicaoElasticSearchAdapter(
 
         return resultMap
     }
+
+    override fun deletarTodos() {
+        centroDistribuicaoElasticRepository.deleteAll()
+    }
 }

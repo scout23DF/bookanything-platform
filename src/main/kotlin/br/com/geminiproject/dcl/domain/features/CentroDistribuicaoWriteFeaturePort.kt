@@ -8,4 +8,5 @@ interface CentroDistribuicaoWriteFeaturePort {
     fun cadastrar(nome: String, localizacao: Point): CentroDistribuicaoModel
     fun deletarPorId(id: UUID)
     fun synchronizeAll(): Map<String, Int>
+    fun deletarTodos()
 }

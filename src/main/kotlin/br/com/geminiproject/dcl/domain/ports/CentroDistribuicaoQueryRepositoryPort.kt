@@ -5,8 +5,11 @@ import org.locationtech.jts.geom.Point
 import java.util.UUID
 
 interface CentroDistribuicaoQueryRepositoryPort {
+
     fun buscarPorId(id: UUID): CentroDistribuicaoModel?
     fun buscarTodos(): List<CentroDistribuicaoModel>
     fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<CentroDistribuicaoModel>
-    fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList : List<CentroDistribuicaoModel>?): Map<String, Int>
+    fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList: List<CentroDistribuicaoModel>?): Map<String, Int>
+    fun deletarTodos()
+
 }

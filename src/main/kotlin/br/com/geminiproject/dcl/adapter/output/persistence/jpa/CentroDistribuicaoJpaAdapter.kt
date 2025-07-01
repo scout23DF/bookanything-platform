@@ -38,4 +38,10 @@ class CentroDistribuicaoJpaAdapter(
             )
         }
     }
+
+    override fun deletarTodos(): List<UUID> {
+        val allIds = repository.findAll().map { it.id!! }
+        repository.deleteAll()
+        return allIds
+    }
 }

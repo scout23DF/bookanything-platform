@@ -84,4 +84,10 @@ class CentroDistribuicaoController(
         geoJsonProcessingService.processGeoJsonFile(contentDataType, uploadedGeoJSONFile)
         return ResponseEntity.ok("GeoJSON file added to the queue successfully. When its processing has finished, you'll get a proper notification.")
     }
+
+    @DeleteMapping("/all")
+    fun deletarTodos(): ResponseEntity<Void> {
+        centroDistribuicaoOrchestrationService.deletarTodos()
+        return ResponseEntity.noContent().build()
+    }
 }

@@ -32,7 +32,8 @@ class GeoJsonKafkaConsumer(
                         (oneFeature.geometry as org.geojson.Point).coordinates.latitude
                     )
                 )
-                centroDistribuicaoOrchestrationService.cadastrar(nome, locationCoords)
+                println("==> Pronto para Cadastrar o seguinte Centro de Distribuição: ${nome} - Coordenadas: ${locationCoords}")
+                // centroDistribuicaoOrchestrationService.cadastrar(nome, locationCoords)
             }
         }
     }
