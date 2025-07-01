@@ -82,6 +82,6 @@ class CentroDistribuicaoController(
                       @RequestPart("file") uploadedGeoJSONFile: MultipartFile): ResponseEntity<String> {
 
         geoJsonProcessingService.processGeoJsonFile(contentDataType, uploadedGeoJSONFile)
-        return ResponseEntity.ok("GeoJSON file processed successfully.")
+        return ResponseEntity.ok("GeoJSON file added to the queue successfully. When its processing has finished, you'll get a proper notification.")
     }
 }

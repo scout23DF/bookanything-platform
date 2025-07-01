@@ -8,13 +8,15 @@ import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.PrecisionModel
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
+import kotlin.text.get
 
 @Service
 class GeoJsonProcessingService(
-    private val centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService
+    private val kafkaTemplate: KafkaTemplate<String, GeoJsonUploadedFileDTO>
 ) {
 
     private val objectMapper = ObjectMapper().registerModule(JtsModule())
@@ -24,22 +26,9 @@ class GeoJsonProcessingService(
 
         val geoJsonUploadedFileDTO : GeoJsonUploadedFileDTO = mountGeoJSONObjectFromUploadedFile(contentDataType, uploadedGeoJSONFile)
 
-        geoJsonUploadedFileDTO.featureCollection.features.forEach { oneFeature ->
-            val nome : String = buildNomeFromProperties(oneFeature.properties)
-
-            if (oneFeature.geometry is org.geojson.Point) {
-                val locationCoords : Point = geometryFactory.createPoint(
-                    Coordinate(
-                        (oneFeature.geometry as org.geojson.Point).coordinates.longitude,
-                        (oneFeature.geometry as org.geojson.Point).coordinates.latitude
-                    )
-                )
-                centroDistribuicaoOrchestrationService.cadastrar(nome, locationCoords)
-            }
+        this.kafkaTemplate.send("geojson-upload-topic", geoJsonUploadedFileDTO)
 
     }
-
-}
 
     private fun mountGeoJSONObjectFromUploadedFile(contentDataType: String, uploadedGeoJSONFile: MultipartFile) : GeoJsonUploadedFileDTO {
 
@@ -62,9 +51,5 @@ class GeoJsonProcessingService(
         }
     }
 
-    private fun buildNomeFromProperties(featurePropertiesMap: MutableMap<String, Any>) : String {
-
-        return "${featurePropertiesMap["state_province"]} - ${featurePropertiesMap["city"]} - ${featurePropertiesMap["station_name"]}"
-    }
 }
 
