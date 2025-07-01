@@ -13,7 +13,7 @@ data class CentroDistribuicaoJpaEntity(
     @Id
     var id: UUID? = null,
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     var nome: String? = null,
 
     @Column(columnDefinition = "geometry(Point,4326)", nullable = false)

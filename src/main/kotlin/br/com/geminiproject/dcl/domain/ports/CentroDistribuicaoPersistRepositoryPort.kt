@@ -8,4 +8,5 @@ interface CentroDistribuicaoPersistRepositoryPort {
     fun deletarPorId(id: UUID)
     fun findAllForSync(): List<CentroDistribuicaoModel>
     fun deletarTodos(): List<UUID>
+    fun existsByName(name: String): Boolean
 }

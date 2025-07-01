@@ -19,6 +19,9 @@ class CentroDistribuicaoOrchestrationService(
 ) : CentroDistribuicaoWriteFeaturePort, CentroDistribuicaoReadFeaturePort {
 
     override fun cadastrar(nome: String, localizacao: Point): CentroDistribuicaoModel {
+        if (centroDistribuicaoPersistRepositoryPort.existsByName(nome)) {
+            throw IllegalArgumentException("Centro de Distribuição com o nome '$nome' já existe.")
+        }
         val centroDistribuicaoModel = CentroDistribuicaoModel(
             id = UUID.randomUUID(),
             nome = nome,

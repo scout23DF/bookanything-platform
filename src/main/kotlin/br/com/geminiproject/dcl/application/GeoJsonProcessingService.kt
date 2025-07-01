@@ -12,11 +12,11 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
-import kotlin.text.get
 
 @Service
 class GeoJsonProcessingService(
-    private val kafkaTemplate: KafkaTemplate<String, GeoJsonUploadedFileDTO>
+    private val kafkaTemplate: KafkaTemplate<String, GeoJsonUploadedFileDTO>,
+    private val centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService
 ) {
 
     private val objectMapper = ObjectMapper().registerModule(JtsModule())
@@ -49,6 +49,33 @@ class GeoJsonProcessingService(
         } catch (e: Exception) {
             throw RuntimeException("Error processing GeoJSON data", e)
         }
+    }
+
+    fun handleUploadedGeoJsonFileConsumedFromQueue(geoJsonUploadedFileDTO: GeoJsonUploadedFileDTO) {
+
+        geoJsonUploadedFileDTO.featureCollection.features.forEach { oneFeature ->
+            val nome: String = buildNomeFromProperties(oneFeature.properties)
+            if (oneFeature.geometry is org.geojson.Point) {
+                val locationCoords: Point = geometryFactory.createPoint(
+                    Coordinate(
+                        (oneFeature.geometry as org.geojson.Point).coordinates.longitude,
+                        (oneFeature.geometry as org.geojson.Point).coordinates.latitude
+                    )
+                )
+
+                try {
+                    centroDistribuicaoOrchestrationService.cadastrar(nome, locationCoords)
+                    println("==> SUCCESS :: O seguinte Centro de Distribuição foi cadastrado com sucesso: ${nome} - Coordenadas: ${locationCoords}")
+                } catch (ex: IllegalArgumentException) {
+                    println("==> FAIL :: Verificação de Duplicação de Centro de Distribuição: ${ex.message}")
+                }
+            }
+        }
+
+    }
+
+    private fun buildNomeFromProperties(featurePropertiesMap: MutableMap<String, Any>) : String {
+        return "${featurePropertiesMap["state_province"]} - ${featurePropertiesMap["city"]} - ${featurePropertiesMap["station_name"]}"
     }
 
 }

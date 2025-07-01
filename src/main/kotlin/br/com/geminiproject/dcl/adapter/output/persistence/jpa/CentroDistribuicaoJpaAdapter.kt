@@ -2,9 +2,8 @@ package br.com.geminiproject.dcl.adapter.output.persistence.jpa
 
 import br.com.geminiproject.dcl.domain.CentroDistribuicaoModel
 import br.com.geminiproject.dcl.domain.ports.CentroDistribuicaoPersistRepositoryPort
-import org.apache.kafka.common.protocol.types.Field
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class CentroDistribuicaoJpaAdapter(
@@ -43,5 +42,9 @@ class CentroDistribuicaoJpaAdapter(
         val allIds = repository.findAll().map { it.id!! }
         repository.deleteAll()
         return allIds
+    }
+
+    override fun existsByName(name: String): Boolean {
+        return repository.existsByNome(name)
     }
 }

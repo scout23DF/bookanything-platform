@@ -27,7 +27,11 @@ class BeanConfig {
     }
 
     @Bean
-    fun geoJsonProcessingService(kafkaTemplate: KafkaTemplate<String, GeoJsonUploadedFileDTO>): GeoJsonProcessingService {
-        return GeoJsonProcessingService(kafkaTemplate)
+    fun geoJsonProcessingService(
+        kafkaTemplate: KafkaTemplate<String, GeoJsonUploadedFileDTO>,
+        centroDistribuicaoOrchestrationService: CentroDistribuicaoOrchestrationService
+    ): GeoJsonProcessingService {
+
+        return GeoJsonProcessingService(kafkaTemplate, centroDistribuicaoOrchestrationService)
     }
 }
