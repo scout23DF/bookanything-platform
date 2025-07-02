@@ -1,33 +1,31 @@
 package br.com.geminiproject.dcl
 
-import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaEntity
+import br.com.geminiproject.dcl.adapter.input.web.CadastrarCentroDistribuicaoRequest
+import br.com.geminiproject.dcl.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
 import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.UUID
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
-import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.query.Criteria
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery
+import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import org.testcontainers.junit.jupiter.Testcontainers
-import org.testcontainers.utility.DockerImageName
+import org.springframework.test.web.servlet.post
+import java.time.Duration
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class BuscarCentrosProximosIntegrationTest {
+class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -38,49 +36,29 @@ class BuscarCentrosProximosIntegrationTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
-
-    companion object {
-        @Container
-        val postgresContainer = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres")).apply {
-            withDatabaseName("dcl_test_db")
-            withUsername("test")
-            withPassword("test")
-        }
-
-        @JvmStatic
-        @org.springframework.test.context.DynamicPropertySource
-        fun properties(registry: org.springframework.test.context.DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url", postgresContainer::getJdbcUrl)
-            registry.add("spring.datasource.username", postgresContainer::getUsername)
-            registry.add("spring.datasource.password", postgresContainer::getPassword)
-        }
-    }
+    @Autowired
+    private lateinit var elasticsearchOperations: ElasticsearchOperations
 
     @AfterEach
     fun tearDown() {
         centroDistribuicaoJpaRepository.deleteAll()
+        elasticsearchOperations.indexOps(CentroDistribuicaoElasticEntity::class.java).delete()
     }
 
     @Test
     fun `should find distribution centers within a given radius`() {
         // Given
-        val cd1 = CentroDistribuicaoJpaEntity(
-            id = UUID.randomUUID(),
-            nome = "CD Proximo 1",
-            localizacao = geometryFactory.createPoint(Coordinate(-46.633308, -23.55052)) // São Paulo
-        )
-        val cd2 = CentroDistribuicaoJpaEntity(
-            id = UUID.randomUUID(),
-            nome = "CD Proximo 2",
-            localizacao = geometryFactory.createPoint(Coordinate(-46.633308, -23.55052)) // Same as São Paulo
-        )
-        val cd3 = CentroDistribuicaoJpaEntity(
-            id = UUID.randomUUID(),
-            nome = "CD Longe",
-            localizacao = geometryFactory.createPoint(Coordinate(-43.1729, -22.9068)) // Rio de Janeiro
-        )
-        centroDistribuicaoJpaRepository.saveAll(listOf(cd1, cd2, cd3))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 2", latitude = -23.55052, longitude = -46.633308))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Longe", latitude = -22.9068, longitude = -43.1729))
+
+
+        // Wait for Kafka and Elasticsearch to process the events
+        await().atMost(Duration.ofSeconds(30)).untilAsserted {
+            val query = CriteriaQuery(Criteria.where("id").exists())
+            val count = elasticsearchOperations.count(query, CentroDistribuicaoElasticEntity::class.java)
+            assertEquals(3, count)
+        }
 
         val targetLatitude = -23.55052
         val targetLongitude = -46.633308
@@ -92,7 +70,7 @@ class BuscarCentrosProximosIntegrationTest {
             param("longitude", targetLongitude.toString())
             param("raioEmKm", radiusInKm.toString())
             with(jwt())
-        }.andExpect { status().isOk() }
+        }.andExpect { status { isOk() } }
             .andReturn()
 
         // Then
@@ -103,5 +81,13 @@ class BuscarCentrosProximosIntegrationTest {
         assert(centrosProximos.any { it.nome == "CD Proximo 1" })
         assert(centrosProximos.any { it.nome == "CD Proximo 2" })
         assert(!centrosProximos.any { it.nome == "CD Longe" })
+    }
+
+    private fun createDistributionCenter(request: CadastrarCentroDistribuicaoRequest) {
+        mockMvc.post("/cds") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+            with(jwt())
+        }.andExpect { status { isCreated() } }
     }
 }
