@@ -15,6 +15,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.http.MediaType
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
@@ -39,6 +41,12 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var elasticsearchOperations: ElasticsearchOperations
 
+    @Autowired
+    private lateinit var kafkaTemplate: KafkaTemplate<String, Any>
+
+    @Autowired
+    private lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
+
     @AfterEach
     fun tearDown() {
         centroDistribuicaoJpaRepository.deleteAll()
@@ -47,17 +55,29 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `should find distribution centers within a given radius`() {
-        // Given
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 2", latitude = -23.55052, longitude = -46.633308))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Longe", latitude = -22.9068, longitude = -43.1729))
+        // Wait until the consumer for the topic is assigned partitions
+        await().atMost(Duration.ofSeconds(10)).until {
+            kafkaListenerEndpointRegistry.listenerContainers.any { container ->
+                container.groupId == "elasticsearch-indexer" && container.assignedPartitions?.isNotEmpty() == true
+            }
+        }
 
+        // Given
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 0", latitude = -23.55051, longitude = -46.633307))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 2", latitude = -23.55053, longitude = -46.633309))
+        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Longe", latitude = -22.9068, longitude = -43.1729))
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
             val query = CriteriaQuery(Criteria.where("id").exists())
-            val count = elasticsearchOperations.count(query, CentroDistribuicaoElasticEntity::class.java)
-            assertEquals(3, count)
+            val searchHits = elasticsearchOperations.search(query, CentroDistribuicaoElasticEntity::class.java)
+            val count = searchHits.totalHits
+            if (count < 4) {
+                val foundIds = searchHits.map { it.content.id }.joinToString()
+                println("Documentos encontrados no Elasticsearch: $foundIds")
+            }
+            assertEquals(4, count)
         }
 
         val targetLatitude = -23.55052
@@ -77,7 +97,8 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
         val responseBody = result.response.contentAsString
         val centrosProximos = objectMapper.readValue(responseBody, Array<br.com.geminiproject.dcl.adapter.input.web.CentroDistribuicaoResponse>::class.java).toList()
 
-        assertEquals(2, centrosProximos.size)
+        assertEquals(3, centrosProximos.size)
+        assert(centrosProximos.any { it.nome == "CD Proximo 0" })
         assert(centrosProximos.any { it.nome == "CD Proximo 1" })
         assert(centrosProximos.any { it.nome == "CD Proximo 2" })
         assert(!centrosProximos.any { it.nome == "CD Longe" })
@@ -89,5 +110,6 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
             content = objectMapper.writeValueAsString(request)
             with(jwt())
         }.andExpect { status { isCreated() } }
+        kafkaTemplate.flush()
     }
 }
