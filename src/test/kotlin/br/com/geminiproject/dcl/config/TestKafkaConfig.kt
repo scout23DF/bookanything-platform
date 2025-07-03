@@ -19,7 +19,7 @@ class TestKafkaConfig {
     ): ConsumerFactory<String, Any> {
         val props = mapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
-            ConsumerConfig.GROUP_ID_CONFIG to "test-group",
+            ConsumerConfig.GROUP_ID_CONFIG to "test-group-" + java.util.UUID.randomUUID().toString(),
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",

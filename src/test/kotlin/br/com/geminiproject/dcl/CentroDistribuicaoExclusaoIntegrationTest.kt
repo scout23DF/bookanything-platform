@@ -1,96 +1,114 @@
 package br.com.geminiproject.dcl
 
 import br.com.geminiproject.dcl.adapter.input.web.CadastrarCentroDistribuicaoRequest
-import br.com.geminiproject.dcl.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
-import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import br.com.geminiproject.dcl.adapter.input.web.CentroDistribuicaoResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations
-import org.springframework.data.elasticsearch.core.query.Criteria
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.http.MediaType
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.time.Duration
-import java.util.UUID
+import kotlin.random.Random
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var centroDistribuicaoJpaRepository: CentroDistribuicaoJpaRepository
-
-    @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @Autowired
-    private lateinit var elasticsearchOperations: ElasticsearchOperations
-
-    @Autowired
-    private lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
-
-    @AfterEach
-    fun tearDown() {
-        centroDistribuicaoJpaRepository.deleteAll()
-        elasticsearchOperations.indexOps(CentroDistribuicaoElasticEntity::class.java).delete()
-    }
 
     @Test
     fun `should delete a distribution center by id`() {
         // Given
         val request = CadastrarCentroDistribuicaoRequest(nome = "CD Para Deletar", latitude = -23.55051, longitude = -46.633307)
         val result = createDistributionCenter(request)
-        val response = objectMapper.readValue(result.response.contentAsString, br.com.geminiproject.dcl.adapter.input.web.CentroDistribuicaoResponse::class.java)
+        val response = objectMapper.readValue(result.response.contentAsString, CentroDistribuicaoResponse::class.java)
 
         // When
         mockMvc.delete("/cds/{id}", response.id) {
             with(jwt())
         }.andExpect { status { isNoContent() } }
 
-        // Then
-        assertTrue(centroDistribuicaoJpaRepository.findById(response.id).isEmpty)
+        // When
+        val resultFromGetById = mockMvc.get("/cds/{id}", response.id) {
+            with(jwt())
+        }.andExpect { status { isNotFound() } }
+            .andReturn()
 
-        await().atMost(Duration.ofSeconds(10)).untilAsserted {
-            val query = CriteriaQuery(Criteria.where("id").`is`(response.id.toString()))
-            val count = elasticsearchOperations.count(query, CentroDistribuicaoElasticEntity::class.java)
-            assertEquals(0, count)
-        }
     }
 
     @Test
     fun `should delete all distribution centers`() {
+
+        val newItemsToCreateCount : Int = 100
+
         // Given
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD 1", latitude = -23.55051, longitude = -46.633307))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD 2", latitude = -23.55052, longitude = -46.633308))
+        IntRange(0, (newItemsToCreateCount - 1)).forEach {
+            createDistributionCenter(
+                CadastrarCentroDistribuicaoRequest(
+                    nome = "One New Distribution Center - No.: ${it}",
+                    latitude = Random(-23).nextDouble(-23.55999, -23.55000 ),
+                    longitude = Random(-46).nextDouble(-46.633999, -46.633000)
+                )
+            )
+        }
+
+        // Wait for Kafka and Elasticsearch to process the events
+        await().atMost(Duration.ofSeconds(30)).untilAsserted {
+
+            // When
+            val result1 = mockMvc.get("/cds/all") {
+                with(jwt())
+            }.andExpect { status { isOk() } }
+                .andReturn()
+
+            // Then
+            val responseBody1 = result1.response.contentAsString
+            val centrosProximos1 = objectMapper.readValue(responseBody1, Array<CentroDistribuicaoResponse>::class.java).toList()
+
+            val count = centrosProximos1.size
+            if (count < newItemsToCreateCount) {
+                val foundIds = centrosProximos1.stream().map { it.id.toString() }.toList().joinToString()
+                println("Documentos encontrados no Elasticsearch: $foundIds")
+            }
+
+            assertEquals(newItemsToCreateCount, (centrosProximos1.size))
+
+        }
 
         // When
         mockMvc.delete("/cds/all") {
             with(jwt())
         }.andExpect { status { isNoContent() } }
 
-        // Then
-        assertEquals(0, centroDistribuicaoJpaRepository.count())
+        // Wait for Kafka and Elasticsearch to process the events
+        await().atMost(Duration.ofSeconds(30)).untilAsserted {
+            // When
+            val result2 = mockMvc.get("/cds/all") {
+                with(jwt())
+            }.andExpect { status { isOk() } }
+                .andReturn()
 
-        await().atMost(Duration.ofSeconds(10)).untilAsserted {
-            val query = CriteriaQuery(Criteria.where("id").exists())
-            val count = elasticsearchOperations.count(query, CentroDistribuicaoElasticEntity::class.java)
-            assertEquals(0, count)
+            // Then
+            val responseBody2 = result2.response.contentAsString
+            val centrosProximos2 =
+                objectMapper.readValue(responseBody2, Array<CentroDistribuicaoResponse>::class.java).toList()
+
+            assertEquals(0, centrosProximos2.size)
         }
     }
 

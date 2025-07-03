@@ -16,13 +16,15 @@ class CentroDistribuicaoElasticSearchAdapter(
 
     override fun buscarPorId(id: UUID): CentroDistribuicaoModel? {
 
-        return centroDistribuicaoElasticRepository.findById(id).get().let { elasticEntity ->
-            CentroDistribuicaoModel(
-                id = elasticEntity.id,
-                nome = elasticEntity.nome,
-                localizacao = GeometryFactory().createPoint(Coordinate(elasticEntity.localizacao.lon, elasticEntity.localizacao.lat))
-            )
-        }
+        return centroDistribuicaoElasticRepository.findById(id)
+            .map { elasticEntity ->
+                CentroDistribuicaoModel(
+                    id = elasticEntity.id,
+                    nome = elasticEntity.nome,
+                    localizacao = GeometryFactory().createPoint(Coordinate(elasticEntity.localizacao.lon, elasticEntity.localizacao.lat))
+                )
+            }
+            .orElse(null)
 
     }
 
