@@ -27,6 +27,8 @@ abstract class AbstractIntegrationTest {
 
         @Container
         val kafka: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
+            .withEnv("KAFKA_MESSAGE_MAX_BYTES", "52428800")
+            .withEnv("KAFKA_REPLICA_FETCH_MAX_BYTES", "52428800")
 
         @JvmStatic
         @DynamicPropertySource
