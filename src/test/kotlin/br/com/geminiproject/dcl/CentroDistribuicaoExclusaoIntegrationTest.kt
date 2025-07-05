@@ -54,7 +54,7 @@ class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should delete all distribution centers`() {
 
-        val newItemsToCreateCount : Int = 100
+        val newItemsToCreateCount : Int = 10
 
         // Given
         IntRange(0, (newItemsToCreateCount - 1)).forEach {

@@ -1,8 +1,10 @@
 package br.com.geminiproject.dcl
 
+import br.com.geminiproject.dcl.adapter.input.web.CadastrarCentroDistribuicaoRequest
 import br.com.geminiproject.dcl.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
 import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaEntity
 import br.com.geminiproject.dcl.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import br.com.geminiproject.dcl.domain.CentroDistribuicaoModel
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,6 +23,8 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import java.time.Duration
+import java.util.UUID
+import kotlin.random.Random
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,11 +49,23 @@ class SynchronizeEndpointIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should synchronize data from database to elasticsearch`() {
         val geometryFactory = GeometryFactory()
-        val centroDistribuicao = CentroDistribuicaoJpaEntity(
-            nome = "CD Sync Test",
-            localizacao = geometryFactory.createPoint(Coordinate(-20.0, -10.0))
-        )
-        centroDistribuicaoJpaRepository.save(centroDistribuicao)
+
+        val newItemsToCreateCount : Int = 100
+
+        IntRange(0, (newItemsToCreateCount - 1)).forEach {
+            val centroDistribuicao = CentroDistribuicaoJpaEntity(
+                id = UUID.randomUUID(),
+                nome = "One New Distribution Center - No.: ${it}",
+                localizacao = geometryFactory.createPoint(
+                    Coordinate(
+                        Random(-23).nextDouble(-23.55999, -23.55000 ),
+                        Random(-46).nextDouble(-46.633999, -46.633000)
+                    )
+                )
+            )
+            centroDistribuicaoJpaRepository.saveAndFlush(centroDistribuicao)
+        }
+
 
         mockMvc.post("/cds/synchronize") {
             with(jwt())
@@ -57,10 +73,10 @@ class SynchronizeEndpointIntegrationTest : AbstractIntegrationTest() {
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted {
             val searchHits = elasticsearchOperations.search(
-                CriteriaQuery(Criteria.where("nome").`is`("CD Sync Test")),
+                CriteriaQuery(Criteria.where("nome").`is`("One New Distribution Center - No.:")),
                 CentroDistribuicaoElasticEntity::class.java
             )
-            assertEquals(1, searchHits.totalHits)
+            assertEquals(newItemsToCreateCount, searchHits.totalHits.toInt())
         }
     }
 }
