@@ -1,0 +1,40 @@
+services:
+
+  bookanything-infra-consul:
+    image: consul:1.15.4
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-consul
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-consul
+    labels:
+        org.springframework.boot.readiness-check.tcp.disable: true
+    ports:
+      - '127.0.0.1:8300:8300'
+      - '127.0.0.1:8500:8500'
+      - '127.0.0.1:8600:8600'
+    command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
+    healthcheck:
+      test: ['CMD-SHELL', "consul info | awk '/health_score/{if ($3 >=1) exit 1; else exit 0}'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.40
+
+
+  bookanything-infra-consul-config-loader:
+    image: jhipster/consul-config-loader:v0.4.1
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-consul-config-loader
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-consul-config-loader
+    environment:
+      - INIT_SLEEP_SECONDS=5
+      - CONSUL_URL=dxttckbkn-infra-consul
+      - CONSUL_PORT=8500
+      # Uncomment to load configuration into Consul from a Git repository
+      # as configured in central-server-config/git2consul.json
+      # Also set SPRING_CLOUD_CONSUL_CONFIG_FORMAT=files on your apps
+      # - CONFIG_MODE=git
+    volumes:
+      - ./consul/central-server-config:/config
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.41

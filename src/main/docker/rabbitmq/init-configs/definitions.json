@@ -1,0 +1,302 @@
+{
+    "rabbit_version": "3.11.7",
+    "rabbitmq_version": "3.11.7",
+    "product_name": "RabbitMQ",
+    "product_version": "3.11.7",
+    "users": [
+        {
+            "name": "admin",
+            "password": "admin",
+            "tags": "administrator,management"
+        },
+        {
+            "name": "guest",
+            "password": "guest",
+            "tags": "administrator,management"
+        },
+        {
+            "name": "tenant-manager",
+            "password": "1a88a1",
+            "tags": "administrator,management"
+        },
+        {
+            "name": "master-tenant-0001",
+            "password": "1a88a1",
+            "tags": "management"
+        },
+        {
+            "name": "master-tenant-0002",
+            "password": "1a88a1",
+            "tags": "management"
+        },
+        {
+            "name": "master-tenant-0003",
+            "password": "1a88a1",
+            "tags": "management"
+        },
+        {
+            "name": "master-tenant-0004",
+            "password": "1a88a1",
+            "tags": "management"
+        },
+        {
+            "name": "master-tenant-0005",
+            "password": "1a88a1",
+            "tags": "management"
+        }
+    ],
+    "vhosts": [
+        {
+            "name": "/"
+        },
+        {
+            "name": "ciam_vhost"
+        },
+        {
+            "name": "scdf-pocs-tenants-vhost"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "admin",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "admin",
+            "vhost": "ciam_vhost",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "admin",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "tenant-manager",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "tenant-manager",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "guest",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "guest",
+            "vhost": "ciam_vhost",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "guest",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+    "topic_permissions": [],
+    "parameters": [],
+    "global_parameters": [
+        {
+            "name": "internal_cluster_id",
+            "value": "rabbitmq-cluster-id-7EsNoN1btJ-r1ESJcc11gA"
+        }
+    ],
+    "policies": [
+        {
+            "vhost": "/",
+            "name": "ha",
+            "pattern": ".*",
+            "apply-to": "all",
+            "definition": {
+                "delivery-limit": 5500,
+                "expires": 9600,
+                "max-length": 152,
+                "max-length-bytes": 15255
+            },
+            "priority": 0
+        }
+    ],
+    "queues": [
+        {
+            "name": "SSOKeycloak-FromClientApps-AllEvents-Queue01",
+            "vhost": "ciam_vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SSOKeycloak-FromAdminConsole-AllEvents-Queue01",
+            "vhost": "ciam_vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEventsTypeA-Queue01",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEventsTypeZ-Queue01",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0001-Queue01-Input",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0001-Queue01-Output",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0002-Queue01-Input",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0002-Queue01-Output",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0003-Queue01-Input",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        },
+        {
+            "name": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0003-Queue01-Output",
+            "vhost": "scdf-pocs-tenants-vhost",
+            "durable": true,
+            "auto_delete": false
+        }
+    ],
+    "exchanges": [
+        {
+            "vhost": "/",
+            "name": "SCDF-PoCs-GenericExchange01",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "name": "SCDF-PoCs-All-TenantsExchange01",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "amq.topic",
+            "vhost": "ciam_vhost",
+            "destination": "SSOKeycloak-FromAdminConsole-AllEvents-Queue01",
+            "destination_type": "queue",
+            "routing_key": "CIAM.KK.EVENTS.FROM_ADMINS.#",
+            "arguments": {}
+        },
+        {
+            "source": "amq.topic",
+            "vhost": "ciam_vhost",
+            "destination": "SSOKeycloak-FromClientApps-AllEvents-Queue01",
+            "destination_type": "queue",
+            "routing_key": "CIAM.KK.EVENTS.FROM_CLIENTS.#",
+            "arguments": {}
+        },
+        {
+            "source": "SCDF-PoCs-GenericExchange01",
+            "vhost": "/",
+            "destination": "SCDF-PoCs-BusinessEventsTypeA-Queue01",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.BUSINESS-EVENTS.TYPE.A.#",
+            "arguments": {}
+        },
+        {
+            "source": "SCDF-PoCs-GenericExchange01",
+            "vhost": "/",
+            "destination": "SCDF-PoCs-BusinessEventsTypeZ-Queue01",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.BUSINESS-EVENTS.TYPE.Z.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0001-Queue01-Input",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0001.INPUT.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0001-Queue01-Output",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0001.OUTPUT.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0002-Queue01-Input",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0002.INPUT.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0002-Queue01-Output",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0002.OUTPUT.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0003-Queue01-Input",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0003.INPUT.#",
+            "arguments": {}
+        },
+        {
+            "vhost": "scdf-pocs-tenants-vhost",
+            "source": "SCDF-PoCs-All-TenantsExchange01",
+            "destination": "SCDF-PoCs-BusinessEvents-Type-A-Tenant-0003-Queue01-Output",
+            "destination_type": "queue",
+            "routing_key": "SCDF-POCS.TENANT-0003.OUTPUT.#",
+            "arguments": {}
+        }
+    ]
+}

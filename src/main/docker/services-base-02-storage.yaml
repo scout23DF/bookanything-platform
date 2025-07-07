@@ -1,0 +1,55 @@
+services:
+
+  bookanything-infra-aws-localstack:
+    image: localstack/localstack:latest
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-aws-localstack
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-aws-localstack
+    environment:
+      - AWS_DEFAULT_REGION=eu-central-1
+      - EDGE_PORT=4566
+      - SERVICES=s3
+      - DEBUG=1
+      - EAGER_SERVICE_LOADING=1
+    ports:
+      - '4566-4583:4566-4583'
+      - '8055:8080'
+    volumes:
+      - aws-localstack-data-volume-01:/var/lib/localstack:z
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.3
+
+
+  bookanything-infra-minio:
+    image: quay.io/minio/minio:latest
+    # image: docker.io/bitnami/minio:2023
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-minio
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-minio
+    environment:
+      - MINIO_ROOT_USER=admin@dexterity.org.de
+      - MINIO_ROOT_PASSWORD=admin_1a88a1
+      - MINIO_DEFAULT_BUCKETS=${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-keycloak-realm01,${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-ticketbooking-business-files-01
+    ports:
+      - '9900:9000'
+      - "9901:9001"
+    command: server -C /etc/minio --address ":9000" --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - ./minio/config:/.mc:z
+      # - ./minio/config:/etc/minio/
+      - minio-data-volume-01:/data:z
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.4
+
+
+volumes:
+  aws-localstack-data-volume-01:
+    driver: local
+  minio-data-volume-01:
+    driver: local

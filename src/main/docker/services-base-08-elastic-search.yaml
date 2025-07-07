@@ -1,0 +1,36 @@
+services:
+
+  bookanything-infra-elasticsearch:
+    image: elasticsearch:8.14.0
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-elasticsearch
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.60
+
+  bookanything-infra-kibana:
+    image: kibana:8.14.0
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-kibana
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - bookanything-infra-elasticsearch
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.61
+
+volumes:
+  elasticsearch-data:
+    driver: local

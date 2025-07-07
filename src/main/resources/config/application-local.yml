@@ -1,0 +1,12 @@
+logging:
+    level:
+        de:
+            org:
+                dexterity:
+                    bookanything: DEBUG
+spring:
+    devtools:
+        livereload:
+            enabled: true
+        restart:
+            enabled: true

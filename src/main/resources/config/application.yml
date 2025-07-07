@@ -1,0 +1,159 @@
+logging:
+    level:
+        de:
+            org:
+                dexterity:
+                    bookanything: INFO
+
+server:
+    port: 8060
+
+spring:
+    application:
+        name: BookAnythingBackendApplication
+    servlet:
+        multipart:
+            max-file-size: 50MB
+            max-request-size: 50MB
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            auto-commit: false
+            poolName: Hikari
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:postgresql://localhost:5432/DBBookAnythingPlatform
+        username: dbabookanythingapps01
+        password: 1a88a1
+    devtools:
+        livereload:
+            enabled: false
+        restart:
+            enabled: false
+    data:
+        jpa:
+            repositories:
+                bootstrap-mode: deferred
+    jpa:
+        hibernate:
+            # ddl-auto: none
+            ddl-auto: update
+            naming:
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+                physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        open-in-view: false
+        properties:
+            hibernate:
+                connection:
+                    provider_disables_autocommit: true
+                generate_statistics: false
+                jdbc:
+                    batch_size: 25
+                    time_zone: UTC
+                order_inserts: true
+                order_updates: true
+                query:
+                    fail_on_pagination_over_collection_fetch: true
+                    in_clause_parameter_padding: true
+                # dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+    liquibase:
+        change-log: classpath:config/liquibase/master.xml
+    jackson:
+        default-property-inclusion: non_absent
+
+    security:
+        oauth2:
+            resource-server:
+                jwt:
+                    issuer-uri: http://localhost:9080/realms/dexterity-apps-01
+                    jwk-set-uri: http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/certs
+            client:
+                provider:
+                    oidc:
+                        issuer-uri: http://localhost:9080/realms/dexterity-apps-01
+                registration:
+                    oidc:
+                        client-id: web_app
+                        client-secret: web_app
+                        scope: openid,profile,email
+
+    kafka:
+        bootstrap-servers: localhost:9092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+            properties:
+                spring.json.add.type.headers: true
+                max.request.size: 52428800
+        consumer:
+            group-id: elasticsearch-indexer
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+            properties:
+                spring:
+                    deserializer:
+                        value:
+                            delegate:
+                                class: org.springframework.kafka.support.serializer.JsonDeserializer
+                    json:
+                        trusted:
+                            packages: de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events,de.grundid.opendatalab.geojson,de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.geojson
+                max.partition.fetch.bytes: 52428800
+
+    elasticsearch:
+        uris: http://localhost:9200
+
+    docker:
+        compose:
+            readiness:
+                # tcp:
+                #     connect-timeout: 10000ms
+                #     read-timeout: 10000ms
+                wait: never
+                timeout: 15s
+            lifecycle-management: start-and-stop
+            start:
+                log-level: debug
+langchain4j:
+    open-ai:
+        chat-model:
+            # You can temporarily use 'demo' key, which is provided for free for demonstration purposes
+            api-key: demo
+            log-requests: 'true'
+            log-responses: 'true'
+            model-name: gpt-4o-mini
+management:
+    endpoint:
+        health:
+            probes:
+                enabled: true
+            show-details: always
+    endpoints:
+        web:
+            base-path: /management
+            exposure:
+                include:
+                    - configprops
+                    - env
+                    - health
+                    - info
+                    - logfile
+                    - loggers
+                    - threaddump
+
+application:
+    security:
+        oauth2:
+            audience: account,api://default
+
+springdoc:
+    enable-native-support: true
+    swagger-ui:
+        operationsSorter: alpha
+        tagsSorter: alpha
+        tryItOutEnabled: true
+        oauth:
+            client-id: swaggerui-test-app
+            realm: dexterity-apps-01
+    oauth2:
+        authorization-url: http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/auth

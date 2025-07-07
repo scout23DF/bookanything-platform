@@ -1,0 +1,22 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "DBsLocalDevInDocker",
+      "Group": "Servers",
+      "Host": "bookanything-infra-postgresql",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "dbamaster01",
+      "Comment": "Databases used in Dev-Local Environment.",
+      "Shared": true,
+      "BGColor": "#FFFFFF",
+      "FGColor": "#4C1130",
+      "Timeout": 60,
+      "SSLMode": "disable",
+      "SSLCompression": 0,
+      "UseSSHTunnel": 0,
+      "TunnelPort": "22",
+      "TunnelAuthentication": 0
+    }
+  }
+}

@@ -1,0 +1,102 @@
+services:
+
+  bookanything-infra-keycloak:
+    image: quay.io/keycloak/keycloak:${ENV_KC_MAIN0_VERSION:-latest}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-keycloak
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-keycloak
+    user: "root:root"
+    labels:
+      org.springframework.boot.readiness-check.tcp.disable: true
+    environment:
+      KC_DB: ${ENV_KC_MAIN0_DB}
+      KC_DB_URL_HOST: ${ENV_KC_MAIN0_DB_URL_HOST}
+      KC_DB_URL_PORT: ${ENV_KC_MAIN0_DB_URL_PORT}
+      KC_DB_URL_DATABASE: ${ENV_KC_MAIN0_DB_URL_DATABASE}
+      KC_DB_USERNAME: ${ENV_KC_MAIN0_DB_USERNAME}
+      KC_DB_PASSWORD: ${ENV_KC_MAIN0_DB_PASSWORD}
+      KC_DB_SCHEMA: ${ENV_KC_MAIN0_DB_SCHEMA}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${ENV_KC_MAIN0_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ENV_KC_MAIN0_ADMIN_PASSWORD}
+      KC_DB_URL_PROPERTIES: ${ENV_KC_MAIN0_DB_URL_PROPERTIES}
+      KC_FEATURES: scripts
+      # KC_FEATURES: ${ENV_KC_MAIN0_FEATURES}
+      # KC_FEATURES_DISABLED: ${ENV_KC_MAIN0_FEATURES_DISABLED}
+
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+
+      KC_HTTP_PORT: ${ENV_KC_MAIN0_HTTP_PORT}
+      KC_HTTPS_PORT: ${ENV_KC_MAIN0_HTTPS_PORT}
+
+      # KC_LOG_LEVEL: ${ENV_KC_MAIN0_LOG_LEVEL}
+      # DEBUG: ${ENV_KC_MAIN0_DEBUG}
+      # DEBUG_PORT: "*:${ENV_KC_MAIN0_DEBUG_PORT}"
+      # KC_CACHE: ${ENV_KC_MAIN0_CACHE}
+      # KC_CACHE_STACK: ${ENV_KC_MAIN0_CACHE_STACK}
+      # Management Settings:
+      # KC_HTTP_MANAGEMENT_PORT: 9110
+      # KC_HTTP_MANAGEMENT_RELATIVE_PATH: "/management"
+      # JAVA_TOOL_OPTIONS: ${ENV_KC_MAIN0_JAVA_TOOL_OPTIONS}
+      # JAVA_OPTS: ${ENV_KC_MAIN0_JAVA_OPTS}
+      # JAVA_OPTS_APPEND: ${ENV_KC_MAIN0_JAVA_OPTS_APPEND}
+    command: 'start-dev --import-realm --verbose'
+    # command: start --import-realm --verbose
+    ports:
+      - '127.0.0.1:9080:9080'
+      - '127.0.0.1:9443:9443'
+      # - "${ENV_KC_MAIN0_HTTP_PORT}:${ENV_KC_MAIN0_HTTP_PORT}"
+      # - "${ENV_KC_MAIN0_HTTPS_PORT}:${ENV_KC_MAIN0_HTTPS_PORT}"
+      # - "${ENV_KC_MAIN0_HTTPS_PORT}:443"
+      # - "${ENV_KC_MAIN0_DEBUG_PORT}:${ENV_KC_MAIN0_DEBUG_PORT}"
+      # - "9000:9000"
+    expose:
+      - "9080"
+      - "9443"
+      # - "${ENV_KC_MAIN0_HTTP_PORT}"
+      # - "${ENV_KC_MAIN0_HTTPS_PORT}"
+      # - "9000"
+    healthcheck:
+      test:
+        # [
+        #   "CMD-SHELL",
+        #   'exec 3<>/dev/tcp/localhost/9110; echo -e "GET /management/health/ready HTTP/1.1\nhost: localhost:9110\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+        # ]
+        [
+          'CMD-SHELL',
+          '[ -f /tmp/JHipsterKeycloakHealthCheck.java ] || echo "public class JHipsterKeycloakHealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/JHipsterKeycloakHealthCheck.java && java /tmp/JHipsterKeycloakHealthCheck.java http://localhost:9000/health/live',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    depends_on:
+      bookanything-infra-postgresql:
+        condition: service_healthy
+    volumes:
+      - ./keycloak/realms-import-config:/opt/keycloak/data/import
+    networks:
+      # - bookanything-network-dev1-01
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.30
+
+
+  bookanything-infra-mailhog:
+    image: mailhog/mailhog:latest
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-mailhog
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-mailhog
+    environment:
+      MH_HOSTNAME: webmail.${ENV_DEFAULT_DOMAIN_SUFFIX}
+      MH_API_BIND_ADDR: 0.0.0.0:8025
+      MH_UI_BIND_ADDR: 0.0.0.0:8025
+      MH_SMTP_BIND_ADDR: 0.0.0.0:1025
+    ports:
+      - "1080:8025"
+      - "1025:1025"
+    expose:
+      - "8025"
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.31

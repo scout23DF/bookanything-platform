@@ -1,0 +1,22 @@
+services:
+
+  bookanything-infra-portainer:
+    image: portainer/portainer-ce:latest
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-portainer
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-portainer
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer-data-volume-01:/data:rw,delegated
+    ports:
+      - 19000:9000
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.2
+
+
+volumes:
+  portainer-data-volume-01:
+    driver: local

@@ -1,0 +1,21 @@
+services:
+
+  bookanything-infra-pgadmin4: # port: 16543:80
+    image: dpage/pgadmin4:latest
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-pgadmin4
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-pgadmin4
+    user: root:root
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@dexterity.org.de"
+      PGADMIN_DEFAULT_PASSWORD: "admin_1a88a1"
+    ports:
+      - "16543:80"
+    expose:
+      - "80"
+    depends_on:
+      - ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-postgresql
+    volumes:
+      - ./pgadmin4/conf/servers.json:/pgadmin4/servers.json
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.50

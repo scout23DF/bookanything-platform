@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+
+    <changeSet id="create-dom01geolocation-tables" author="andre.nascimento">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tb_geo_location"/>
+                <tableExists tableName="tb_address"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tb_geo_location">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_geo_location"/>
+            </column>
+            <column name="tp_geo_location" type="VARCHAR(31)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_name" type="VARCHAR(255)"/>
+            <column name="ge_geographic_boundary" type="geometry"/>
+
+            <column name="continent_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_continent_parent" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+            <column name="region_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_region_parent" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+            <column name="country_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_country_parent" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+            <column name="province_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_province_parent" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+            <column name="city_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_city_parent" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="tb_address">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_address"/>
+            </column>
+            <column name="ds_street_name" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_house_number" type="VARCHAR(40)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ds_floor_number" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ds_door_number" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ds_address_line2" type="VARCHAR(120)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ds_postal_code" type="VARCHAR(08)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_district_name" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_city_name" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_province_name" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_country_name" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ge_coordinates" type="point">
+                <constraints nullable="true"/>
+            </column>
+            <column name="cd_status" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="district_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_district_address" referencedTableName="tb_geo_location" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

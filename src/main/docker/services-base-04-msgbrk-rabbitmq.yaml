@@ -1,0 +1,40 @@
+services:
+
+  bookanything-infra-rabbitmq-broker:
+    image: rabbitmq:4-management
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-rabbitmq-broker
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-rabbitmq-broker
+    user: root:root
+    # command: rabbitmq-server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - '5672'
+      - '15672'
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "node_health_check" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      RABBITMQ_CONFIG_FILE: /etc/rabbitmq/tckbkn-custom-rabbitmq
+      RABBITMQ_ERLANG_COOKIE: MDRVBBXFRHGPCNMRGQZZ
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: ciam_vhost
+      LANG: en_US.utf8
+      LC_ALL: en_US.utf8
+      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+    volumes:
+      - ./rabbitmq/init-configs:/etc/rabbitmq:z
+      - rabbitmq-mnesia-volume-01:/var/lib/rabbitmq/mnesia:z
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.23
+
+
+volumes:
+  rabbitmq-mnesia-volume-01:
+    driver: local

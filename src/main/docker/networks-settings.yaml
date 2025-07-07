@@ -1,0 +1,7 @@
+# Networks configurations
+networks:
+  bookanything-network-dev1-01:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.100.0.0/16

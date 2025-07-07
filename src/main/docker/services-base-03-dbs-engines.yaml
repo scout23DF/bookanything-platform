@@ -1,0 +1,42 @@
+services:
+
+  bookanything-infra-postgresql:
+    image: ${ENV_POSTGRESQL_IMAGE}:${ENV_POSTGRESQL_VERSION}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-postgresql
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-postgresql
+    # user: "root:root"
+    environment:
+      POSTGRES_DB: ${ENV_POSTGRES_01_BUSINESS_DATABASE_NAME}
+      POSTGRES_PORT: ${ENV_POSTGRES_01_PORT}
+      POSTGRES_USER: ${ENV_POSTGRES_01_MASTERDBA_USERNAME}
+      POSTGRES_PASSWORD: ${ENV_POSTGRES_01_MASTERDBA_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
+      DEFAULT_ENCODING: "UTF-8"
+      DEFAULT_CTYPE: "en_US.UTF-8"
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis,hstore,postgis_topology,pgrouting
+      RECREATE_DATADIR: "false"
+      IP_LIST: "*"
+    ports:
+      - "${ENV_POSTGRES_01_PORT}:${ENV_POSTGRES_01_PORT}"
+    expose:
+      - "${ENV_POSTGRES_01_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgresql/init-configs/init-scripts/01-create-roles-users-dbs-schemas.sql:/docker-entrypoint-initdb.d/01-create-roles-users-dbs-schemas.sql:ro
+      - ./postgresql/init-configs/init-scripts/02-keycloak-db-dump-to-load-01.sql:/docker-entrypoint-initdb.d/02-keycloak-db-dump-to-load-01.sql:ro
+      - ./postgresql/init-configs/init-scripts/03-dbs-tckbkn-apps-dump-to-load.sql:/docker-entrypoint-initdb.d/03-dbs-tckbkn-apps-dump-to-load.sql:ro
+      - postgresql-data-volume-01:/var/lib/postgresql:rw,delegated
+    networks:
+      bookanything-network-dev1-01:
+        ipv4_address: 172.100.0.10
+
+
+volumes:
+  postgresql-data-volume-01:
+    driver: local
+
+

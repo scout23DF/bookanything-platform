@@ -1,0 +1,25 @@
+spring:
+    application:
+        name: BookAnythingBackendApplication
+    cloud:
+        compatibility-verifier:
+            enabled: false
+        consul:
+            config:
+                format: yaml
+                profile-separator: '-'
+                watch:
+                    enabled: false
+            discovery:
+                health-check-path: ${server.servlet.context-path:}/management/health
+                instance-id: BookAnythingBackendApplication:${spring.application.instance-id:${random.value}}
+                prefer-ip-address: true
+                service-name: BookAnythingBackendApplication
+                tags[0]: version=@project.version@
+                tags[1]: context-path=${server.servlet.context-path:}
+                tags[2]: profile=${spring.profiles.active:}
+                tags[3]: git-version=${git.build.version:}
+                tags[4]: git-commit=${git.commit.id.abbrev:}
+                tags[5]: git-branch=${git.branch:}
+            host: localhost
+            port: 8500
