@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
+import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.KafkaContainer
@@ -30,6 +31,11 @@ abstract class AbstractIntegrationTest {
             .withEnv("KAFKA_MESSAGE_MAX_BYTES", "52428800")
             .withEnv("KAFKA_REPLICA_FETCH_MAX_BYTES", "52428800")
 
+        @Container
+        val keycloak: KeycloakContainer = KeycloakContainer("keycloak/keycloak:26.3.0")
+            .withRealmImportFile("keycloak/dexterity-apps-01-realm.json")
+
+
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
@@ -38,6 +44,8 @@ abstract class AbstractIntegrationTest {
             registry.add("spring.datasource.password", postgres::getPassword)
             registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress)
             registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
+            registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { keycloak.authServerUrl + "/realms/dexterity-apps-01" }
+            registry.add("spring.security.oauth2.client.provider.oidc.issuer-uri") { keycloak.authServerUrl + "/realms/dexterity-apps-01" }
         }
     }
 }
