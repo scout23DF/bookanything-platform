@@ -1,6 +1,6 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.jpa.repositories.CentroDistribuicaoJpaRepository
 import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events.CentroDistribuicaoCadastradoEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterEach

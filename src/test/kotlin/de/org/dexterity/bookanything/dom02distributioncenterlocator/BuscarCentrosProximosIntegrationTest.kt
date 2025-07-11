@@ -1,9 +1,10 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CadastrarCentroDistribuicaoRequest
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.input.web.dtos.CreateCentroDistribuicaoRestRequest
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.elasticsearch.entities.CentroDistribuicaoElasticEntity
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.jpa.repositories.CentroDistribuicaoJpaRepository
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.input.web.dtos.CentroDistribuicaoRestResponse
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -63,10 +64,10 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
         }
 
         // Given
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 0", latitude = -23.55051, longitude = -46.633307))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Proximo 2", latitude = -23.55053, longitude = -46.633309))
-        createDistributionCenter(CadastrarCentroDistribuicaoRequest(nome = "CD Longe", latitude = -22.9068, longitude = -43.1729))
+        createDistributionCenter(CreateCentroDistribuicaoRestRequest(nome = "CD Proximo 0", latitude = -23.55051, longitude = -46.633307))
+        createDistributionCenter(CreateCentroDistribuicaoRestRequest(nome = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
+        createDistributionCenter(CreateCentroDistribuicaoRestRequest(nome = "CD Proximo 2", latitude = -23.55053, longitude = -46.633309))
+        createDistributionCenter(CreateCentroDistribuicaoRestRequest(nome = "CD Longe", latitude = -22.9068, longitude = -43.1729))
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
@@ -95,7 +96,7 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
 
         // Then
         val responseBody = result.response.contentAsString
-        val centrosProximos = objectMapper.readValue(responseBody, Array<de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CentroDistribuicaoResponse>::class.java).toList()
+        val centrosProximos = objectMapper.readValue(responseBody, Array<CentroDistribuicaoRestResponse>::class.java).toList()
 
         assertEquals(3, centrosProximos.size)
         assert(centrosProximos.any { it.nome == "CD Proximo 0" })
@@ -104,7 +105,7 @@ class BuscarCentrosProximosIntegrationTest : AbstractIntegrationTest() {
         assert(!centrosProximos.any { it.nome == "CD Longe" })
     }
 
-    private fun createDistributionCenter(request: CadastrarCentroDistribuicaoRequest) {
+    private fun createDistributionCenter(request: CreateCentroDistribuicaoRestRequest) {
         mockMvc.post("/cds") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)

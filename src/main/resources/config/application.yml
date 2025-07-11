@@ -98,7 +98,7 @@ spring:
                                 class: org.springframework.kafka.support.serializer.JsonDeserializer
                     json:
                         trusted:
-                            packages: de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events,de.grundid.opendatalab.geojson,de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.geojson
+                            packages: de.grundid.opendatalab.geojson,de.org.dexterity.bookanything.*
                 max.partition.fetch.bytes: 52428800
 
     elasticsearch:

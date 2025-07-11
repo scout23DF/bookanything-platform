@@ -1,7 +1,7 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator.application
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.CentroDistribuicaoModel
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.EventPublisherPort
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.models.CentroDistribuicaoModel
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events.CentroDistribuicaoCadastradoEvent
 import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events.CentroDistribuicaoDeletadoEvent
 import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.events.CentrosDistribuicaoDeletadosEvent

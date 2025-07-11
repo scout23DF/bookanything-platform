@@ -1,6 +1,6 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.ports
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.CentroDistribuicaoModel
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.models.CentroDistribuicaoModel
 import java.util.*
 
 interface CentroDistribuicaoPersistRepositoryPort {

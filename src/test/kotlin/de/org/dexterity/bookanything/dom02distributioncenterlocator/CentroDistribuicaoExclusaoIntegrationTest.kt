@@ -1,7 +1,7 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CadastrarCentroDistribuicaoRequest
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CentroDistribuicaoResponse
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.input.web.dtos.CreateCentroDistribuicaoRestRequest
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.input.web.dtos.CentroDistribuicaoRestResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,9 +34,9 @@ class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should delete a distribution center by id`() {
         // Given
-        val request = CadastrarCentroDistribuicaoRequest(nome = "CD Para Deletar", latitude = -23.55051, longitude = -46.633307)
+        val request = CreateCentroDistribuicaoRestRequest(nome = "CD Para Deletar", latitude = -23.55051, longitude = -46.633307)
         val result = createDistributionCenter(request)
-        val response = objectMapper.readValue(result.response.contentAsString, CentroDistribuicaoResponse::class.java)
+        val response = objectMapper.readValue(result.response.contentAsString, CentroDistribuicaoRestResponse::class.java)
 
         // When
         mockMvc.delete("/cds/{id}", response.id) {
@@ -59,7 +59,7 @@ class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
         // Given
         IntRange(0, (newItemsToCreateCount - 1)).forEach {
             createDistributionCenter(
-                CadastrarCentroDistribuicaoRequest(
+                CreateCentroDistribuicaoRestRequest(
                     nome = "One New Distribution Center - No.: ${it}",
                     latitude = Random(-23).nextDouble(-23.55999, -23.55000 ),
                     longitude = Random(-46).nextDouble(-46.633999, -46.633000)
@@ -78,7 +78,7 @@ class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
 
             // Then
             val responseBody1 = result1.response.contentAsString
-            val centrosProximos1 = objectMapper.readValue(responseBody1, Array<CentroDistribuicaoResponse>::class.java).toList()
+            val centrosProximos1 = objectMapper.readValue(responseBody1, Array<CentroDistribuicaoRestResponse>::class.java).toList()
 
             val count = centrosProximos1.size
             if (count < newItemsToCreateCount) {
@@ -106,13 +106,13 @@ class CentroDistribuicaoExclusaoIntegrationTest : AbstractIntegrationTest() {
             // Then
             val responseBody2 = result2.response.contentAsString
             val centrosProximos2 =
-                objectMapper.readValue(responseBody2, Array<CentroDistribuicaoResponse>::class.java).toList()
+                objectMapper.readValue(responseBody2, Array<CentroDistribuicaoRestResponse>::class.java).toList()
 
             assertEquals(0, centrosProximos2.size)
         }
     }
 
-    private fun createDistributionCenter(request: CadastrarCentroDistribuicaoRequest): org.springframework.test.web.servlet.MvcResult {
+    private fun createDistributionCenter(request: CreateCentroDistribuicaoRestRequest): org.springframework.test.web.servlet.MvcResult {
         return mockMvc.post("/cds") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)

@@ -1,10 +1,10 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator.application
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.geojson.GeoJsonUploadedFileDTO
 import com.bedatadriven.jackson.datatype.jts.JtsModule
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.dtos.GeoJsonUploadedFileDTO
 import org.geojson.FeatureCollection
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
+import java.util.*
 
 // Using RuntimeException is common in Spring for exceptions that should result in a client error.
 class InvalidGeoJsonFileException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
@@ -29,18 +30,25 @@ class GeoJsonProcessingService(
     private val objectMapper = ObjectMapper().registerModule(JtsModule())
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
 
-    fun processGeoJsonFile(contentDataType: String, uploadedGeoJSONFile: MultipartFile) {
+    fun processGeoJsonFile(contentDataType: String, uploadedGeoJSONFile: MultipartFile): Map<String, String> {
+
+        var resultMap : Map<String, String> = mutableMapOf()
+        var messageResult : String = "The uploaded file was successfully validated and queued to be processed ASAP. You'll be notified when it gets done."
 
         try {
 
             val geoJsonUploadedFileDTO = mountGeoJSONObjectFromUploadedFile(contentDataType, uploadedGeoJSONFile)
             this.kafkaTemplate.send("geojson-upload-topic", geoJsonUploadedFileDTO)
-            logger.info("Successfully processed and sent GeoJSON file to Kafka topic.")
+            logger.info(messageResult)
+
         } catch (e: InvalidGeoJsonFileException) {
-            logger.error("Failed to process GeoJSON file: ${e.message}", e)
-            // Re-throw the exception so the controller layer can handle it and return a proper HTTP status.
-            throw e
+            messageResult = "Failed to process GeoJSON file: ${e.message}"
+            logger.error(messageResult, e)
         }
+
+        resultMap = mapOf("result1" to messageResult)
+
+        return resultMap
 
     }
 
@@ -75,7 +83,7 @@ class GeoJsonProcessingService(
 
     fun handleUploadedGeoJsonFileConsumedFromQueue(geoJsonUploadedFileDTO: GeoJsonUploadedFileDTO) {
         geoJsonUploadedFileDTO.featureCollection.features.forEach { oneFeature ->
-            val nome: String = buildNomeFromProperties(oneFeature.properties)
+            val nome: String = buildNomeFromProperties(geoJsonUploadedFileDTO.contentDataType, oneFeature.properties)
             if (oneFeature.geometry is org.geojson.Point) {
                 val geoJsonPoint = oneFeature.geometry as org.geojson.Point
                 val coordinates = geoJsonPoint.coordinates
@@ -100,36 +108,68 @@ class GeoJsonProcessingService(
         }
     }
 
-    /*
-    fun handleUploadedGeoJsonFileConsumedFromQueue(geoJsonUploadedFileDTO: GeoJsonUploadedFileDTO) {
+    private fun buildNomeFromProperties(contentDataType: String, featurePropertiesMap: Map<String, Any>): String {
 
-        geoJsonUploadedFileDTO.featureCollection.features.forEach { oneFeature ->
-            val nome: String = buildNomeFromProperties(oneFeature.properties)
-            if (oneFeature.geometry is org.geojson.Point) {
-                val locationCoords: Point = geometryFactory.createPoint(
-                    Coordinate(
-                        (oneFeature.geometry as org.geojson.Point).coordinates.longitude,
-                        (oneFeature.geometry as org.geojson.Point).coordinates.latitude
-                    )
-                )
+        var finalBuiltName : String = ""
+        var firstStmt : String
+        var secondStmt : String
+        var thirdStmt : String
 
-                try {
-                    centroDistribuicaoOrchestrationService.cadastrar(nome, locationCoords)
-                    println("==> SUCCESS :: O seguinte Centro de Distribuição foi cadastrado com sucesso: ${nome} - Coordenadas: ${locationCoords}")
-                } catch (ex: IllegalArgumentException) {
-                    println("==> FAIL :: Verificação de Duplicação de Centro de Distribuição: ${ex.message}")
-                }
+        finalBuiltName = when (contentDataType) {
+            "ev-charging-stations" -> {
+                firstStmt = (featurePropertiesMap["state_province"] ?: "Unknown State") as String
+                secondStmt = (featurePropertiesMap["city"] ?: "Unknown City") as String
+                thirdStmt = (featurePropertiesMap["station_name"] ?: "Unknown Station") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "schools" -> {
+                firstStmt = (featurePropertiesMap["Phase"] ?: "Unknown Phase") as String
+                secondStmt = (featurePropertiesMap["Establishment"] ?: "Unknown Establishment") as String
+                thirdStmt = (featurePropertiesMap["School ward"] ?: "Unknown School ward") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "e-scooters" -> {
+                firstStmt = (featurePropertiesMap["OBJECTID"]?.toString() ?: "Unknown OBJECTID") as String
+                secondStmt = (featurePropertiesMap["Location"] ?: "Unknown Location") as String
+                thirdStmt = (featurePropertiesMap["WARD"] ?: "Unknown WARD") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "grocery-stores" -> {
+                firstStmt = (featurePropertiesMap["State"] ?: "Unknown State") as String
+                secondStmt = (featurePropertiesMap["City"] ?: "Unknown City") as String
+                thirdStmt = (featurePropertiesMap["Company"] ?: "Unknown Company") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "museums" -> {
+                firstStmt = (featurePropertiesMap["Bankfield Museum"] ?: "Unknown Bankfield Museum") as String
+                secondStmt = (featurePropertiesMap["Easting"] ?: "Unknown Easting") as String
+                thirdStmt = (featurePropertiesMap["Northing"] ?: "Unknown Northing") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "pharmacies" -> {
+                firstStmt = (featurePropertiesMap["East"] ?: "Unknown East") as String
+                secondStmt = (featurePropertiesMap["PharmacyName"] ?: "Unknown PharmacyName") as String
+                thirdStmt = (featurePropertiesMap["Ward"] ?: "Unknown Ward") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "theatres" -> {
+                firstStmt = (featurePropertiesMap["NAME"] ?: "Unknown NAME") as String
+                secondStmt = (featurePropertiesMap["Northings"] ?: "Unknown Northings") as String
+                thirdStmt = (featurePropertiesMap["Eastings"] ?: "Unknown Eastings") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            "dentists" -> {
+                firstStmt = (featurePropertiesMap["County"] ?: "Unknown County") as String
+                secondStmt = (featurePropertiesMap["City"] ?: "Unknown City") as String
+                thirdStmt = (featurePropertiesMap["Name"] ?: "Unknown Name") as String
+                "$firstStmt - $secondStmt - $thirdStmt"
+            }
+            else -> {
+                "[Name Not Defined - ${UUID.randomUUID()}]"
             }
         }
 
-    }
-    */
-
-    private fun buildNomeFromProperties(featurePropertiesMap: Map<String, Any>): String {
-        val state = featurePropertiesMap["state_province"] ?: "Unknown State"
-        val city = featurePropertiesMap["city"] ?: "Unknown City"
-        val station = featurePropertiesMap["station_name"] ?: "Unknown Station"
-        return "$state - $city - $station"
+        return finalBuiltName
     }
 
 }

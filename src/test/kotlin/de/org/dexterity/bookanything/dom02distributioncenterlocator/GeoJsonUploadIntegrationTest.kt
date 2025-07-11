@@ -1,8 +1,8 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CentroDistribuicaoResponse
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.input.web.dtos.CentroDistribuicaoRestResponse
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.elasticsearch.entities.CentroDistribuicaoElasticEntity
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.jpa.repositories.CentroDistribuicaoJpaRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -104,7 +104,7 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
 
             // Then
             val responseBody1 = result1.response.contentAsString
-            val centrosProximos1 = objectMapper.readValue(responseBody1, Array<CentroDistribuicaoResponse>::class.java).toList()
+            val centrosProximos1 = objectMapper.readValue(responseBody1, Array<CentroDistribuicaoRestResponse>::class.java).toList()
 
             val count = centrosProximos1.size
             if (count < newItemsToCreateCount) {

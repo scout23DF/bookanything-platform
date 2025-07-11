@@ -1,10 +1,8 @@
 package de.org.dexterity.bookanything.dom02distributioncenterlocator
 
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.input.web.CadastrarCentroDistribuicaoRequest
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.elasticsearch.CentroDistribuicaoElasticEntity
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.jpa.CentroDistribuicaoJpaEntity
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.adapter.output.persistence.jpa.CentroDistribuicaoJpaRepository
-import de.org.dexterity.bookanything.dom02distributioncenterlocator.domain.CentroDistribuicaoModel
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.elasticsearch.entities.CentroDistribuicaoElasticEntity
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.jpa.entities.CentroDistribuicaoJpaEntity
+import de.org.dexterity.bookanything.dom02distributioncenterlocator.infrastructure.adapters.output.persistence.jpa.repositories.CentroDistribuicaoJpaRepository
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
