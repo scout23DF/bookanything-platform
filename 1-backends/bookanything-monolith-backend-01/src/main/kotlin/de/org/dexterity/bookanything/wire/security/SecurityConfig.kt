@@ -22,6 +22,7 @@ class SecurityConfig {
                     "/swagger-ui.html"
                 ).permitAll()
                 auth.requestMatchers("/localizable-places/**").authenticated()
+                auth.requestMatchers("/api/v1/geolocation/**").authenticated()
                 auth.anyRequest().permitAll()
             }
             .oauth2ResourceServer { oauth2 -> oauth2.jwt() }
