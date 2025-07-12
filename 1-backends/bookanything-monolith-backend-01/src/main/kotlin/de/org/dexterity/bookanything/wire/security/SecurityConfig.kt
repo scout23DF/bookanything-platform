@@ -21,7 +21,7 @@ class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                auth.requestMatchers("/cds/**").authenticated()
+                auth.requestMatchers("/localizable-places/**").authenticated()
                 auth.anyRequest().permitAll()
             }
             .oauth2ResourceServer { oauth2 -> oauth2.jwt() }
