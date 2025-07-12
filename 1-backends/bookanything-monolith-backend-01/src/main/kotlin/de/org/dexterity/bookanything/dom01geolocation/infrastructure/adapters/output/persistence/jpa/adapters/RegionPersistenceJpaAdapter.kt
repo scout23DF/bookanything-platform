@@ -1,0 +1,52 @@
+package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.adapters
+
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IRegionRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
+import de.org.dexterity.bookanything.shared.annotations.Adapter
+import java.util.*
+
+
+@Adapter
+class RegionPersistenceJpaAdapter(
+    val regionJpaRepository: RegionJpaRepository,
+    val geoLocationJpaMapper: GeoLocationJpaMapper
+) : IRegionRepositoryPort {
+
+    override fun saveNew(targetModel: RegionModel): RegionModel {
+        val convertedEntity = geoLocationJpaMapper.regionToJpaEntity(targetModel)
+        val entitySaved = regionJpaRepository.save(convertedEntity)
+        return geoLocationJpaMapper.regionToDomainModel(entitySaved)
+    }
+
+    override fun update(targetModel: RegionModel): RegionModel? {
+        val entityId: Long = targetModel.id.id
+
+        return regionJpaRepository.findById(entityId)
+            .map { geoLocationJpaMapper.regionToJpaEntity(targetModel, it) }
+            .map { regionJpaRepository.save(it) }
+            .map { geoLocationJpaMapper.regionToDomainModel(it) }
+            .orElse(null)
+    }
+
+    override fun existsGeoLocationById(geoLocationId: GeoLocationId): Boolean {
+        val entityIdToSearch: Long = geoLocationId.id
+        return regionJpaRepository.existsById(entityIdToSearch)
+    }
+
+    override fun findById(geoLocationId: GeoLocationId): Optional<RegionModel> {
+        return regionJpaRepository.findById(geoLocationId.id)
+            .map { geoLocationJpaMapper.regionToDomainModel(it) }
+    }
+
+    override fun findAll(): List<RegionModel> {
+        return regionJpaRepository.findAll()
+            .map { geoLocationJpaMapper.regionToDomainModel(it) }
+    }
+
+    override fun deleteById(geoLocationId: GeoLocationId) {
+        regionJpaRepository.deleteById(geoLocationId.id)
+    }
+
+}
