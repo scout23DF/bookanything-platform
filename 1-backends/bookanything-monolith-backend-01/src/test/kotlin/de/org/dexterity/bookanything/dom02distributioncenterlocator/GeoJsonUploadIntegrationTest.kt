@@ -80,7 +80,7 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
         // Given
         val sampleFile = MockMultipartFile(
             "file",
-            "sample.geojson",
+            "ev-charging-stations.geojson",
             MediaType.APPLICATION_JSON_VALUE,
             testGeoJSONFile.inputStream()
         )
@@ -89,7 +89,7 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
         // When
         mockMvc.perform(multipart("/cds/upload-geojson")
             .file(sampleFile)
-            .param("contentDataType", "geojson")
+            .param("contentDataType", "ev-charging-stations")
             .contentType(MediaType.MULTIPART_FORM_DATA)
         ).andExpect(status().isOk())
 
