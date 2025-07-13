@@ -160,7 +160,7 @@ class GeoLocationJpaMapper {
         )
     }
 
-    private fun buildPointFromGeoCoordinate(sourceGeoCoordinate: GeoCoordinate?): Point? {
+    fun buildPointFromGeoCoordinate(sourceGeoCoordinate: GeoCoordinate?): Point? {
         return sourceGeoCoordinate?.let {
             val geometryFactory = GeometryFactory()
             val coordinate = Coordinate(sourceGeoCoordinate.longitude, sourceGeoCoordinate.latitude)

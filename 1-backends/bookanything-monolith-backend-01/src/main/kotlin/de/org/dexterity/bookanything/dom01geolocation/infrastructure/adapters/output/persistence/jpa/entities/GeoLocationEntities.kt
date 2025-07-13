@@ -14,20 +14,20 @@ import java.util.Objects
 abstract class AbstractBaseGeoLocationEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    open val id: Long? = null,
 
     @Column("ds_name")
-    val name: String,
+    open var name: String,
 
     @Column("tp_geo_location", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    val type: GeoLocationType,
+    open val type: GeoLocationType,
 
     @Column(name = "ge_geographic_boundary", columnDefinition = "geometry")
-    val boundaryRepresentation: Geometry?,
+    open var boundaryRepresentation: Geometry?,
 
     @Column("parent_id", insertable = false, updatable = false)
-    val parentId: Long? = null,
+    open val parentId: Long? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -49,8 +49,8 @@ open class ContinentEntity(
     name: String,
     boundaryRepresentation: Geometry?,
 
-    @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val regionsList: List<RegionEntity>? = emptyList()
+    @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = RegionEntity::class)
+    open var regionsList: List<RegionEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.CONTINENT,
@@ -65,10 +65,10 @@ open class RegionEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_region_continent"))
-    open val continent: ContinentEntity,
+    open var continent: ContinentEntity,
 
-    @OneToMany(mappedBy = "region", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val countriesList: List<CountryEntity>? = emptyList()
+    @OneToMany(mappedBy = "region", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = CountryEntity::class)
+    open var countriesList: List<CountryEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.REGION,
@@ -83,10 +83,10 @@ open class CountryEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_country_region"))
-    open val region: RegionEntity,
+    open var region: RegionEntity,
 
-    @OneToMany(mappedBy = "country", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val provincesList: List<ProvinceEntity>? = emptyList()
+    @OneToMany(mappedBy = "country", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = ProvinceEntity::class)
+    open var provincesList: List<ProvinceEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.COUNTRY,
@@ -101,10 +101,10 @@ open class ProvinceEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_province_country"))
-    open val country: CountryEntity,
+    open var country: CountryEntity,
 
-    @OneToMany(mappedBy = "province", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val citiesList: List<CityEntity>? = emptyList()
+    @OneToMany(mappedBy = "province", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = CityEntity::class)
+    open var citiesList: List<CityEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.PROVINCE,
@@ -119,10 +119,10 @@ open class CityEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_city_province"))
-    open val province: ProvinceEntity,
+    open var province: ProvinceEntity,
 
-    @OneToMany(mappedBy = "city", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val districtsList: List<DistrictEntity>? = emptyList()
+    @OneToMany(mappedBy = "city", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = DistrictEntity::class)
+    open var districtsList: List<DistrictEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.CITY,
@@ -137,10 +137,10 @@ open class DistrictEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_district_city"))
-    open val city: CityEntity,
+    open var city: CityEntity,
 
-    @OneToMany(mappedBy = "district", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    open val addressesList: List<AddressEntity>? = emptyList()
+    @OneToMany(mappedBy = "district", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = AddressEntity::class)
+    open var addressesList: List<AddressEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
     type = GeoLocationType.DISTRICT,
@@ -155,45 +155,45 @@ open class AddressEntity(
     open val id: Long? = null,
 
     @Column("ds_street_name")
-    open val streetName: String,
+    open var streetName: String,
 
     @Column("ds_house_number")
-    open val houseNumber: String?,
+    open var houseNumber: String?,
 
     @Column("ds_floor_number")
-    open val floorNumber: String?,
+    open var floorNumber: String?,
 
     @Column("ds_door_number")
-    open val doorNumber: String?,
+    open var doorNumber: String?,
 
     @Column("ds_address_line2")
-    open val addressLine2: String?,
+    open var addressLine2: String?,
 
     @Column("ds_postal_code")
-    open val postalCode: String,
+    open var postalCode: String,
 
     @Column("ds_district_name")
-    open val districtName: String,
+    open var districtName: String,
 
     @Column("ds_city_name")
-    open val cityName: String,
+    open var cityName: String,
 
     @Column("ds_province_name")
-    open val provinceName: String,
+    open var provinceName: String,
 
     @Column("ds_country_name")
-    open val countryName: String,
+    open var countryName: String,
 
     @Column("ge_coordinates", columnDefinition = "point")
-    open val coordinates: Point?,
+    open var coordinates: Point?,
 
     @Column("cd_status")
     @Enumerated(EnumType.STRING)
-    open val status: StatusType? = StatusType.ACTIVE,
+    open var status: StatusType? = StatusType.ACTIVE,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id")
-    open val district: DistrictEntity
+    open var district: DistrictEntity
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

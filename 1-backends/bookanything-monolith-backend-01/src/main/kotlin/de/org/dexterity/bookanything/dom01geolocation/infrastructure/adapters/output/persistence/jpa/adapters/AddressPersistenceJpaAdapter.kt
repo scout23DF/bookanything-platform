@@ -4,12 +4,14 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.AddressModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IAddressRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.AddressJpaRepository
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
 
 @Adapter
 class AddressPersistenceJpaAdapter(
     val addressJpaRepository: AddressJpaRepository,
+    val districtJpaRepository: DistrictJpaRepository,
     val geoLocationJpaMapper: GeoLocationJpaMapper
 ) : IAddressRepositoryPort {
 
@@ -23,8 +25,23 @@ class AddressPersistenceJpaAdapter(
         val entityId: Long = targetModel.id.id
 
         return addressJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.addressToJpaEntity(targetModel) }
-            .map { addressJpaRepository.save(it) }
+            .map { existingEntity ->
+                existingEntity.streetName = targetModel.streetName
+                existingEntity.houseNumber = targetModel.houseNumber
+                existingEntity.floorNumber = targetModel.floorNumber
+                existingEntity.doorNumber = targetModel.doorNumber
+                existingEntity.addressLine2 = targetModel.addressLine2
+                existingEntity.postalCode = targetModel.postalCode
+                existingEntity.districtName = targetModel.districtName
+                existingEntity.cityName = targetModel.cityName
+                existingEntity.provinceName = targetModel.provinceName
+                existingEntity.countryName = targetModel.countryName
+                existingEntity.coordinates = geoLocationJpaMapper.buildPointFromGeoCoordinate(targetModel.coordinates)
+                existingEntity.status = targetModel.status
+                val districtEntity = districtJpaRepository.findById(targetModel.district.id.id).orElseThrow()
+                existingEntity.district = districtEntity
+                addressJpaRepository.save(existingEntity)
+            }
             .map { geoLocationJpaMapper.addressToDomainModel(it) }
             .orElse(null)
     }

@@ -31,8 +31,13 @@ class ProvincePersistenceJpaAdapter(
         val entityId: Long = targetModel.id.id
 
         return provinceJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.provinceToJpaEntity(targetModel) }
-            .map { provinceJpaRepository.save(it) }
+            .map { existingEntity ->
+                existingEntity.name = targetModel.name
+                existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
+                val countryEntity = countryJpaRepository.findById(targetModel.country.id.id).orElseThrow()
+                existingEntity.country = countryEntity
+                provinceJpaRepository.save(existingEntity)
+            }
             .map { geoLocationJpaMapper.provinceToDomainModel(it) }
             .orElse(null)
     }

@@ -21,11 +21,14 @@ class ContinentPersistenceJpaAdapter(
     }
 
     override fun update(targetModel: ContinentModel): ContinentModel? {
-        val entityId: Long = targetModel.id.component1()
+        val entityId: Long = targetModel.id.id
 
         return continentJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.continentToJpaEntity(targetModel) }
-            .map { continentJpaRepository.save(it) }
+            .map { existingEntity ->
+                existingEntity.name = targetModel.name
+                existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
+                continentJpaRepository.save(existingEntity)
+            }
             .map { geoLocationJpaMapper.continentToDomainModel(it) }
             .orElse(null)
     }
