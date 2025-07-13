@@ -3,6 +3,7 @@ package de.org.dexterity.bookanything.dom01geolocation.application.usecases
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.toModel
 import org.locationtech.jts.io.WKTReader
 import org.springframework.stereotype.Service
 import java.util.Optional
@@ -17,43 +18,34 @@ class GeoLocationCRUDService(
     private val districtUseCase: DistrictUseCase
 ) {
 
+    private val useCaseMap: Map<GeoLocationType, IGeoLocationUseCase<out IGeoLocationModel>> = mapOf(
+        GeoLocationType.CONTINENT to continentUseCase,
+        GeoLocationType.REGION to regionUseCase,
+        GeoLocationType.COUNTRY to countryUseCase,
+        GeoLocationType.PROVINCE to provinceUseCase,
+        GeoLocationType.CITY to cityUseCase,
+        GeoLocationType.DISTRICT to districtUseCase
+    )
+
     @Suppress("UNCHECKED_CAST")
     private fun <T : IGeoLocationModel> getUseCase(type: GeoLocationType): IGeoLocationUseCase<T> {
-        return when (type) {
-            GeoLocationType.CONTINENT -> continentUseCase as IGeoLocationUseCase<T>
-            GeoLocationType.REGION -> regionUseCase as IGeoLocationUseCase<T>
-            GeoLocationType.COUNTRY -> countryUseCase as IGeoLocationUseCase<T>
-            GeoLocationType.PROVINCE -> provinceUseCase as IGeoLocationUseCase<T>
-            GeoLocationType.CITY -> cityUseCase as IGeoLocationUseCase<T>
-            GeoLocationType.DISTRICT -> districtUseCase as IGeoLocationUseCase<T>
-        }
+        return useCaseMap[type] as? IGeoLocationUseCase<T>
+            ?: throw IllegalArgumentException("Unsupported GeoLocationType: $type")
     }
 
     fun create(type: GeoLocationType, request: CreateGeoLocationRequest): IGeoLocationModel {
         val useCase = getUseCase<IGeoLocationModel>(type)
-        val model = when (type) {
-            GeoLocationType.CONTINENT -> request.toContinentModel()
-            GeoLocationType.REGION -> {
-                val parent = continentUseCase.findById(GeoLocationId(request.parentId!!)).orElseThrow { IllegalArgumentException("Continent not found for ID: ${request.parentId}") }
-                request.toRegionModel(parent)
-            }
-            GeoLocationType.COUNTRY -> {
-                val parent = regionUseCase.findById(GeoLocationId(request.parentId!!)).orElseThrow { IllegalArgumentException("Region not found for ID: ${request.parentId}") }
-                request.toCountryModel(parent)
-            }
-            GeoLocationType.PROVINCE -> {
-                val parent = countryUseCase.findById(GeoLocationId(request.parentId!!)).orElseThrow { IllegalArgumentException("Country not found for ID: ${request.parentId}") }
-                request.toProvinceModel(parent)
-            }
-            GeoLocationType.CITY -> {
-                val parent = provinceUseCase.findById(GeoLocationId(request.parentId!!)).orElseThrow { IllegalArgumentException("Province not found for ID: ${request.parentId}") }
-                request.toCityModel(parent)
-            }
-            GeoLocationType.DISTRICT -> {
-                val parent = cityUseCase.findById(GeoLocationId(request.parentId!!)).orElseThrow { IllegalArgumentException("City not found for ID: ${request.parentId}") }
-                request.toDistrictModel(parent)
+        val parent: IGeoLocationModel? = request.parentId?.let {
+            when (type) {
+                GeoLocationType.REGION -> continentUseCase.findById(GeoLocationId(it)).orElseThrow { IllegalArgumentException("Continent not found for ID: $it") }
+                GeoLocationType.COUNTRY -> regionUseCase.findById(GeoLocationId(it)).orElseThrow { IllegalArgumentException("Region not found for ID: $it") }
+                GeoLocationType.PROVINCE -> countryUseCase.findById(GeoLocationId(it)).orElseThrow { IllegalArgumentException("Country not found for ID: $it") }
+                GeoLocationType.CITY -> provinceUseCase.findById(GeoLocationId(it)).orElseThrow { IllegalArgumentException("Province not found for ID: $it") }
+                GeoLocationType.DISTRICT -> cityUseCase.findById(GeoLocationId(it)).orElseThrow { IllegalArgumentException("City not found for ID: $it") }
+                else -> null
             }
         }
+        val model = request.toModel(type, parent)
         return useCase.create(model)
     }
 
