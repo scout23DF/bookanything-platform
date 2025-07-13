@@ -89,7 +89,37 @@ class GeoLocationController(
         return ResponseEntity.noContent().build()
     }
 
-    // ... Implement similar endpoints for Country, Province, City, District
+    // Country Endpoints
+    @PostMapping("/countries")
+    fun createCountry(@RequestBody dto: CreateGeoLocationRequest): ResponseEntity<GeoLocationResponse> {
+        val parent = regionUseCase.findById(GeoLocationId(dto.parentId!!)).orElse(null) ?: return ResponseEntity.badRequest().build()
+        return ResponseEntity.ok(countryUseCase.create(dto.toCountryModel(parent)).toResponse())
+    }
+
+    @GetMapping("/countries/{id}")
+    fun getCountry(@PathVariable id: Long): ResponseEntity<GeoLocationResponse> {
+        return countryUseCase.findById(GeoLocationId(id))
+            .map { ResponseEntity.ok(it.toResponse()) }
+            .orElse(ResponseEntity.notFound().build())
+    }
+
+    @GetMapping("/countries")
+    fun getAllCountries(): List<GeoLocationResponse> {
+        return countryUseCase.findAll().map { it.toResponse() }
+    }
+
+    @PutMapping("/countries/{id}")
+    fun updateCountry(@PathVariable id: Long, @RequestBody dto: UpdateGeoLocationRequest): ResponseEntity<GeoLocationResponse> {
+        val country = countryUseCase.findById(GeoLocationId(id)).orElse(null) ?: return ResponseEntity.notFound().build()
+        val updatedCountry = country.copy(name = dto.name, boundaryRepresentation = dto.boundaryRepresentation?.let { WKTReader().read(it) })
+        return ResponseEntity.ok(countryUseCase.update(updatedCountry)?.toResponse())
+    }
+
+    @DeleteMapping("/countries/{id}")
+    fun deleteCountry(@PathVariable id: Long): ResponseEntity<Void> {
+        countryUseCase.deleteById(GeoLocationId(id))
+        return ResponseEntity.noContent().build()
+    }
 
     // Address Endpoints
     @PostMapping("/addresses")

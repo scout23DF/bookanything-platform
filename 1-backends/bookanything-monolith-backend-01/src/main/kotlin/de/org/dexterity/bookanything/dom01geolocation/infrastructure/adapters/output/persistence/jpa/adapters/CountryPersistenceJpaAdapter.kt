@@ -3,20 +3,27 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.CountryModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICountryRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CountryEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CountryJpaRepository
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
-
 
 @Adapter
 class CountryPersistenceJpaAdapter(
     val countryJpaRepository: CountryJpaRepository,
+    val regionJpaRepository: RegionJpaRepository,
     val geoLocationJpaMapper: GeoLocationJpaMapper
 ) : ICountryRepositoryPort {
 
     override fun saveNew(targetModel: CountryModel): CountryModel {
-        val convertedEntity = geoLocationJpaMapper.countryToJpaEntity(targetModel)
-        val entitySaved = countryJpaRepository.save(convertedEntity)
+        val regionEntity = regionJpaRepository.findById(targetModel.region.id.id).orElseThrow()
+        val countryEntity = CountryEntity(
+            name = targetModel.name,
+            boundaryRepresentation = targetModel.boundaryRepresentation,
+            region = regionEntity
+        )
+        val entitySaved = countryJpaRepository.save(countryEntity)
         return geoLocationJpaMapper.countryToDomainModel(entitySaved)
     }
 
