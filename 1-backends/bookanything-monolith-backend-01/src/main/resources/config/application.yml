@@ -26,9 +26,9 @@ spring:
         password: 1a88a1
     devtools:
         livereload:
-            enabled: false
+            enabled: true
         restart:
-            enabled: false
+            enabled: true
     data:
         jpa:
             repositories:
@@ -40,7 +40,7 @@ spring:
             naming:
                 implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
                 physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-        open-in-view: false
+        open-in-view: true
         properties:
             hibernate:
                 connection:
@@ -54,6 +54,8 @@ spring:
                 query:
                     fail_on_pagination_over_collection_fetch: true
                     in_clause_parameter_padding: true
+                show_sql: true
+                format_sql: true
                 # dialect: org.hibernate.dialect.PostgreSQLDialect
     database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
     liquibase:

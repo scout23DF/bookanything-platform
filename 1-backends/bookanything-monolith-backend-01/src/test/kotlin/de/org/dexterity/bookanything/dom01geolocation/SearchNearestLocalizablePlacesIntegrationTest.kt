@@ -86,7 +86,7 @@ class SearchNearestLocalizablePlacesIntegrationTest : AbstractIntegrationTest() 
         val radiusInKm = 1.0 // 1 km
 
         // When
-        val result = mockMvc.get("/localizable-places/search-nearby") {
+        val result = mockMvc.get("/api/v1/localizable-places/search-nearby") {
             param("latitude", targetLatitude.toString())
             param("longitude", targetLongitude.toString())
             param("raioEmKm", radiusInKm.toString())
@@ -106,7 +106,7 @@ class SearchNearestLocalizablePlacesIntegrationTest : AbstractIntegrationTest() 
     }
 
     private fun createDistributionCenter(request: CreateLocalizablePlaceRestRequest) {
-        mockMvc.post("/localizable-places") {
+        mockMvc.post("/api/v1/localizable-places") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
             with(jwt())

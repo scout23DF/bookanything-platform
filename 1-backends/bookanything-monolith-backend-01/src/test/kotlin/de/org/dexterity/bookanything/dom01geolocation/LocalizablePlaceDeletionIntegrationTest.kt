@@ -40,12 +40,12 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
         val response = objectMapper.readValue(result.response.contentAsString, LocalizablePlaceRestResponse::class.java)
 
         // When
-        mockMvc.delete("/localizable-places/{id}", response.id) {
+        mockMvc.delete("/api/v1/localizable-places/{id}", response.id) {
             with(jwt())
         }.andExpect { status { isNoContent() } }
 
         // When
-        val resultFromGetById = mockMvc.get("/localizable-places/{id}", response.id) {
+        val resultFromGetById = mockMvc.get("/api/v1/localizable-places/{id}", response.id) {
             with(jwt())
         }.andExpect { status { isNotFound() } }
             .andReturn()
@@ -72,7 +72,7 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
 
             // When
-            val result1 = mockMvc.get("/localizable-places/all") {
+            val result1 = mockMvc.get("/api/v1/localizable-places/all") {
                 with(jwt())
             }.andExpect { status { isOk() } }
                 .andReturn()
@@ -92,14 +92,14 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
         }
 
         // When
-        mockMvc.delete("/localizable-places/all") {
+        mockMvc.delete("/api/v1/localizable-places/all") {
             with(jwt())
         }.andExpect { status { isNoContent() } }
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
             // When
-            val result2 = mockMvc.get("/localizable-places/all") {
+            val result2 = mockMvc.get("/api/v1/localizable-places/all") {
                 with(jwt())
             }.andExpect { status { isOk() } }
                 .andReturn()
@@ -114,7 +114,7 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
     }
 
     private fun createDistributionCenter(request: CreateLocalizablePlaceRestRequest): MvcResult {
-        return mockMvc.post("/localizable-places") {
+        return mockMvc.post("/api/v1/localizable-places") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
             with(jwt())

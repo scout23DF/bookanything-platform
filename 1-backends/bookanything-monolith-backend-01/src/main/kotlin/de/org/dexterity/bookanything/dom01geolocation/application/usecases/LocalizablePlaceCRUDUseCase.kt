@@ -31,7 +31,7 @@ class LocalizablePlaceCRUDUseCase(
         eventPublisherPort.publish(
             LocalizablePlaceCreatedEvent(
                 id = savedCentroDistribuicao.id,
-                nome = savedCentroDistribuicao.name,
+                name = savedCentroDistribuicao.name,
                 latitude = savedCentroDistribuicao.locationPoint.y,
                 longitude = savedCentroDistribuicao.locationPoint.x
             )

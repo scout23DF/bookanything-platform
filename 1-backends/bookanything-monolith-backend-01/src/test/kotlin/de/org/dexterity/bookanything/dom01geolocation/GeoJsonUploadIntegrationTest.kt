@@ -79,7 +79,7 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
         val newItemsToCreateCount : Int = 22
 
         // When
-        mockMvc.perform(multipart("/localizable-places/upload-geojson")
+        mockMvc.perform(multipart("/api/v1/localizable-places/upload-geojson")
             .file(sampleFile)
             .param("contentDataType", "ev-charging-stations")
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -89,7 +89,7 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
 
             // When
-            val result1 = mockMvc.get("/localizable-places/all") {
+            val result1 = mockMvc.get("/api/v1/localizable-places/all") {
                 with(jwt())
             }.andExpect { status { isOk() } }
                 .andReturn()

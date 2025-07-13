@@ -65,7 +65,7 @@ class SynchronizeEndpointIntegrationTest : AbstractIntegrationTest() {
         }
 
 
-        mockMvc.post("/localizable-places/synchronize") {
+        mockMvc.post("/api/v1/localizable-places/synchronize") {
             with(jwt())
         }.andExpect { status { isOk() } }
 

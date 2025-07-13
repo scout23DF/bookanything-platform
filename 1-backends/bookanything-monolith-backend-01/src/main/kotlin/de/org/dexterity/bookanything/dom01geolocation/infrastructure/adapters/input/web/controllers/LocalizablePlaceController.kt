@@ -14,7 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 @RestController
-@RequestMapping("/localizable-places")
+@RequestMapping("/api/v1/localizable-places")
 class LocalizablePlaceController(
     private val handlerMediatorManager: HandlersMediatorManager,
     private val localizablePlaceRestMapper: LocalizablePlaceRestMapper

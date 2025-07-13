@@ -35,7 +35,7 @@ class BeanConfig {
     fun continentUseCase(repository: IContinentRepositoryPort): ContinentUseCase = ContinentUseCase(repository)
 
     @Bean
-    fun regionUseCase(repository: IRegionRepositoryPort): RegionUseCase = RegionUseCase(repository)
+    fun regionUseCase(repository: IRegionRepositoryPort, continentUseCase: ContinentUseCase): RegionUseCase = RegionUseCase(repository, continentUseCase)
 
     @Bean
     fun countryUseCase(repository: ICountryRepositoryPort): CountryUseCase = CountryUseCase(repository)
@@ -53,38 +53,3 @@ class BeanConfig {
     fun addressUseCase(repository: IAddressRepositoryPort): AddressUseCase = AddressUseCase(repository)
 }
 
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.LocalizablePlaceCRUDUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.GeoJsonFileManagerUseCase
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlacePersistRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlaceQueryRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.GeoJsonFilePublisherPort
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-
-@Configuration
-class BeanConfig {
-
-    @Bean
-    fun localizablePlaceCRUDUseCase(
-        localizablePlacePersistRepositoryPort: LocalizablePlacePersistRepositoryPort,
-        localizablePlaceQueryRepositoryPort: LocalizablePlaceQueryRepositoryPort,
-        eventPublisher: EventPublisherPort
-    ): LocalizablePlaceCRUDUseCase {
-
-        return LocalizablePlaceCRUDUseCase(
-            localizablePlacePersistRepositoryPort,
-            localizablePlaceQueryRepositoryPort,
-            eventPublisher
-        )
-    }
-
-    @Bean
-    fun geoJsonFileManagerUseCase(
-        localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase,
-        geoJsonFilePublisherPort: GeoJsonFilePublisherPort
-    ): GeoJsonFileManagerUseCase {
-
-        return GeoJsonFileManagerUseCase(localizablePlaceCRUDUseCase, geoJsonFilePublisherPort)
-    }
-}

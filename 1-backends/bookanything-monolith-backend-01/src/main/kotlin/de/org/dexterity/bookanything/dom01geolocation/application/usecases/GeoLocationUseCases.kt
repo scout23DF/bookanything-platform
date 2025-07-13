@@ -2,8 +2,12 @@ package de.org.dexterity.bookanything.dom01geolocation.application.usecases
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.WKTReader
+import org.springframework.stereotype.Service
 import java.util.*
 
+@Service
 class ContinentUseCase(private val repository: IContinentRepositoryPort) {
     fun create(model: ContinentModel): ContinentModel = repository.saveNew(model)
     fun findById(id: GeoLocationId): Optional<ContinentModel> = repository.findById(id)
@@ -12,7 +16,11 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) {
     fun deleteById(id: GeoLocationId) = repository.deleteById(id)
 }
 
-class RegionUseCase(private val repository: IRegionRepositoryPort) {
+@Service
+class RegionUseCase(
+    private val repository: IRegionRepositoryPort,
+    private val continentUseCase: ContinentUseCase
+) {
     fun create(model: RegionModel): RegionModel = repository.saveNew(model)
     fun findById(id: GeoLocationId): Optional<RegionModel> = repository.findById(id)
     fun findAll(): List<RegionModel> = repository.findAll()

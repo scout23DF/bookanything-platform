@@ -24,7 +24,7 @@ class AddressPersistenceJpaAdapter(
         val entityId: Long = targetModel.id.id
 
         return addressJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.addressToJpaEntity(targetModel, it) }
+            .map { geoLocationJpaMapper.addressToJpaEntity(targetModel) }
             .map { addressJpaRepository.save(it) }
             .map { geoLocationJpaMapper.addressToDomainModel(it) }
             .orElse(null)

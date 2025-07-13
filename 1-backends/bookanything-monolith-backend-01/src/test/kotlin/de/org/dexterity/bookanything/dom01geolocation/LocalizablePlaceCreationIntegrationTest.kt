@@ -56,7 +56,7 @@ class LocalizablePlaceCreationIntegrationTest : AbstractIntegrationTest() {
             }
         """
 
-        val result = mockMvc.post("/localizable-places") {
+        val result = mockMvc.post("/api/v1/localizable-places") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
             with(jwt())
@@ -81,7 +81,7 @@ class LocalizablePlaceCreationIntegrationTest : AbstractIntegrationTest() {
             }
         """
 
-        mockMvc.post("/localizable-places") {
+        mockMvc.post("/api/v1/localizable-places") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
             with(jwt())

@@ -3,20 +3,27 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IRegionRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.RegionEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
 
-
 @Adapter
 class RegionPersistenceJpaAdapter(
     val regionJpaRepository: RegionJpaRepository,
+    val continentJpaRepository: ContinentJpaRepository,
     val geoLocationJpaMapper: GeoLocationJpaMapper
 ) : IRegionRepositoryPort {
 
     override fun saveNew(targetModel: RegionModel): RegionModel {
-        val convertedEntity = geoLocationJpaMapper.regionToJpaEntity(targetModel)
-        val entitySaved = regionJpaRepository.save(convertedEntity)
+        val continentEntity = continentJpaRepository.findById(targetModel.continent.id.id).orElseThrow()
+        val regionEntity = RegionEntity(
+            name = targetModel.name,
+            boundaryRepresentation = targetModel.boundaryRepresentation,
+            continent = continentEntity
+        )
+        val entitySaved = regionJpaRepository.save(regionEntity)
         return geoLocationJpaMapper.regionToDomainModel(entitySaved)
     }
 
@@ -24,7 +31,7 @@ class RegionPersistenceJpaAdapter(
         val entityId: Long = targetModel.id.id
 
         return regionJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.regionToJpaEntity(targetModel, it) }
+            .map { geoLocationJpaMapper.regionToJpaEntity(targetModel) }
             .map { regionJpaRepository.save(it) }
             .map { geoLocationJpaMapper.regionToDomainModel(it) }
             .orElse(null)

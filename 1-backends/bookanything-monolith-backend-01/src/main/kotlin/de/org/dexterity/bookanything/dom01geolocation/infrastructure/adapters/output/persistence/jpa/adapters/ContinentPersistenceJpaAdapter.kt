@@ -24,7 +24,7 @@ class ContinentPersistenceJpaAdapter(
         val entityId: Long = targetModel.id.component1()
 
         return continentJpaRepository.findById(entityId)
-            .map { geoLocationJpaMapper.continentToJpaEntity(targetModel, it) }
+            .map { geoLocationJpaMapper.continentToJpaEntity(targetModel) }
             .map { continentJpaRepository.save(it) }
             .map { geoLocationJpaMapper.continentToDomainModel(it) }
             .orElse(null)
