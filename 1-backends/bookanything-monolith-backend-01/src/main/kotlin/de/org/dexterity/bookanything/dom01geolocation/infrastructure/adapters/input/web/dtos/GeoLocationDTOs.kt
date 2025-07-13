@@ -51,25 +51,19 @@ private val wktReader = WKTReader()
 
 private fun String.toGeometry(): Geometry = wktReader.read(this)
 
-// Model to Response DTO
-fun ContinentModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun RegionModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun CountryModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun ProvinceModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun CityModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun DistrictModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
-fun AddressModel.toResponse() = AddressResponse(
-    id.id, streetName, houseNumber, floorNumber, doorNumber, addressLine2, postalCode,
-    districtName, cityName, provinceName, countryName
-)
+fun IGeoLocationModel.toResponse() = GeoLocationResponse(id.id, name, boundaryRepresentation?.toText())
 
-// Request DTO to Model
-fun CreateGeoLocationRequest.toContinentModel() = ContinentModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundaryRepresentation?.toGeometry())
-fun CreateGeoLocationRequest.toRegionModel(continent: ContinentModel) = RegionModel(id = GeoLocationId(0), name = name, continent = continent, boundaryRepresentation = boundaryRepresentation?.toGeometry())
-fun CreateGeoLocationRequest.toCountryModel(region: RegionModel) = CountryModel(id = GeoLocationId(0), name = name, region = region, boundaryRepresentation = boundaryRepresentation?.toGeometry())
-fun CreateGeoLocationRequest.toProvinceModel(country: CountryModel) = ProvinceModel(id = GeoLocationId(0), name = name, country = country, boundaryRepresentation = boundaryRepresentation?.toGeometry())
-fun CreateGeoLocationRequest.toCityModel(province: ProvinceModel) = CityModel(id = GeoLocationId(0), name = name, province = province, boundaryRepresentation = boundaryRepresentation?.toGeometry())
-fun CreateGeoLocationRequest.toDistrictModel(city: CityModel) = DistrictModel(id = GeoLocationId(0), name = name, city = city, boundaryRepresentation = boundaryRepresentation?.toGeometry())
+fun CreateGeoLocationRequest.toModel(type: GeoLocationType, parent: IGeoLocationModel? = null): IGeoLocationModel {
+    val boundary = boundaryRepresentation?.toGeometry()
+    return when (type) {
+        GeoLocationType.CONTINENT -> ContinentModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary)
+        GeoLocationType.REGION -> RegionModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary, continent = parent as ContinentModel)
+        GeoLocationType.COUNTRY -> CountryModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary, region = parent as RegionModel)
+        GeoLocationType.PROVINCE -> ProvinceModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary, country = parent as CountryModel)
+        GeoLocationType.CITY -> CityModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary, province = parent as ProvinceModel)
+        GeoLocationType.DISTRICT -> DistrictModel(id = GeoLocationId(0), name = name, boundaryRepresentation = boundary, city = parent as CityModel)
+    }
+}
 
 fun CreateAddressRequest.toAddressModel(district: DistrictModel) = AddressModel(
     id = GeoLocationId(0),

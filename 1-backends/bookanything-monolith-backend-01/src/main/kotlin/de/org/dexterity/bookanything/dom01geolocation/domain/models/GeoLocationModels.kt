@@ -1,13 +1,19 @@
 package de.org.dexterity.bookanything.dom01geolocation.domain.models
 
 import org.locationtech.jts.geom.Geometry
+import kotlin.reflect.KClass
 
 enum class StatusType {
     ACTIVE, INACTIVE, INVALID
 }
 
-enum class GeoLocationType {
-    CONTINENT, REGION, COUNTRY, PROVINCE, CITY, DISTRICT
+enum class GeoLocationType(val modelClass: KClass<out IGeoLocationModel>) {
+    CONTINENT(ContinentModel::class),
+    REGION(RegionModel::class),
+    COUNTRY(CountryModel::class),
+    PROVINCE(ProvinceModel::class),
+    CITY(CityModel::class),
+    DISTRICT(DistrictModel::class)
 }
 
 data class GeoCoordinate(val latitude: Double, val longitude: Double)
@@ -18,7 +24,7 @@ sealed interface IGeoLocationModel {
     val id: GeoLocationId
     val name: String
     val type: GeoLocationType
-    val boundaryRepresentation: Geometry? // New field for boundary representation
+    val boundaryRepresentation: Geometry?
 }
 
 data class ContinentModel (
