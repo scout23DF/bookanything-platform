@@ -7,7 +7,6 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
 
-
 @Adapter
 class AddressPersistenceJpaAdapter(
     val addressJpaRepository: AddressJpaRepository,
@@ -49,4 +48,8 @@ class AddressPersistenceJpaAdapter(
         addressJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun findByDistrictIdAndStreetNameStartingWith(districtId: GeoLocationId, streetNamePrefix: String): List<AddressModel> {
+        return addressJpaRepository.findByDistrictIdAndStreetNameStartingWithIgnoreCase(districtId.id, streetNamePrefix)
+            .map { geoLocationJpaMapper.addressToDomainModel(it) }
+    }
 }

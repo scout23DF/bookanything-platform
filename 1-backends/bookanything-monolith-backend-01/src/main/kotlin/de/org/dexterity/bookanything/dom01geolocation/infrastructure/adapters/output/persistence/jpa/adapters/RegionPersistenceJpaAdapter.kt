@@ -56,4 +56,8 @@ class RegionPersistenceJpaAdapter(
         regionJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String): List<RegionModel> {
+        return regionJpaRepository.findByContinentIdAndNameStartingWithIgnoreCase(continentId.id, namePrefix)
+            .map { geoLocationJpaMapper.regionToDomainModel(it) }
+    }
 }

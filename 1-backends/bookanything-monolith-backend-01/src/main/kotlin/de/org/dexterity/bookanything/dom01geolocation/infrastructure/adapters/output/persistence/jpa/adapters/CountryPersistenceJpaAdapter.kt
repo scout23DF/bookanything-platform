@@ -56,4 +56,8 @@ class CountryPersistenceJpaAdapter(
         countryJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel> {
+        return countryJpaRepository.findByRegionIdAndNameStartingWithIgnoreCase(regionId.id, namePrefix)
+            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+    }
 }

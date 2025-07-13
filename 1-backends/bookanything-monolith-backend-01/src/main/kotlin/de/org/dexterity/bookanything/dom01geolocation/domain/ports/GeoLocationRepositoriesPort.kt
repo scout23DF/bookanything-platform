@@ -14,16 +14,30 @@ sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
 
 }
 
-interface IContinentRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ContinentModel>
+interface IContinentRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ContinentModel> {
+    fun findByNameStartingWith(namePrefix: String): List<ContinentModel>
+}
 
-interface IRegionRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<RegionModel>
+interface IRegionRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<RegionModel> {
+    fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String): List<RegionModel>
+}
 
-interface ICountryRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CountryModel>
+interface ICountryRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CountryModel> {
+    fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel>
+}
 
-interface IProvinceRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ProvinceModel>
+interface IProvinceRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ProvinceModel> {
+    fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel>
+}
 
-interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel>
+interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel> {
+    fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel>
+}
 
-interface IDistrictRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<DistrictModel>
+interface IDistrictRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<DistrictModel> {
+    fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel>
+}
 
-interface IAddressRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<AddressModel>
+interface IAddressRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<AddressModel> {
+    fun findByDistrictIdAndStreetNameStartingWith(districtId: GeoLocationId, streetNamePrefix: String): List<AddressModel>
+}

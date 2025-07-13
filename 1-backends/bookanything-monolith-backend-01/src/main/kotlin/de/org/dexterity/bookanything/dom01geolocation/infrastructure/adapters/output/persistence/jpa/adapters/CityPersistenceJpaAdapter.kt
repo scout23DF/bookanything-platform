@@ -3,20 +3,27 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICityRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CityEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
-
 
 @Adapter
 class CityPersistenceJpaAdapter(
     val cityJpaRepository: CityJpaRepository,
+    val provinceJpaRepository: ProvinceJpaRepository,
     val geoLocationJpaMapper: GeoLocationJpaMapper
 ) : ICityRepositoryPort {
 
     override fun saveNew(targetModel: CityModel): CityModel {
-        val convertedEntity = geoLocationJpaMapper.cityToJpaEntity(targetModel)
-        val entitySaved = cityJpaRepository.save(convertedEntity)
+        val provinceEntity = provinceJpaRepository.findById(targetModel.province.id.id).orElseThrow()
+        val cityEntity = CityEntity(
+            name = targetModel.name,
+            boundaryRepresentation = targetModel.boundaryRepresentation,
+            province = provinceEntity
+        )
+        val entitySaved = cityJpaRepository.save(cityEntity)
         return geoLocationJpaMapper.cityToDomainModel(entitySaved)
     }
 
@@ -49,4 +56,8 @@ class CityPersistenceJpaAdapter(
         cityJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel> {
+        return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix)
+            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+    }
 }

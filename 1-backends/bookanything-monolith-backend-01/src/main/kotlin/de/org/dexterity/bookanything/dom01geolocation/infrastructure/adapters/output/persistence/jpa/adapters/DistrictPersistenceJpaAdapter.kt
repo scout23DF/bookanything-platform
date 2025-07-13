@@ -1,22 +1,29 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.adapters
 
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IDistrictRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IDistrictRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
-
 
 @Adapter
 class DistrictPersistenceJpaAdapter(
     val districtJpaRepository: DistrictJpaRepository,
+    val cityJpaRepository: CityJpaRepository,
     val geoLocationJpaMapper: GeoLocationJpaMapper
 ) : IDistrictRepositoryPort {
 
     override fun saveNew(targetModel: DistrictModel): DistrictModel {
-        val convertedEntity = geoLocationJpaMapper.districtToJpaEntity(targetModel)
-        val entitySaved = districtJpaRepository.save(convertedEntity)
+        val cityEntity = cityJpaRepository.findById(targetModel.city.id.id).orElseThrow()
+        val districtEntity = DistrictEntity(
+            name = targetModel.name,
+            boundaryRepresentation = targetModel.boundaryRepresentation,
+            city = cityEntity
+        )
+        val entitySaved = districtJpaRepository.save(districtEntity)
         return geoLocationJpaMapper.districtToDomainModel(entitySaved)
     }
 
@@ -49,4 +56,8 @@ class DistrictPersistenceJpaAdapter(
         districtJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel> {
+        return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
+            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+    }
 }

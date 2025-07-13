@@ -42,6 +42,16 @@ class GeoLocationController(
         return geoLocationCRUDService.findAll(geoLocationType).map { it.toResponse() }
     }
 
+    @GetMapping("/{type}/search")
+    fun search(
+        @PathVariable type: String,
+        @RequestParam(required = false) parentId: Long?,
+        @RequestParam namePrefix: String
+    ): List<GeoLocationResponse> {
+        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
+        return geoLocationCRUDService.search(geoLocationType, parentId, namePrefix).map { it.toResponse() }
+    }
+
     @PutMapping("/{type}/{id}")
     fun update(
         @PathVariable type: String,
