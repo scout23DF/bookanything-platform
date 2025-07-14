@@ -3,9 +3,6 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.*
 import de.org.dexterity.bookanything.shared.annotations.Mapper
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
-import org.locationtech.jts.geom.Point
 
 @Mapper
 class GeoLocationJpaMapper {
@@ -122,6 +119,7 @@ class GeoLocationJpaMapper {
         )
     }
 
+    /*
     fun addressToJpaEntity(addressModel: AddressModel): AddressEntity {
         return AddressEntity(
             id = addressModel.id.id,
@@ -173,4 +171,6 @@ class GeoLocationJpaMapper {
             GeoCoordinate(sourcePoint.x, sourcePoint.y)
         }
     }
+    */
+
 }

@@ -1,9 +1,24 @@
-package de.org.dexterity.bookanything.dom01geolocation.application.usecases
+package de.org.dexterity.bookanything.dom01geolocation.application.services
 
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.CityUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.ContinentUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.CountryUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.DistrictUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.IGeoLocationUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.ProvinceUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.RegionUseCase
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.CountryModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.ProvinceModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.toModel
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.locationtech.jts.io.WKTReader
 import org.springframework.stereotype.Service
 import java.util.Optional
@@ -15,7 +30,8 @@ class GeoLocationCRUDService(
     private val countryUseCase: CountryUseCase,
     private val provinceUseCase: ProvinceUseCase,
     private val cityUseCase: CityUseCase,
-    private val districtUseCase: DistrictUseCase
+    private val districtUseCase: DistrictUseCase,
+    private val geoLocationRestMapper: GeoLocationRestMapper
 ) {
 
     private val useCaseMap: Map<GeoLocationType, IGeoLocationUseCase<out IGeoLocationModel>> = mapOf(
@@ -45,7 +61,7 @@ class GeoLocationCRUDService(
                 else -> null
             }
         }
-        val model = request.toModel(type, parent)
+        val model = geoLocationRestMapper.fromCreateGeoLocationRequestToModel(type, request, parent)
         return useCase.create(model)
     }
 

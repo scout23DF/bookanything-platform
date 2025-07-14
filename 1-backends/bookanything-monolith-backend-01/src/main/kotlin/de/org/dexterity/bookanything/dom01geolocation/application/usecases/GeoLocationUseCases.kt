@@ -104,15 +104,3 @@ class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLoc
         return repository.findByCityIdAndNameStartingWith(parentId, namePrefix)
     }
 }
-
-@Service
-class AddressUseCase(private val repository: IAddressRepositoryPort) {
-    fun create(model: AddressModel): AddressModel = repository.saveNew(model)
-    fun findById(id: GeoLocationId): Optional<AddressModel> = repository.findById(id)
-    fun findAll(): List<AddressModel> = repository.findAll()
-    fun update(model: AddressModel): AddressModel? = repository.update(model)
-    fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    fun findByDistrictIdAndStreetNameStartingWith(districtId: GeoLocationId, streetNamePrefix: String): List<AddressModel> {
-        return repository.findByDistrictIdAndStreetNameStartingWith(districtId, streetNamePrefix)
-    }
-}

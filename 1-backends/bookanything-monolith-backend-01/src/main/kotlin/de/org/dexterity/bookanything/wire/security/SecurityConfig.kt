@@ -23,6 +23,7 @@ class SecurityConfig {
                 ).permitAll()
                 auth.requestMatchers("/api/v1/localizable-places/**").authenticated()
                 auth.requestMatchers("/api/v1/geolocation/**").authenticated()
+                auth.requestMatchers("/api/v1/addresses/**").authenticated()
                 auth.anyRequest().permitAll()
             }
             .oauth2ResourceServer { oauth2 -> oauth2.jwt() }

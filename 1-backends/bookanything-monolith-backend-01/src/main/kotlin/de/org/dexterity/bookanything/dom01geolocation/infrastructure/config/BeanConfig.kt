@@ -1,8 +1,9 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.config
 
+import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -51,7 +52,7 @@ class BeanConfig {
     fun districtUseCase(repository: IDistrictRepositoryPort): DistrictUseCase = DistrictUseCase(repository)
 
     @Bean
-    fun addressUseCase(repository: IAddressRepositoryPort): AddressUseCase = AddressUseCase(repository)
+    fun addressUseCase(repository: AddressPersistRepositoryPort): AddressUseCase = AddressUseCase(repository)
 
     @Bean
     fun geoLocationCRUDService(
@@ -60,14 +61,16 @@ class BeanConfig {
         countryUseCase: CountryUseCase,
         provinceUseCase: ProvinceUseCase,
         cityUseCase: CityUseCase,
-        districtUseCase: DistrictUseCase
+        districtUseCase: DistrictUseCase,
+        geoLocationRestMapper: GeoLocationRestMapper
     ): GeoLocationCRUDService = GeoLocationCRUDService(
         continentUseCase,
         regionUseCase,
         countryUseCase,
         provinceUseCase,
         cityUseCase,
-        districtUseCase
+        districtUseCase,
+        geoLocationRestMapper
     )
 }
 

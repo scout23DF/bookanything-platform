@@ -37,7 +37,3 @@ interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel> {
 interface IDistrictRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<DistrictModel> {
     fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel>
 }
-
-interface IAddressRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<AddressModel> {
-    fun findByDistrictIdAndStreetNameStartingWith(districtId: GeoLocationId, streetNamePrefix: String): List<AddressModel>
-}

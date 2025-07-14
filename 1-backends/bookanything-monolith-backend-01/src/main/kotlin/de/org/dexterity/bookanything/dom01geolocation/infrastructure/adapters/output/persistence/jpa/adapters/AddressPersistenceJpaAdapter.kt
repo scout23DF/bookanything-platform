@@ -2,7 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.AddressModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IAddressRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.AddressPersistRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.AddressJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
@@ -12,13 +12,13 @@ import java.util.*
 class AddressPersistenceJpaAdapter(
     val addressJpaRepository: AddressJpaRepository,
     val districtJpaRepository: DistrictJpaRepository,
-    val geoLocationJpaMapper: GeoLocationJpaMapper
-) : IAddressRepositoryPort {
+    val addressJpaMapper: AddressJpaMapper
+) : AddressPersistRepositoryPort {
 
     override fun saveNew(targetModel: AddressModel): AddressModel {
-        val convertedEntity = geoLocationJpaMapper.addressToJpaEntity(targetModel)
+        val convertedEntity = addressJpaMapper.addressToJpaEntity(targetModel)
         val entitySaved = addressJpaRepository.save(convertedEntity)
-        return geoLocationJpaMapper.addressToDomainModel(entitySaved)
+        return addressJpaMapper.addressToDomainModel(entitySaved)
     }
 
     override fun update(targetModel: AddressModel): AddressModel? {
@@ -36,29 +36,29 @@ class AddressPersistenceJpaAdapter(
                 existingEntity.cityName = targetModel.cityName
                 existingEntity.provinceName = targetModel.provinceName
                 existingEntity.countryName = targetModel.countryName
-                existingEntity.coordinates = geoLocationJpaMapper.buildPointFromGeoCoordinate(targetModel.coordinates)
+                existingEntity.coordinates = addressJpaMapper.buildPointFromGeoCoordinate(targetModel.coordinates)
                 existingEntity.status = targetModel.status
                 val districtEntity = districtJpaRepository.findById(targetModel.district.id.id).orElseThrow()
                 existingEntity.district = districtEntity
                 addressJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMapper.addressToDomainModel(it) }
+            .map { addressJpaMapper.addressToDomainModel(it) }
             .orElse(null)
     }
 
-    override fun existsGeoLocationById(geoLocationId: GeoLocationId): Boolean {
+    override fun existsAddressById(geoLocationId: GeoLocationId): Boolean {
         val entityIdToSearch: Long = geoLocationId.id
         return addressJpaRepository.existsById(entityIdToSearch)
     }
 
     override fun findById(geoLocationId: GeoLocationId): Optional<AddressModel> {
         return addressJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMapper.addressToDomainModel(it) }
+            .map { addressJpaMapper.addressToDomainModel(it) }
     }
 
     override fun findAll(): List<AddressModel> {
         return addressJpaRepository.findAll()
-            .map { geoLocationJpaMapper.addressToDomainModel(it) }
+            .map { addressJpaMapper.addressToDomainModel(it) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -67,6 +67,6 @@ class AddressPersistenceJpaAdapter(
 
     override fun findByDistrictIdAndStreetNameStartingWith(districtId: GeoLocationId, streetNamePrefix: String): List<AddressModel> {
         return addressJpaRepository.findByDistrictIdAndStreetNameStartingWithIgnoreCase(districtId.id, streetNamePrefix)
-            .map { geoLocationJpaMapper.addressToDomainModel(it) }
+            .map { addressJpaMapper.addressToDomainModel(it) }
     }
 }
