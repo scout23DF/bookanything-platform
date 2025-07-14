@@ -3,6 +3,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.AddressModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.AddressPersistRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.AddressJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.AddressJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter

@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationI
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IRegionRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.RegionEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter

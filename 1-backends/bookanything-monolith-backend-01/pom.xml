@@ -171,6 +171,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -204,7 +210,6 @@
 			<artifactId>jackson-datatype-jts</artifactId>
 			<version>${jackson-datatype-jts.version}</version>
 		</dependency>
-
 
 
 		<!-- Dependencies for Testing -->
@@ -268,6 +273,18 @@
 			<groupId>com.github.dasniko</groupId>
 			<artifactId>testcontainers-keycloak</artifactId>
 			<version>3.8.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.mockk</groupId>
+			<artifactId>mockk</artifactId>
+			<version>${mockk.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.mockk</groupId>
+			<artifactId>mockk-jvm</artifactId>
+			<version>${mockk.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -365,6 +382,15 @@
 				<configuration>
 					<release>${java.version}</release>
 					<parameters>true</parameters>
+
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.5.5.Final</version>
+						</path>
+					</annotationProcessorPaths>
+
 					<target>${java.version}</target>
 					<compilerArgs>
 						<arg>-Xlint:unchecked</arg>

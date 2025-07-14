@@ -1,4 +1,4 @@
-package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.adapters
+package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.*
@@ -38,6 +38,7 @@ class GeoLocationJpaMapper {
             id = GeoLocationId(regionEntity.id!!),
             name = regionEntity.name,
             boundaryRepresentation = regionEntity.boundaryRepresentation,
+            parentId = regionEntity.continent.id,
             continent = continentToDomainModel(regionEntity.continent),
             countriesList = emptyList() // regionEntity.countriesList?.map { countryToDomainModel(it) } ?: emptyList()
         )
@@ -57,6 +58,7 @@ class GeoLocationJpaMapper {
             id = GeoLocationId(countryEntity.id!!),
             name = countryEntity.name,
             boundaryRepresentation = countryEntity.boundaryRepresentation,
+            parentId = countryEntity.region.id,
             region = regionToDomainModel(countryEntity.region),
             provincesList = emptyList() // countryEntity.provincesList?.map { provinceToDomainModel(it) } ?: emptyList()
         )
@@ -76,6 +78,7 @@ class GeoLocationJpaMapper {
             id = GeoLocationId(provinceEntity.id!!),
             name = provinceEntity.name,
             boundaryRepresentation = provinceEntity.boundaryRepresentation,
+            parentId = provinceEntity.country.id,
             country = countryToDomainModel(provinceEntity.country),
             citiesList = emptyList() // provinceEntity.citiesList?.map { cityToDomainModel(it) } ?: emptyList()
         )
@@ -95,6 +98,7 @@ class GeoLocationJpaMapper {
             id = GeoLocationId(cityEntity.id!!),
             name = cityEntity.name,
             boundaryRepresentation = cityEntity.boundaryRepresentation,
+            parentId = cityEntity.province.id,
             province = provinceToDomainModel(cityEntity.province),
             districtsList = emptyList() // cityEntity.districtsList?.map { districtToDomainModel(it) } ?: emptyList()
         )
@@ -114,63 +118,10 @@ class GeoLocationJpaMapper {
             id = GeoLocationId(districtEntity.id!!),
             name = districtEntity.name,
             boundaryRepresentation = districtEntity.boundaryRepresentation,
+            parentId = districtEntity.city.id,
             city = cityToDomainModel(districtEntity.city),
             addressesList = emptyList() // districtEntity.addressesList?.map { addressToDomainModel(it) } ?: emptyList()
         )
     }
-
-    /*
-    fun addressToJpaEntity(addressModel: AddressModel): AddressEntity {
-        return AddressEntity(
-            id = addressModel.id.id,
-            streetName = addressModel.streetName,
-            houseNumber = addressModel.houseNumber,
-            floorNumber = addressModel.floorNumber,
-            doorNumber = addressModel.doorNumber,
-            addressLine2 = addressModel.addressLine2,
-            postalCode = addressModel.postalCode,
-            districtName = addressModel.districtName,
-            cityName = addressModel.cityName,
-            provinceName = addressModel.provinceName,
-            countryName = addressModel.countryName,
-            coordinates = buildPointFromGeoCoordinate(addressModel.coordinates),
-            status = addressModel.status,
-            district = districtToJpaEntity(addressModel.district)
-        )
-    }
-
-    fun addressToDomainModel(addressEntity: AddressEntity): AddressModel {
-        return AddressModel(
-            id = GeoLocationId(addressEntity.id!!),
-            streetName = addressEntity.streetName,
-            houseNumber = addressEntity.houseNumber,
-            floorNumber = addressEntity.floorNumber,
-            doorNumber = addressEntity.doorNumber,
-            addressLine2 = addressEntity.addressLine2,
-            postalCode = addressEntity.postalCode,
-            districtName = addressEntity.districtName,
-            cityName = addressEntity.cityName,
-            provinceName = addressEntity.provinceName,
-            countryName = addressEntity.countryName,
-            coordinates = buildGeoCoordinateFromPoint(addressEntity.coordinates),
-            status = addressEntity.status,
-            district = districtToDomainModel(addressEntity.district)
-        )
-    }
-
-    fun buildPointFromGeoCoordinate(sourceGeoCoordinate: GeoCoordinate?): Point? {
-        return sourceGeoCoordinate?.let {
-            val geometryFactory = GeometryFactory()
-            val coordinate = Coordinate(sourceGeoCoordinate.longitude, sourceGeoCoordinate.latitude)
-            geometryFactory.createPoint(coordinate)
-        }
-    }
-
-    private fun buildGeoCoordinateFromPoint(sourcePoint: Point?): GeoCoordinate? {
-        return sourcePoint?.let {
-            GeoCoordinate(sourcePoint.x, sourcePoint.y)
-        }
-    }
-    */
 
 }

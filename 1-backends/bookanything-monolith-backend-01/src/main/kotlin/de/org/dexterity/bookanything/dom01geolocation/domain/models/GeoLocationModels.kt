@@ -25,12 +25,14 @@ sealed interface IGeoLocationModel {
     val name: String
     val type: GeoLocationType
     val boundaryRepresentation: Geometry?
+    val parentId: Long?
 }
 
 data class ContinentModel (
     override val id: GeoLocationId,
     override val name: String,
     override val boundaryRepresentation: Geometry? = null,
+    override val parentId: Long? = null,
     val regionsList: List<RegionModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.CONTINENT
@@ -40,6 +42,7 @@ data class RegionModel (
     override val id: GeoLocationId,
     override val name: String,
     override val boundaryRepresentation: Geometry? = null,
+    override val parentId: Long?,
     val continent: ContinentModel,
     val countriesList: List<CountryModel>? = null
 ) : IGeoLocationModel {
@@ -50,6 +53,7 @@ data class CountryModel (
     override val id: GeoLocationId,
     override val name: String,
     override val boundaryRepresentation: Geometry? = null,
+    override val parentId: Long?,
     val region: RegionModel,
     val provincesList: List<ProvinceModel>? = null
 ) : IGeoLocationModel {
@@ -60,6 +64,7 @@ data class ProvinceModel (
     override val id: GeoLocationId,
     override val name: String,
     override val boundaryRepresentation: Geometry? = null,
+    override val parentId: Long?,
     val country: CountryModel,
     val citiesList: List<CityModel>? = null
 ) : IGeoLocationModel {
@@ -72,6 +77,7 @@ data class CityModel (
     override val boundaryRepresentation: Geometry? = null,
     val isCountryCapital: Boolean? = false,
     val isProvinceCapital: Boolean? = false,
+    override val parentId: Long?,
     val province: ProvinceModel,
     val districtsList: List<DistrictModel>? = null
 ) : IGeoLocationModel {
@@ -82,6 +88,7 @@ data class DistrictModel (
     override val id: GeoLocationId,
     override val name: String,
     override val boundaryRepresentation: Geometry? = null,
+    override val parentId: Long?,
     val city: CityModel,
     val addressesList: List<AddressModel>? = null
 ) : IGeoLocationModel {

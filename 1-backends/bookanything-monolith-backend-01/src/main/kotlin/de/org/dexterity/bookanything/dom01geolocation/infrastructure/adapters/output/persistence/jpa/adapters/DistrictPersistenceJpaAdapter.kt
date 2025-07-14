@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictMode
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IDistrictRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter

@@ -1,9 +1,16 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.AddressModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoCoordinate
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.shared.annotations.Mapper
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import java.util.UUID
 
@@ -22,3 +29,4 @@ data class LocalizablePlaceJpaEntity(
     // Construtor sem argumentos para o Hibernate
     constructor() : this(null, null, null)
 }
+

@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationI
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.ProvinceModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IProvinceRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.ProvinceEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CountryJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter

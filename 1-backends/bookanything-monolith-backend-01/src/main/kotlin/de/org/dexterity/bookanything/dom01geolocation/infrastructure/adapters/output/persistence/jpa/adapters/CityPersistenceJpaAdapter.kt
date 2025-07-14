@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICityRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CityEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter

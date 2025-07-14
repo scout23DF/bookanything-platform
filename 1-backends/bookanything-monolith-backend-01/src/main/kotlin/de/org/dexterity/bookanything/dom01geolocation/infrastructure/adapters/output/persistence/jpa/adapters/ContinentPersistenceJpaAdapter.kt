@@ -3,6 +3,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IContinentRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
