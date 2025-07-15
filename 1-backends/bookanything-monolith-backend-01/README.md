@@ -1,4 +1,4 @@
-# Distribution Center Locator Microservice
+# BookAnything Platform - Monolith Backend
 
 ![Java](https://img.shields.io/badge/Java-17-blue.svg)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blueviolet.svg)
@@ -10,17 +10,18 @@
 
 ## Overview
 
-This project is a Kotlin Spring Boot microservice designed to efficiently manage and locate distribution centers. It implements a hexagonal architecture and the Command Query Responsibility Segregation (CQRS) pattern, leveraging Apache Kafka for asynchronous communication and data consistency across different data stores.
+This project is the first core backend service for the **BookAnything Platform**. It's a Kotlin Spring Boot application designed to manage and locate any kind of bookable/reservable entities that have a physical location. It implements a hexagonal architecture and the Command Query Responsibility Segregation (CQRS) pattern, leveraging Apache Kafka for asynchronous communication and data consistency.
+
+This service is part of a larger monorepo, the **BookAnything-Platform**, which aims to provide a complete solution for booking and acquiring products or services.
 
 ## Features
 
-*   **Distribution Center Management:** RESTful API for creating, retrieving, updating, and deleting distribution center records.
-*   **Geo-spatial Queries:** Efficiently find distribution centers within a specified radius using Elasticsearch and PostGIS.
-*   **Asynchronous GeoJSON Processing:** Upload GeoJSON files containing multiple distribution centers, which are then processed asynchronously via Kafka.
+*   **Localizable Entity Management:** RESTful API for creating, retrieving, updating, and deleting records of entities with geographic locations.
+*   **Geo-spatial Queries:** Efficiently find entities within a specified radius using Elasticsearch and PostGIS.
+*   **Asynchronous GeoJSON Processing:** Upload GeoJSON files containing multiple entities, which are then processed asynchronously via Kafka.
 *   **Data Synchronization:** Manual synchronization endpoint to ensure data consistency between PostgreSQL (write-model) and Elasticsearch (read-model).
-*   **Optimized Bulk Operations:** Efficient bulk deletion of distribution centers, leveraging Kafka events and Elasticsearch's `deleteAll` functionality.
-*   **Unique Name Constraint:** Prevents duplicate distribution center names with database-level enforcement and cached existence checks for performance.
-*   **Event-Driven Architecture:** Utilizes Kafka for event publishing (e.g., on creation, individual deletion, bulk deletion) to maintain data consistency.
+*   **Optimized Bulk Operations:** Efficient bulk deletion of entities, leveraging Kafka events and Elasticsearch's `deleteAll` functionality.
+*   **Event-Driven Architecture:** Utilizes Kafka for event publishing to maintain data consistency.
 *   **API Documentation:** Integrated Swagger UI for interactive API exploration.
 
 ## Architecture
@@ -37,46 +38,37 @@ The project adheres to a **Hexagonal Architecture**, separating the core domain 
 *   **Messaging:** Apache Kafka (7.6.0)
 *   **Authentication/Authorization:** Spring Security (OAuth2 Resource Server, integrated with Keycloak)
 *   **Geo-spatial Libraries:**
-    *   JTS (Java Topology Suite) for geometric operations.
-    *   `geojson-jackson` (for GeoJSON structure mapping).
-    *   `jackson-datatype-jts` (for JTS geometry serialization/deserialization).
+    *   JTS (Java Topology Suite)
+    *   `geojson-jackson` & `jackson-datatype-jts`
 *   **API Documentation:** Springdoc OpenAPI (Swagger UI)
 *   **Containerization:** Docker, Docker Compose
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-
-*   Java Development Kit (JDK) 17 or higher
-*   Apache Maven (3.x or higher)
-*   Docker Desktop (or Docker Engine and Docker Compose)
+*   Java Development Kit (JDK) 17+
+*   Apache Maven (3.x+)
+*   Docker & Docker Compose
 
 ### Cloning the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/distribution-center-locator.git
-cd distribution-center-locator
+git clone https://github.com/YOUR_USERNAME/bookanything-platform.git
+cd bookanything-platform/1-backends/bookanything-monolith-backend-01
 ```
 
 ### Running Dependent Services with Docker Compose
 
-This project relies on PostgreSQL (with PostGIS), Apache Kafka, Zookeeper, Elasticsearch, Kibana, and Keycloak. All these services can be started using Docker Compose.
-
-Navigate to the root directory of the project where `docker-compose.yml` is located and run:
+Navigate to the `1-backends/bookanything-monolith-backend-01` directory and run:
 
 ```bash
 docker-compose up -d
 ```
 
-This command will download the necessary Docker images and start all services in detached mode. It might take a few minutes for all services to be fully up and running.
+This will start all required services (PostgreSQL, Kafka, Elasticsearch, etc.).
 
 ### Building and Running the Spring Boot Application
-
-Once the Docker services are up, you can build and run the Spring Boot application.
 
 ```bash
 # Build the project
@@ -92,25 +84,21 @@ The application will start on `http://localhost:8080`.
 
 The API documentation is available via Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
-Here's a summary of the main endpoints:
+Key endpoints include:
 
-*   `POST /cds`: Create a new distribution center.
-*   `GET /cds/{id}`: Retrieve a distribution center by ID.
-*   `GET /cds/all`: Retrieve all distribution centers.
-*   `GET /cds/search-nearby`: Find distribution centers within a given radius.
-    *   Parameters: `latitude`, `longitude`, `raioEmKm`.
-*   `DELETE /cds/{id}`: Delete a distribution center by ID.
-*   `DELETE /cds/all`: Delete all distribution centers (optimized bulk deletion).
-*   `POST /cds/synchronize`: Trigger a manual synchronization of data from PostgreSQL to Elasticsearch.
-*   `POST /cds/upload-geojson`: Upload a GeoJSON file for asynchronous processing.
-    *   Consumes `multipart/form-data`.
-    *   Parameters: `contentDataType` (String), `file` (MultipartFile).
+*   `POST /api/v1/localizable-places`: Create a new localizable entity.
+*   `GET /api/v1/localizable-places/{id}`: Retrieve an entity by ID.
+*   `GET /api/v1/localizable-places/all`: Retrieve all entities.
+*   `GET /api/v1/localizable-places/search-nearby`: Find entities within a given radius.
+*   `DELETE /api/v1/localizable-places/{id}`: Delete an entity by ID.
+*   `DELETE /api/v1/localizable-places/all`: Delete all entities.
+*   `POST /api/v1/localizable-places/synchronize`: Trigger manual data synchronization.
+*   `POST /api/v1/localizable-places/upload-geojson`: Upload a GeoJSON file for asynchronous processing.
 
 ## Contributing
 
-Feel free to fork the repository, open issues, or submit pull requests. Any contributions are welcome!
+Contributions are welcome! Please feel free to fork the repository, open issues, or submit pull requests.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. (Note: You might need to create a LICENSE file in your repository if you don't have one.)
-
+This project is licensed under the MIT License.

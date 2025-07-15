@@ -62,6 +62,10 @@ class DistrictPersistenceJpaAdapter(
         districtJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun deleteAll() {
+        districtJpaRepository.deleteAll()
+    }
+
     override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel> {
         return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
             .map { geoLocationJpaMapper.districtToDomainModel(it) }

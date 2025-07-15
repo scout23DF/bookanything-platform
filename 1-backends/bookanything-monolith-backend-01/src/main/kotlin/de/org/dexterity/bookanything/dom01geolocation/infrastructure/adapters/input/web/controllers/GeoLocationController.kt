@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/v1/geolocation")
+@RequestMapping("/api/v1/geolocations")
 class GeoLocationController(
     private val geoLocationCRUDService: GeoLocationCRUDService,
     private val handlerMediatorManager: HandlersMediatorManager,
@@ -91,4 +91,15 @@ class GeoLocationController(
 
         return ResponseEntity.noContent().build()
     }
+
+    @DeleteMapping("/{type}/all")
+    fun deleteAll(@PathVariable type: String): ResponseEntity<Void> {
+
+        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
+
+        geoLocationCRUDService.deleteAll(geoLocationType)
+
+        return ResponseEntity.noContent().build()
+    }
+
 }

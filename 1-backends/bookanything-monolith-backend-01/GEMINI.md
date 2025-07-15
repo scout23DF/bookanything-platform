@@ -1,67 +1,39 @@
-# Project Context: Distribution Center Locator Microservice
+# Project Context: BookAnything-Platform
 
-This document provides a comprehensive overview of the `distribution-center-locator` microservice, detailing its architecture, features, and current state.
+This document provides a comprehensive overview of the `BookAnything-Platform` monorepo.
 
 ## Overview
 
-The `distribution-center-locator` is a Kotlin Spring Boot microservice designed to manage distribution centers. It leverages a hexagonal architecture to ensure clear separation of concerns and maintainability.
+The `BookAnything-Platform` is a monorepo that aggregates projects and assets for a complete solution. The platform's goal is to manage any product or service that can be scheduled/booked and subsequently acquired, following specific acquisition/hiring flows according to the product/service category.
 
-## Key Features and Functionality
+The monorepo is structured as follows:
+- `1-backends`: Contains backend services.
+- `2-bff`: Contains Backend-for-Frontend services.
+- `3-frontends`: Contains frontend applications.
+- `4-clients-and-utilities`: Contains client libraries and various utilities.
 
-*   **REST API:** Provides a comprehensive set of RESTful endpoints for managing distribution centers, including:
-    *   **Create:** Register new distribution centers.
-    *   **Read:** Retrieve distribution center information by ID, list all centers, and find centers within a specified radius.
-    *   **Delete:** Remove individual distribution centers by ID or perform bulk deletions of all centers.
-    *   **Synchronize:** A dedicated endpoint (`/synchronize`) to trigger a full data synchronization from the primary data store (PostgreSQL) to the query data store (Elasticsearch).
-    *   **GeoJSON Upload:** An endpoint (`/upload-geojson`) to asynchronously process GeoJSON files containing distribution center data.
+## Current State: `bookanything-monolith-backend-01`
 
-*   **Asynchronous Processing with Kafka:**
-    *   **GeoJSON File Uploads:** GeoJSON content is published as `GeoJsonUploadedFileDTO` messages to a Kafka topic (`geojson-upload-topic`).
-    *   **Kafka Producer Configuration:** Configured to handle large messages (50MB `max.request.size`) and correctly serialize custom DTOs using `JsonSerializer`.
-    *   **Kafka Consumer Configuration:** Configured to receive large messages (50MB `max.partition.fetch.bytes`) and trust custom DTO packages (`br.com.geminiproject.dcl.domain.geojson`) for deserialization.
-    *   **`GeoJsonKafkaConsumer`:** A dedicated Kafka consumer processes GeoJSON messages, parsing the content and registering distribution centers.
-    *   **Event-Driven Consistency:** Kafka is used to ensure data consistency between the write and query repositories for create and delete operations.
+The main component currently under development is `bookanything-monolith-backend-01`, located in the `1-backends` directory. This is a Kotlin Spring Boot service that serves as the foundation for the platform.
 
+### Key Features and Functionality of `bookanything-monolith-backend-01`
+
+*   **Core Service:** Initially conceived as a `distribution-center-locator`, this service is being refactored to become the core backend for the BookAnything platform. It manages entities that are "localizable" or have a geographical component.
+*   **REST API:** Provides a comprehensive set of RESTful endpoints for managing these localizable entities. This includes CRUD operations, geo-spatial queries (finding entities within a radius), and data synchronization.
+*   **Asynchronous Processing with Kafka:** Uses Kafka for asynchronous tasks, such as processing uploaded GeoJSON files containing entity data. This ensures the platform is scalable and resilient.
 *   **CQRS (Command Query Responsibility Segregation) Pattern:**
-    *   **Write Repository (PostgreSQL/JPA):**
-        *   Serves as the primary data store and source of truth for transactional data.
-        *   Enforces data integrity with a unique constraint on the `nome` field for distribution centers.
-        *   Includes a `existsByName` method with `@Cacheable` annotation for performance optimization of existence checks.
-    *   **Query Repository (Elasticsearch):**
-        *   Optimized for read operations, particularly geo-spatial queries (e.g., finding centers within a radius).
-        *   Maintains consistency with the write repository through Kafka events and a synchronization mechanism.
-
-*   **Data Synchronization:**
-    *   The `/synchronize` endpoint triggers a process that reads all distribution center data from PostgreSQL and re-indexes it into Elasticsearch, ensuring eventual consistency.
-    *   Bulk deletion of distribution centers in PostgreSQL triggers a single Kafka event (`CentrosDistribuicaoDeletadosEvent`), which is consumed by a dedicated Kafka consumer to perform a `deleteAll()` operation in Elasticsearch, significantly improving performance for mass deletions.
-
-*   **Domain Model:**
-    *   `CentroDistribuicaoModel`: The core domain object representing a distribution center.
-    *   `GeoJsonUploadedFileDTO`: A data transfer object used for Kafka messages containing GeoJSON file content.
-
-*   **Architectural Principles:**
-    *   **Hexagonal Architecture:** Promotes loose coupling and testability by separating core domain logic from external concerns (databases, messaging, APIs).
-    *   **Event-Driven Architecture:** Utilizes Kafka for asynchronous communication and to maintain data consistency across different data stores.
-
+    *   **Write Repository (PostgreSQL/JPA):** The primary data store (source of truth).
+    *   **Query Repository (Elasticsearch):** Optimized for complex read operations, especially geo-spatial queries.
+*   **Event-Driven Architecture:** Kafka is used to maintain data consistency between the write (PostgreSQL) and read (Elasticsearch) repositories.
 *   **Technology Stack:**
     *   **Language:** Kotlin
     *   **Framework:** Spring Boot
     *   **Build Tool:** Maven
-    *   **Database:** PostgreSQL with PostGIS extension (for spatial data)
+    *   **Database:** PostgreSQL with PostGIS
     *   **Search Engine:** Elasticsearch
     *   **Messaging:** Apache Kafka
-    *   **Authentication/Authorization:** Spring Security with OAuth2 Resource Server (Keycloak integration)
-    *   **API Documentation:** Springdoc OpenAPI (Swagger UI)
-    *   **Monitoring:** Spring Boot Actuator
-    *   **Geo-spatial Libraries:** JTS (Java Topology Suite) for geometric operations, `geojson-jackson` and `jackson-datatype-jts` for GeoJSON serialization/deserialization.
+    *   **Authentication/Authorization:** Spring Security with OAuth2 (Keycloak)
 
-## Current State
+## Future Vision
 
-The project is in a robust state, with a well-defined architecture and implemented features for managing distribution centers. Recent enhancements include:
-
-*   Asynchronous GeoJSON file processing via Kafka.
-*   Improved handling of large GeoJSON file uploads.
-*   Optimized bulk deletion of distribution centers in Elasticsearch.
-*   Implementation of a unique name constraint for distribution centers with caching for existence checks.
-
-The system is designed for scalability, consistency, and maintainability, leveraging modern microservice patterns and technologies.
+The platform will evolve by adding more specialized backend services, BFFs for different client experiences (e.g., web, mobile), and the corresponding frontend applications. The initial backend service provides the core location-based service capabilities that will be fundamental for many of the bookable items on the platform.

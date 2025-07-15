@@ -37,24 +37,6 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var elasticsearchOperations: ElasticsearchOperations
 
-    private val invalidGeoJson = """
-        {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "properties": {
-                "nome": "CD Invalid"
-              },
-              "geometry": {
-                "type": "Point",
-                "coordinates": [-46.633307]
-              }
-            }
-          ]
-        }
-    """
-
     @BeforeEach
     fun setup() {
         if (elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).exists()) {
@@ -76,17 +58,19 @@ class GeoJsonUploadIntegrationTest : AbstractIntegrationTest() {
             MediaType.APPLICATION_JSON_VALUE,
             testGeoJSONFile.inputStream()
         )
-        val newItemsToCreateCount : Int = 22
+        val newItemsToCreateCount : Int = 5
 
         // When
         mockMvc.perform(multipart("/api/v1/localizable-places/upload-geojson")
             .file(sampleFile)
             .param("contentDataType", "ev-charging-stations")
             .contentType(MediaType.MULTIPART_FORM_DATA)
-        ).andExpect(status().isOk())
+            ).andExpect(status().isOk())
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
+
+            elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
 
             // When
             val result1 = mockMvc.get("/api/v1/localizable-places/all") {

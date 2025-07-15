@@ -3,12 +3,15 @@ package de.org.dexterity.bookanything.dom01geolocation
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateLocalizablePlaceRestRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.LocalizablePlaceRestResponse
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.elasticsearch.entities.LocalizablePlaceElasticEntity
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
@@ -31,6 +34,18 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    private lateinit var elasticsearchOperations: ElasticsearchOperations
+
+    @BeforeEach
+    fun setup() {
+        if (elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).exists()) {
+            elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).delete()
+        }
+        elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).create()
+        elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
+    }
+
 
     @Test
     fun shouldDeleteALocalizablePlaceById() {
@@ -43,6 +58,8 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
         mockMvc.delete("/api/v1/localizable-places/{id}", response.id) {
             with(jwt())
         }.andExpect { status { isNoContent() } }
+
+        elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
 
         // When
         val resultFromGetById = mockMvc.get("/api/v1/localizable-places/{id}", response.id) {
@@ -58,18 +75,20 @@ class LocalizablePlaceDeletionIntegrationTest : AbstractIntegrationTest() {
         val newItemsToCreateCount : Int = 10
 
         // Given
-        IntRange(0, (newItemsToCreateCount - 1)).forEach {
+        IntRange(0, (newItemsToCreateCount - 1)).forEach { i ->
             createDistributionCenter(
                 CreateLocalizablePlaceRestRequest(
-                    name = "One New LocalizablePlace - No.: ${it}",
-                    latitude = Random(-23).nextDouble(-23.55999, -23.55000 ),
-                    longitude = Random(-46).nextDouble(-46.633999, -46.633000)
+                    name = "One New LocalizablePlace - No.: ${i}",
+                    latitude = Random.nextDouble(-23.55999, -23.55000 ),
+                    longitude = Random.nextDouble(-46.633999, -46.633000)
                 )
             )
         }
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
+
+            elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
 
             // When
             val result1 = mockMvc.get("/api/v1/localizable-places/all") {

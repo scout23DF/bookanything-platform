@@ -11,6 +11,7 @@ sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
     fun findById(geoLocationId: GeoLocationId): Optional<T>
     fun findAll(): List<T>
     fun deleteById(geoLocationId: GeoLocationId)
+    fun deleteAll()
 
 }
 

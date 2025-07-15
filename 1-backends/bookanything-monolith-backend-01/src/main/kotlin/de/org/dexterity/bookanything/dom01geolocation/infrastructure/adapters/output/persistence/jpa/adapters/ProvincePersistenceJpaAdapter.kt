@@ -62,6 +62,10 @@ class ProvincePersistenceJpaAdapter(
         provinceJpaRepository.deleteById(geoLocationId.id)
     }
 
+    override fun deleteAll() {
+        provinceJpaRepository.deleteAll()
+    }
+
     override fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel> {
         return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix)
             .map { geoLocationJpaMapper.provinceToDomainModel(it) }
