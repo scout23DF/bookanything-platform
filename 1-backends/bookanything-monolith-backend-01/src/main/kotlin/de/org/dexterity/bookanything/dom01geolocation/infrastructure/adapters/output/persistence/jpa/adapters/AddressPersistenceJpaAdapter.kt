@@ -3,6 +3,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.AddressModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.AddressPersistRepositoryPort
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.AddressEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.AddressJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.AddressJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
@@ -17,8 +18,25 @@ class AddressPersistenceJpaAdapter(
 ) : AddressPersistRepositoryPort {
 
     override fun saveNew(targetModel: AddressModel): AddressModel {
-        val convertedEntity = addressJpaMapper.addressToJpaEntity(targetModel)
-        val entitySaved = addressJpaRepository.save(convertedEntity)
+        val districtEntity = districtJpaRepository.findById(targetModel.district.id.id).orElseThrow()
+
+        val newAddressEntity = AddressEntity(
+            streetName = targetModel.streetName,
+            houseNumber = targetModel.houseNumber,
+            floorNumber = targetModel.floorNumber,
+            doorNumber = targetModel.doorNumber,
+            addressLine2 = targetModel.addressLine2,
+            postalCode = targetModel.postalCode,
+            districtName = targetModel.districtName,
+            cityName = targetModel.cityName,
+            provinceName = targetModel.provinceName,
+            countryName = targetModel.countryName,
+            coordinates = addressJpaMapper.buildPointFromGeoCoordinate(targetModel.coordinates),
+            district = districtEntity
+        )
+
+        val entitySaved = addressJpaRepository.save(newAddressEntity)
+
         return addressJpaMapper.addressToDomainModel(entitySaved)
     }
 

@@ -10,7 +10,7 @@ import java.util.*
 open class AddressEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long? = null,
+    open var id: Long? = null,
 
     @Column("ds_street_name")
     open var streetName: String,
@@ -42,7 +42,7 @@ open class AddressEntity(
     @Column("ds_country_name")
     open var countryName: String,
 
-    @Column("ge_coordinates", columnDefinition = "point")
+    @Column("ge_coordinates", columnDefinition="geometry(Point,4326)" )
     open var coordinates: Point?,
 
     @Column("cd_status")

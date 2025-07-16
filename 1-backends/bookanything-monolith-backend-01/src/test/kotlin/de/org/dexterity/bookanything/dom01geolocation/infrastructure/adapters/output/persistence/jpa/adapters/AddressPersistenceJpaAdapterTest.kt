@@ -112,14 +112,16 @@ class AddressPersistenceJpaAdapterTest {
             status = StatusType.ACTIVE
         )
 
+        every { districtJpaRepository.findById(any()) } returns Optional.of(districtEntity)
+        every { addressJpaMapper.buildPointFromGeoCoordinate(any()) } returns geometryFactory.createPoint(Coordinate(1.0, 2.0))
         every { addressJpaMapper.addressToJpaEntity(model) } returns addressEntity
-        every { addressJpaRepository.save(addressEntity) } returns savedEntity
+        every { addressJpaRepository.save(any()) } returns savedEntity
         every { addressJpaMapper.addressToDomainModel(savedEntity) } returns savedModel
 
         val result = adapter.saveNew(model)
 
         assertEquals(savedModel, result)
-        verify(exactly = 1) { addressJpaRepository.save(addressEntity) }
+        verify(exactly = 1) { addressJpaRepository.save(any()) }
     }
 
     @Test
