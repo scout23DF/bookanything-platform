@@ -1,4 +1,4 @@
-package de.org.dexterity.bookanything.dom01geolocation
+package de.org.dexterity.bookanything.shared.integrationtests
 
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -15,7 +15,9 @@ abstract class AbstractIntegrationTest {
 
     companion object {
         @Container
-        val postgres: PostgreSQLContainer<*> = PostgreSQLContainer(DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres"))
+        val postgres: PostgreSQLContainer<*> = PostgreSQLContainer(
+            DockerImageName.parse("postgis/postgis:16-3.4").asCompatibleSubstituteFor("postgres")
+        )
             .withDatabaseName("DBBookAnythingPlatform")
             .withUsername("dbabookanythingapps01")
             .withPassword("1a88a1")

@@ -2,7 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.i
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import de.org.dexterity.bookanything.dom01geolocation.AbstractIntegrationTest
+import de.org.dexterity.bookanything.shared.integrationtests.AbstractIntegrationTest
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
