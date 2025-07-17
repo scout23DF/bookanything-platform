@@ -133,14 +133,14 @@ class GeoLocationControllerTest {
         val continents = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
         val responseList = listOf(GeoLocationResponse(type = type, id = 1, name = "Asia", boundaryRepresentation = null, parentId = null))
 
-        every { geoLocationCRUDService.search(type, null, namePrefix) } returns continents
+        every { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) } returns continents
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any()) } answers { callOriginal() }
 
-        val result = controller.search(type.name, null, namePrefix)
+        val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix)
 
         assertEquals(1, result.size)
         assertEquals(responseList[0].id, result[0].id)
         assertEquals(responseList[0].name, result[0].name)
-        verify(exactly = 1) { geoLocationCRUDService.search(type, null, namePrefix) }
+        verify(exactly = 1) { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) }
     }
 }

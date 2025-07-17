@@ -10,6 +10,7 @@ class GeoLocationJpaMapper {
     fun continentToJpaEntity(continentModel: ContinentModel): ContinentEntity {
         return ContinentEntity(
             name = continentModel.name,
+            alias = continentModel.alias,
             boundaryRepresentation = continentModel.boundaryRepresentation,
             regionsList = emptyList() // continentModel.regionsList?.map { regionToJpaEntity(it) } ?: emptyList()
         )
@@ -19,6 +20,7 @@ class GeoLocationJpaMapper {
         return ContinentModel(
             id = GeoLocationId(continentEntity.id!!),
             name = continentEntity.name,
+            alias = continentEntity.alias,
             boundaryRepresentation = continentEntity.boundaryRepresentation,
             regionsList = emptyList() // continentEntity.regionsList?.map { regionToDomainModel(it) } ?: emptyList()
         )
@@ -27,6 +29,7 @@ class GeoLocationJpaMapper {
     fun regionToJpaEntity(regionModel: RegionModel): RegionEntity {
         return RegionEntity(
             name = regionModel.name,
+            alias = regionModel.alias,
             boundaryRepresentation = regionModel.boundaryRepresentation,
             continent = continentToJpaEntity(regionModel.continent),
             countriesList = emptyList() // regionModel.countriesList?.map { countryToJpaEntity(it) } ?: emptyList()
@@ -37,6 +40,7 @@ class GeoLocationJpaMapper {
         return RegionModel(
             id = GeoLocationId(regionEntity.id!!),
             name = regionEntity.name,
+            alias = regionEntity.alias,
             boundaryRepresentation = regionEntity.boundaryRepresentation,
             parentId = regionEntity.continent.id,
             continent = continentToDomainModel(regionEntity.continent),
@@ -47,6 +51,7 @@ class GeoLocationJpaMapper {
     fun countryToJpaEntity(countryModel: CountryModel): CountryEntity {
         return CountryEntity(
             name = countryModel.name,
+            alias = countryModel.alias,
             boundaryRepresentation = countryModel.boundaryRepresentation,
             region = regionToJpaEntity(countryModel.region),
             provincesList = emptyList() // countryModel.provincesList?.map { provinceToJpaEntity(it) } ?: emptyList()
@@ -57,6 +62,7 @@ class GeoLocationJpaMapper {
         return CountryModel(
             id = GeoLocationId(countryEntity.id!!),
             name = countryEntity.name,
+            alias = countryEntity.alias,
             boundaryRepresentation = countryEntity.boundaryRepresentation,
             parentId = countryEntity.region.id,
             region = regionToDomainModel(countryEntity.region),
@@ -67,6 +73,7 @@ class GeoLocationJpaMapper {
     fun provinceToJpaEntity(provinceModel: ProvinceModel): ProvinceEntity {
         return ProvinceEntity(
             name = provinceModel.name,
+            alias = provinceModel.alias,
             boundaryRepresentation = provinceModel.boundaryRepresentation,
             country = countryToJpaEntity(provinceModel.country),
             citiesList = emptyList() // provinceModel.citiesList?.map { cityToJpaEntity(it) } ?: emptyList()
@@ -77,6 +84,7 @@ class GeoLocationJpaMapper {
         return ProvinceModel(
             id = GeoLocationId(provinceEntity.id!!),
             name = provinceEntity.name,
+            alias = provinceEntity.alias,
             boundaryRepresentation = provinceEntity.boundaryRepresentation,
             parentId = provinceEntity.country.id,
             country = countryToDomainModel(provinceEntity.country),
@@ -87,6 +95,7 @@ class GeoLocationJpaMapper {
     fun cityToJpaEntity(cityModel: CityModel): CityEntity {
         return CityEntity(
             name = cityModel.name,
+            alias = cityModel.alias,
             boundaryRepresentation = cityModel.boundaryRepresentation,
             province = provinceToJpaEntity(cityModel.province),
             districtsList = emptyList() // cityModel.districtsList?.map { districtToJpaEntity(it) } ?: emptyList()
@@ -97,6 +106,7 @@ class GeoLocationJpaMapper {
         return CityModel(
             id = GeoLocationId(cityEntity.id!!),
             name = cityEntity.name,
+            alias = cityEntity.alias,
             boundaryRepresentation = cityEntity.boundaryRepresentation,
             parentId = cityEntity.province.id,
             province = provinceToDomainModel(cityEntity.province),
@@ -107,6 +117,7 @@ class GeoLocationJpaMapper {
     fun districtToJpaEntity(districtModel: DistrictModel): DistrictEntity {
         return DistrictEntity(
             name = districtModel.name,
+            alias = districtModel.alias,
             boundaryRepresentation = districtModel.boundaryRepresentation,
             city = cityToJpaEntity(districtModel.city),
             addressesList = emptyList() // districtModel.addressesList?.map { addressToJpaEntity(it) } ?: emptyList()
@@ -117,6 +128,7 @@ class GeoLocationJpaMapper {
         return DistrictModel(
             id = GeoLocationId(districtEntity.id!!),
             name = districtEntity.name,
+            alias = districtEntity.alias,
             boundaryRepresentation = districtEntity.boundaryRepresentation,
             parentId = districtEntity.city.id,
             city = cityToDomainModel(districtEntity.city),

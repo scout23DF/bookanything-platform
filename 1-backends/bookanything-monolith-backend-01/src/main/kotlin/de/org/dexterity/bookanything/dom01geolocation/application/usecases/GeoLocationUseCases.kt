@@ -13,16 +13,36 @@ interface IGeoLocationUseCase<T : IGeoLocationModel> {
     fun deleteById(id: GeoLocationId)
     fun deleteAll()
     fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<T>
+    fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<T>
 }
 
 @Service
 class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoLocationUseCase<ContinentModel> {
-    override fun create(model: ContinentModel): ContinentModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<ContinentModel> = repository.findById(id)
-    override fun findAll(): List<ContinentModel> = repository.findAll()
-    override fun update(model: ContinentModel): ContinentModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+
+    override fun create(model: ContinentModel): ContinentModel {
+        return repository.saveNew(model)
+    }
+
+    override fun findById(id: GeoLocationId): Optional<ContinentModel> {
+        return repository.findById(id)
+    }
+
+    override fun findAll(): List<ContinentModel> {
+        return repository.findAll()
+    }
+
+    override fun update(model: ContinentModel): ContinentModel? {
+        return repository.update(model)
+    }
+
+    override fun deleteById(id: GeoLocationId) {
+        return repository.deleteById(id)
+    }
+
+    override fun deleteAll() {
+        return repository.deleteAll()
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<ContinentModel> {
         // Continents do not have a parent, so parentId should be null
         if (parentId != null) {
@@ -30,6 +50,15 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoL
         }
         return repository.findByNameStartingWith(namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<ContinentModel> {
+        // Continents do not have a parent, so parentId should be null
+        if (parentId != null) {
+            return emptyList()
+        }
+        return repository.findByAliasStartingWith(aliasPrefix)
+    }
+
 }
 
 @Service
@@ -46,6 +75,14 @@ class RegionUseCase(private val repository: IRegionRepositoryPort) : IGeoLocatio
         }
         return repository.findByContinentIdAndNameStartingWith(parentId, namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<RegionModel> {
+        if (parentId == null) {
+            return emptyList() // Regions must have a parent
+        }
+        return repository.findByContinentIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
 }
 
 @Service
@@ -62,6 +99,14 @@ class CountryUseCase(private val repository: ICountryRepositoryPort) : IGeoLocat
         }
         return repository.findByRegionIdAndNameStartingWith(parentId, namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<CountryModel> {
+        if (parentId == null) {
+            return emptyList() // Regions must have a parent
+        }
+        return repository.findByRegionIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
 }
 
 @Service
@@ -78,6 +123,14 @@ class ProvinceUseCase(private val repository: IProvinceRepositoryPort) : IGeoLoc
         }
         return repository.findByCountryIdAndNameStartingWith(parentId, namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<ProvinceModel> {
+        if (parentId == null) {
+            return emptyList() // Regions must have a parent
+        }
+        return repository.findByCountryIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
 }
 
 @Service
@@ -94,6 +147,14 @@ class CityUseCase(private val repository: ICityRepositoryPort) : IGeoLocationUse
         }
         return repository.findByProvinceIdAndNameStartingWith(parentId, namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<CityModel> {
+        if (parentId == null) {
+            return emptyList() // Regions must have a parent
+        }
+        return repository.findByProvinceIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
 }
 
 @Service
@@ -110,4 +171,12 @@ class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLoc
         }
         return repository.findByCityIdAndNameStartingWith(parentId, namePrefix)
     }
+
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<DistrictModel> {
+        if (parentId == null) {
+            return emptyList() // Regions must have a parent
+        }
+        return repository.findByCityIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
 }

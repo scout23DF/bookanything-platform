@@ -23,6 +23,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 LocalizablePlaceModel(
                     id = elasticEntity.id,
                     name = elasticEntity.name,
+                    alias = elasticEntity.alias,
                     locationPoint = GeometryFactory().createPoint(
                         Coordinate(
                             elasticEntity.locationPoint.lon,
@@ -41,6 +42,7 @@ class LocalizablePlaceElasticSearchAdapter(
             LocalizablePlaceModel(
                 id = elasticEntity.id,
                 name = elasticEntity.name,
+                alias = elasticEntity.alias,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -52,6 +54,22 @@ class LocalizablePlaceElasticSearchAdapter(
 
     }
 
+    override fun buscarPorAliasIniciandoPor(alias: String): List<LocalizablePlaceModel> {
+        return localizablePlaceElasticRepository.findByAliasStartingWith(alias).map { elasticEntity ->
+            LocalizablePlaceModel(
+                id = elasticEntity.id,
+                name = elasticEntity.name,
+                alias = elasticEntity.alias,
+                locationPoint = GeometryFactory().createPoint(
+                    Coordinate(
+                        elasticEntity.locationPoint.lon,
+                        elasticEntity.locationPoint.lat
+                    )
+                )
+            )
+        }.toList()
+    }
+
     override fun buscarCentrosProximos(
         locationPoint: Point,
         raioEmKm: Double
@@ -61,6 +79,7 @@ class LocalizablePlaceElasticSearchAdapter(
             LocalizablePlaceModel(
                 id = elasticEntity.id,
                 name = elasticEntity.name,
+                alias = elasticEntity.alias,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -87,6 +106,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 LocalizablePlaceElasticEntity(
                     id = oneLocalizablePlaceFromDB.id,
                     name = oneLocalizablePlaceFromDB.name,
+                    alias = oneLocalizablePlaceFromDB.alias,
                     locationPoint = GeoPoint(
                         oneLocalizablePlaceFromDB.locationPoint.y,
                         oneLocalizablePlaceFromDB.locationPoint.x

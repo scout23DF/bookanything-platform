@@ -2,8 +2,8 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.i
 
 import de.org.dexterity.bookanything.dom01geolocation.application.cqrs.command.*
 import de.org.dexterity.bookanything.dom01geolocation.application.cqrs.query.*
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.LocalizablePlaceRestResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateLocalizablePlaceRestRequest
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.LocalizablePlaceRestResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.LocalizablePlaceRestMapper
 import de.org.dexterity.bookanything.shared.mediators.HandlersMediatorManager
 import org.springframework.http.MediaType
@@ -23,9 +23,9 @@ class LocalizablePlaceController(
     @PostMapping
     fun create(@RequestBody restRequest: CreateLocalizablePlaceRestRequest): ResponseEntity<LocalizablePlaceRestResponse> {
 
-        val cqrsCommandRequest : CreateCentroDistribuicaoCQRSRequest = localizablePlaceRestMapper.fromRestRequestToCQRSRequest(restRequest)
+        val cqrsCommandRequest : CreateLocalizablePlaceCQRSRequest = localizablePlaceRestMapper.fromRestRequestToCQRSRequest(restRequest)
 
-        val cqrsCommandResponse : CreateCentroDistribuicaoCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
+        val cqrsCommandResponse : CreateLocalizablePlaceCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
 
         val uri = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -41,13 +41,13 @@ class LocalizablePlaceController(
     @GetMapping("/all")
     fun searchAll(): ResponseEntity<List<LocalizablePlaceRestResponse>> {
 
-        val cqrsCommandRequest = GetAllCentroDistribuicaoCQRSRequest(
+        val cqrsCommandRequest = GetAllLocalizablePlacesCQRSRequest(
             commandId = UUID.randomUUID()
         )
 
-        val cqrsCommandResponse : GetAllCentroDistribuicaoCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
+        val cqrsCommandResponse : GetAllLocalizablePlacesCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
 
-        val responseList = cqrsCommandResponse?.centrosDistribuicaoModelList?.map {
+        val responseList = cqrsCommandResponse?.localizablePlacesModelsList?.map {
             localizablePlaceRestMapper.fromDomainToRestResponse(it)
         }
         return ResponseEntity.ok(responseList)
@@ -56,12 +56,12 @@ class LocalizablePlaceController(
     @GetMapping("/{id}")
     fun searchById(@PathVariable id: UUID): ResponseEntity<LocalizablePlaceRestResponse> {
 
-        val cqrsCommandRequest = GetByIdCentroDistribuicaoCQRSRequest(
+        val cqrsCommandRequest = GetByIdLocalizablePlaceCQRSRequest(
             commandId = UUID.randomUUID(),
             id = id
         )
 
-        val cqrsCommandResponse : GetByIdCentroDistribuicaoCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
+        val cqrsCommandResponse : GetByIdLocalizablePlaceCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
 
         return if (cqrsCommandResponse?.localizablePlaceModel != null) {
             ResponseEntity.ok(localizablePlaceRestMapper.fromDomainToRestResponse(cqrsCommandResponse.localizablePlaceModel))
@@ -78,15 +78,31 @@ class LocalizablePlaceController(
         @RequestParam raioEmKm: Double
     ): ResponseEntity<List<LocalizablePlaceRestResponse>> {
 
-        val cqrsCommandRequest : GetByNearestCentroDistribuicaoCQRSRequest = localizablePlaceRestMapper.fromRequestParamsToCQRSRequest(
+        val cqrsCommandRequest : GetByNearestLocalizablePlacesCQRSRequest = localizablePlaceRestMapper.fromRequestParamsToCQRSRequest(
             latitude,
             longitude,
             raioEmKm
         )
 
-        val cqrsCommandResponse : GetByNearestCentroDistribuicaoCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
+        val cqrsCommandResponse : GetByNearestLocalizablePlacesCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
 
-        val responseList = cqrsCommandResponse?.centrosDistribuicaoModelList?.map {
+        val responseList = cqrsCommandResponse?.localizablePlacesModelsList?.map {
+            localizablePlaceRestMapper.fromDomainToRestResponse(it)
+        }
+        return ResponseEntity.ok(responseList)
+
+    }
+
+    @GetMapping("/search-by-alias")
+    fun searchByAliasPrefix(@RequestParam aliasPrefix: String): ResponseEntity<List<LocalizablePlaceRestResponse>> {
+
+        val cqrsCommandRequest : GetByAliasLocalizablePlacesCQRSRequest = localizablePlaceRestMapper.fromRequestParamsToCQRSRequest(
+            aliasPrefix
+        )
+
+        val cqrsCommandResponse : GetByAliasLocalizablePlacesCQRSResponse? = handlerMediatorManager.dispatch(cqrsCommandRequest)
+
+        val responseList = cqrsCommandResponse?.localizablePlacesModelsList?.map {
             localizablePlaceRestMapper.fromDomainToRestResponse(it)
         }
         return ResponseEntity.ok(responseList)

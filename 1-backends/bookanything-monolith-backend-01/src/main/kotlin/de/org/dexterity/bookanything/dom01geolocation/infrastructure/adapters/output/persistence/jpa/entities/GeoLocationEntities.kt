@@ -17,6 +17,9 @@ abstract class AbstractBaseGeoLocationEntity(
     @Column("ds_name")
     open var name: String,
 
+    @Column("ds_alias", nullable = true, length = 20)
+    open var alias: String? = null,
+
     @Column("tp_geo_location", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     open val type: GeoLocationType,
@@ -45,12 +48,14 @@ abstract class AbstractBaseGeoLocationEntity(
 @DiscriminatorValue("CONTINENT")
 open class ContinentEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = RegionEntity::class)
     open var regionsList: List<RegionEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.CONTINENT,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -59,6 +64,7 @@ open class ContinentEntity(
 @DiscriminatorValue("REGION")
 open class RegionEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,6 +75,7 @@ open class RegionEntity(
     open var countriesList: List<CountryEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.REGION,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -77,6 +84,7 @@ open class RegionEntity(
 @DiscriminatorValue("COUNTRY")
 open class CountryEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -87,6 +95,7 @@ open class CountryEntity(
     open var provincesList: List<ProvinceEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.COUNTRY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -95,6 +104,7 @@ open class CountryEntity(
 @DiscriminatorValue("PROVINCE")
 open class ProvinceEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -105,6 +115,7 @@ open class ProvinceEntity(
     open var citiesList: List<CityEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.PROVINCE,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -113,6 +124,7 @@ open class ProvinceEntity(
 @DiscriminatorValue("CITY")
 open class CityEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -123,6 +135,7 @@ open class CityEntity(
     open var districtsList: List<DistrictEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.CITY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -131,6 +144,7 @@ open class CityEntity(
 @DiscriminatorValue("DISTRICT")
 open class DistrictEntity(
     name: String,
+    alias: String? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -141,6 +155,7 @@ open class DistrictEntity(
     open var addressesList: List<AddressEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
     name = name,
+    alias = alias,
     type = GeoLocationType.DISTRICT,
     boundaryRepresentation = boundaryRepresentation
 )

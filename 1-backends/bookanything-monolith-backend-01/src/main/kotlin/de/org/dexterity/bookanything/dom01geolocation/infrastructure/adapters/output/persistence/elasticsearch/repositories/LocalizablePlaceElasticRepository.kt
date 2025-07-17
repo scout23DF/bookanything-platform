@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface LocalizablePlaceElasticRepository : ElasticsearchRepository<LocalizablePlaceElasticEntity, UUID>, LocalizablePlaceElasticRepositoryCustom
+interface LocalizablePlaceElasticRepository : ElasticsearchRepository<LocalizablePlaceElasticEntity, UUID>, LocalizablePlaceElasticRepositoryCustom {
+    fun findByAliasStartingWith(searchedAlias: String): List<LocalizablePlaceElasticEntity>
+}

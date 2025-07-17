@@ -51,8 +51,8 @@ class GeoLocationController(
         return geoLocationCRUDService.findAll(geoLocationType).map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
     }
 
-    @GetMapping("/{type}/search")
-    fun search(
+    @GetMapping("/{type}/search-by-name")
+    fun searchByParentIdAndNameStartingWith(
         @PathVariable type: String,
         @RequestParam(required = false) parentId: Long?,
         @RequestParam namePrefix: String
@@ -60,8 +60,22 @@ class GeoLocationController(
 
         val geoLocationType = GeoLocationType.valueOf(type.uppercase())
 
-        return geoLocationCRUDService.search(geoLocationType, parentId, namePrefix)
+        return geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix)
                                      .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+
+    }
+
+    @GetMapping("/{type}/search-by-alias")
+    fun searchByParentIdAndAliasStartingWith(
+        @PathVariable type: String,
+        @RequestParam(required = true) parentId: Long,
+        @RequestParam aliasPrefix: String
+    ): List<GeoLocationResponse> {
+
+        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
+
+        return geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
 
     }
 

@@ -9,82 +9,108 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 
-data class GetAllCentroDistribuicaoCQRSResponse(val centrosDistribuicaoModelList: List<LocalizablePlaceModel>)
+data class GetAllLocalizablePlacesCQRSResponse(val localizablePlacesModelsList: List<LocalizablePlaceModel>)
 
-data class GetAllCentroDistribuicaoCQRSRequest(
+data class GetAllLocalizablePlacesCQRSRequest(
     override val commandId: UUID
-) : IGenericDataRequest<GetAllCentroDistribuicaoCQRSResponse?>
+) : IGenericDataRequest<GetAllLocalizablePlacesCQRSResponse?>
 
 @Component
-class GetAllCentroDistribuicaoHandler(
-    val centroDistribuicaoCRUDUseCase: LocalizablePlaceCRUDUseCase
-) : IGenericRequestHandler<GetAllCentroDistribuicaoCQRSRequest, GetAllCentroDistribuicaoCQRSResponse> {
+class GetAllLocalizablePlacesHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetAllLocalizablePlacesCQRSRequest, GetAllLocalizablePlacesCQRSResponse> {
 
-    override fun getRequestType(): Class<GetAllCentroDistribuicaoCQRSRequest> {
-        return GetAllCentroDistribuicaoCQRSRequest::class.java
+    override fun getRequestType(): Class<GetAllLocalizablePlacesCQRSRequest> {
+        return GetAllLocalizablePlacesCQRSRequest::class.java
     }
 
-    override fun handleRequest(requestHolder: GetAllCentroDistribuicaoCQRSRequest): GetAllCentroDistribuicaoCQRSResponse? {
+    override fun handleRequest(requestHolder: GetAllLocalizablePlacesCQRSRequest): GetAllLocalizablePlacesCQRSResponse? {
 
-        val allFoundModelsList = centroDistribuicaoCRUDUseCase.buscarTodos()
+        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarTodos()
 
-        return GetAllCentroDistribuicaoCQRSResponse(allFoundModelsList)
+        return GetAllLocalizablePlacesCQRSResponse(allFoundModelsList)
     }
 
 }
 
 
-data class GetByIdCentroDistribuicaoCQRSResponse(val localizablePlaceModel: LocalizablePlaceModel?)
+data class GetByIdLocalizablePlaceCQRSResponse(val localizablePlaceModel: LocalizablePlaceModel?)
 
-data class GetByIdCentroDistribuicaoCQRSRequest(
+data class GetByIdLocalizablePlaceCQRSRequest(
     override val commandId: UUID,
     val id: UUID
-) : IGenericDataRequest<GetByIdCentroDistribuicaoCQRSResponse?>
+) : IGenericDataRequest<GetByIdLocalizablePlaceCQRSResponse?>
 
 @Component
-class GetByIdCentroDistribuicaoHandler(
-    val centroDistribuicaoCRUDUseCase: LocalizablePlaceCRUDUseCase
-) : IGenericRequestHandler<GetByIdCentroDistribuicaoCQRSRequest, GetByIdCentroDistribuicaoCQRSResponse> {
+class GetByIdLocalizablePlaceHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetByIdLocalizablePlaceCQRSRequest, GetByIdLocalizablePlaceCQRSResponse> {
 
-    override fun getRequestType(): Class<GetByIdCentroDistribuicaoCQRSRequest> {
-        return GetByIdCentroDistribuicaoCQRSRequest::class.java
+    override fun getRequestType(): Class<GetByIdLocalizablePlaceCQRSRequest> {
+        return GetByIdLocalizablePlaceCQRSRequest::class.java
     }
 
-    override fun handleRequest(requestHolder: GetByIdCentroDistribuicaoCQRSRequest): GetByIdCentroDistribuicaoCQRSResponse? {
+    override fun handleRequest(requestHolder: GetByIdLocalizablePlaceCQRSRequest): GetByIdLocalizablePlaceCQRSResponse? {
 
-        val foundModel = centroDistribuicaoCRUDUseCase.buscarPorId(requestHolder.id)
+        val foundModel = localizablePlaceCRUDUseCase.buscarPorId(requestHolder.id)
 
-        return GetByIdCentroDistribuicaoCQRSResponse(foundModel)
+        return GetByIdLocalizablePlaceCQRSResponse(foundModel)
     }
 
 }
 
 
-data class GetByNearestCentroDistribuicaoCQRSResponse(val centrosDistribuicaoModelList: List<LocalizablePlaceModel>)
+data class GetByNearestLocalizablePlacesCQRSResponse(val localizablePlacesModelsList: List<LocalizablePlaceModel>)
 
-data class GetByNearestCentroDistribuicaoCQRSRequest(
+data class GetByNearestLocalizablePlacesCQRSRequest(
     override val commandId: UUID,
     val locationPointRef: Point,
     val raioEmKm: Double
-) : IGenericDataRequest<GetByNearestCentroDistribuicaoCQRSResponse?>
+) : IGenericDataRequest<GetByNearestLocalizablePlacesCQRSResponse?>
 
 @Component
-class GetByNearestCentroDistribuicaoHandler(
-    val centroDistribuicaoCRUDUseCase: LocalizablePlaceCRUDUseCase
-) : IGenericRequestHandler<GetByNearestCentroDistribuicaoCQRSRequest, GetByNearestCentroDistribuicaoCQRSResponse> {
+class GetByNearestLocalizablePlacesHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetByNearestLocalizablePlacesCQRSRequest, GetByNearestLocalizablePlacesCQRSResponse> {
 
-    override fun getRequestType(): Class<GetByNearestCentroDistribuicaoCQRSRequest> {
-        return GetByNearestCentroDistribuicaoCQRSRequest::class.java
+    override fun getRequestType(): Class<GetByNearestLocalizablePlacesCQRSRequest> {
+        return GetByNearestLocalizablePlacesCQRSRequest::class.java
     }
 
-    override fun handleRequest(requestHolder: GetByNearestCentroDistribuicaoCQRSRequest): GetByNearestCentroDistribuicaoCQRSResponse? {
+    override fun handleRequest(requestHolder: GetByNearestLocalizablePlacesCQRSRequest): GetByNearestLocalizablePlacesCQRSResponse? {
 
-        val allFoundModelsList = centroDistribuicaoCRUDUseCase.buscarCentrosProximos(
+        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarCentrosProximos(
             requestHolder.locationPointRef,
             requestHolder.raioEmKm
         )
 
-        return GetByNearestCentroDistribuicaoCQRSResponse(allFoundModelsList)
+        return GetByNearestLocalizablePlacesCQRSResponse(allFoundModelsList)
+    }
+
+}
+
+
+data class GetByAliasLocalizablePlacesCQRSResponse(val localizablePlacesModelsList: List<LocalizablePlaceModel>)
+
+data class GetByAliasLocalizablePlacesCQRSRequest(
+    override val commandId: UUID,
+    val searchedAliasPrefix: String
+) : IGenericDataRequest<GetByAliasLocalizablePlacesCQRSResponse?>
+
+@Component
+class GetByAliasCentroDistribuicaoHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetByAliasLocalizablePlacesCQRSRequest, GetByAliasLocalizablePlacesCQRSResponse> {
+
+    override fun getRequestType(): Class<GetByAliasLocalizablePlacesCQRSRequest> {
+        return GetByAliasLocalizablePlacesCQRSRequest::class.java
+    }
+
+    override fun handleRequest(requestHolder: GetByAliasLocalizablePlacesCQRSRequest): GetByAliasLocalizablePlacesCQRSResponse? {
+
+        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarPorAliasIniciandoPor(requestHolder.searchedAliasPrefix)
+
+        return GetByAliasLocalizablePlacesCQRSResponse(allFoundModelsList)
     }
 
 }

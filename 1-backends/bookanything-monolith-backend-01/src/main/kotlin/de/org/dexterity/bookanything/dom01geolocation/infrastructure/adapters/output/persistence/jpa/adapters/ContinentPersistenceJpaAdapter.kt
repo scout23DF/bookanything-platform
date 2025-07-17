@@ -61,4 +61,9 @@ class ContinentPersistenceJpaAdapter(
         return continentJpaRepository.findByNameStartingWithIgnoreCase(namePrefix)
             .map { geoLocationJpaMapper.continentToDomainModel(it) }
     }
+
+    override fun findByAliasStartingWith(searchedAlias: String): List<ContinentModel> {
+        return continentJpaRepository.findByAliasStartingWithIgnoreCase(searchedAlias)
+            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+    }
 }

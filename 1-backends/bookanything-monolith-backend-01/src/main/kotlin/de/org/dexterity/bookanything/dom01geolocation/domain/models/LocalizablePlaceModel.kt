@@ -6,5 +6,6 @@ import java.util.UUID
 data class LocalizablePlaceModel(
     val id: UUID,
     val name: String,
+    val alias: String?,
     val locationPoint: Point
 )

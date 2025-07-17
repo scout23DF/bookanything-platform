@@ -23,10 +23,13 @@ data class LocalizablePlaceJpaEntity(
     @Column(name="ds_name", nullable = false, unique = true)
     var name: String? = null,
 
+    @Column(name="ds_alias", length = 20)
+    var alias: String? = null,
+
     @Column(name="ge_location", columnDefinition="geometry(Point,4326)", nullable = false)
     var locationPoint: Point? = null
 ) {
     // Construtor sem argumentos para o Hibernate
-    constructor() : this(null, null, null)
+    constructor() : this(null, null, null, null)
 }
 

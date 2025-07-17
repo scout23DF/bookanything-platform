@@ -10,30 +10,32 @@ import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
-data class CreateCentroDistribuicaoCQRSResponse(val localizablePlaceModel: LocalizablePlaceModel)
+data class CreateLocalizablePlaceCQRSResponse(val localizablePlaceModel: LocalizablePlaceModel)
 
-data class CreateCentroDistribuicaoCQRSRequest(
+data class CreateLocalizablePlaceCQRSRequest(
     override val commandId: UUID,
     val locationName: String,
+    val alias: String?,
     val locationPoint: Point
-) : IGenericDataRequest<CreateCentroDistribuicaoCQRSResponse?>
+) : IGenericDataRequest<CreateLocalizablePlaceCQRSResponse?>
 
 @Component
 class CreateCentroDistribuicaoHandler(
     val centroDistribuicaoCRUDUseCase: LocalizablePlaceCRUDUseCase
-) : IGenericRequestHandler<CreateCentroDistribuicaoCQRSRequest, CreateCentroDistribuicaoCQRSResponse> {
+) : IGenericRequestHandler<CreateLocalizablePlaceCQRSRequest, CreateLocalizablePlaceCQRSResponse> {
 
-    override fun getRequestType(): Class<CreateCentroDistribuicaoCQRSRequest> {
-        return CreateCentroDistribuicaoCQRSRequest::class.java
+    override fun getRequestType(): Class<CreateLocalizablePlaceCQRSRequest> {
+        return CreateLocalizablePlaceCQRSRequest::class.java
     }
 
-    override fun handleRequest(requestHolder: CreateCentroDistribuicaoCQRSRequest): CreateCentroDistribuicaoCQRSResponse? {
+    override fun handleRequest(requestHolder: CreateLocalizablePlaceCQRSRequest): CreateLocalizablePlaceCQRSResponse? {
         val centroDistribuicaoModelResult = centroDistribuicaoCRUDUseCase.cadastrar(
             requestHolder.locationName,
+            requestHolder.alias,
             requestHolder.locationPoint
         )
 
-        return CreateCentroDistribuicaoCQRSResponse(centroDistribuicaoModelResult)
+        return CreateLocalizablePlaceCQRSResponse(centroDistribuicaoModelResult)
     }
 
 }

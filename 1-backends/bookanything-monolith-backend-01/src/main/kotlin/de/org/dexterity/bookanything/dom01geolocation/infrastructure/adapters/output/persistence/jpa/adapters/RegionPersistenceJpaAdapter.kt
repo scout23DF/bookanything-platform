@@ -70,4 +70,9 @@ class RegionPersistenceJpaAdapter(
         return regionJpaRepository.findByContinentIdAndNameStartingWithIgnoreCase(continentId.id, namePrefix)
             .map { geoLocationJpaMapper.regionToDomainModel(it) }
     }
+
+    override fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String): List<RegionModel> {
+        return regionJpaRepository.findByContinentIdAndAliasStartingWithIgnoreCase(continentId.id, searchedAlias)
+            .map { geoLocationJpaMapper.regionToDomainModel(it) }
+    }
 }

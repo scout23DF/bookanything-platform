@@ -18,13 +18,14 @@ class LocalizablePlaceCRUDUseCase(
     private val eventPublisherPort: EventPublisherPort
 ) : LocalizablePlaceWriteFeaturePort, LocalizablePlaceReadFeaturePort {
 
-    override fun cadastrar(nome: String, localizacao: Point): LocalizablePlaceModel {
+    override fun cadastrar(nome: String, alias: String?, localizacao: Point): LocalizablePlaceModel {
         if (localizablePlacePersistRepositoryPort.existsByName(nome)) {
             throw IllegalArgumentException("Centro de Distribuição com o nome '$nome' já existe.")
         }
         val localizablePlaceModel = LocalizablePlaceModel(
             id = UUID.randomUUID(),
             name = nome,
+            alias = alias,
             locationPoint = localizacao
         )
         val savedCentroDistribuicao = localizablePlacePersistRepositoryPort.salvar(localizablePlaceModel)
@@ -32,6 +33,7 @@ class LocalizablePlaceCRUDUseCase(
             LocalizablePlaceCreatedEvent(
                 id = savedCentroDistribuicao.id,
                 name = savedCentroDistribuicao.name,
+                alias = savedCentroDistribuicao.alias,
                 latitude = savedCentroDistribuicao.locationPoint.y,
                 longitude = savedCentroDistribuicao.locationPoint.x
             )
@@ -49,6 +51,10 @@ class LocalizablePlaceCRUDUseCase(
 
     override fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel> {
         return localizablePlaceQueryRepositoryPort.buscarCentrosProximos(localizacao, raioEmKm)
+    }
+
+    override fun buscarPorAliasIniciandoPor(searchedAlias: String): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.buscarPorAliasIniciandoPor(searchedAlias)
     }
 
     override fun deletarPorId(id: UUID) {

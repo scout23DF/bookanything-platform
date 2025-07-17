@@ -8,6 +8,7 @@ interface LocalizablePlaceQueryRepositoryPort {
 
     fun buscarPorId(id: UUID): LocalizablePlaceModel?
     fun buscarTodos(): List<LocalizablePlaceModel>
+    fun buscarPorAliasIniciandoPor(alias: String): List<LocalizablePlaceModel>
     fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel>
     fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList: List<LocalizablePlaceModel>?): Map<String, Int>
     fun deletarTodos()

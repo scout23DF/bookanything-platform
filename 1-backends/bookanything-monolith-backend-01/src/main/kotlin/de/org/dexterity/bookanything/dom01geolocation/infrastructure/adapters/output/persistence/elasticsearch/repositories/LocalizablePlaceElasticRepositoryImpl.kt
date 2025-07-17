@@ -22,4 +22,10 @@ class LocalizablePlaceElasticRepositoryImpl(private val elasticsearchOperations:
 
     }
 
+    override fun findByAlias(alias: String): List<LocalizablePlaceElasticEntity> {
+        val query = CriteriaQuery(Criteria.where("alias").`is`(alias))
+        val searchHits: SearchHits<LocalizablePlaceElasticEntity> = elasticsearchOperations.search(query as Query, LocalizablePlaceElasticEntity::class.java)
+        return searchHits.map { searchHit -> searchHit.content }.toList()
+    }
+
 }

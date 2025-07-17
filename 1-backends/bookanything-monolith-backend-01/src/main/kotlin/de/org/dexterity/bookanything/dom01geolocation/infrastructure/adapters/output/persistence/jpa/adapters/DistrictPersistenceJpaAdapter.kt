@@ -70,4 +70,9 @@ class DistrictPersistenceJpaAdapter(
         return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
             .map { geoLocationJpaMapper.districtToDomainModel(it) }
     }
+
+    override fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel> {
+        return districtJpaRepository.findByCityIdAndAliasStartingWithIgnoreCase(cityId.id, searchedAlias)
+            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+    }
 }

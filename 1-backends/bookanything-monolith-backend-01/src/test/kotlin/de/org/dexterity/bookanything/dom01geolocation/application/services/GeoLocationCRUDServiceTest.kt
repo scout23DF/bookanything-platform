@@ -134,13 +134,13 @@ class GeoLocationCRUDServiceTest {
     }
 
     @Test
-    fun `search should call useCase findByParentIdAndNameStartingWith`() {
+    fun searchByParentIdAndNameStartingWith() {
         val namePrefix = "A"
         val continents = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix) } returns continents
 
-        val result = service.search(GeoLocationType.CONTINENT, null, namePrefix)
+        val result = service.searchByParentIdAndNameStartingWith(GeoLocationType.CONTINENT, null, namePrefix)
 
         assertEquals(continents, result)
         verify(exactly = 1) { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix) }

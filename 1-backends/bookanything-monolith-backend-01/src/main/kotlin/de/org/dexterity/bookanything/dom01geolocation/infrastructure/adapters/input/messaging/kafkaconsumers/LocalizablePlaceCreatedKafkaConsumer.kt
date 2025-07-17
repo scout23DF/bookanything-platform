@@ -21,6 +21,7 @@ class LocalizablePlaceCreatedKafkaConsumer(
         val elasticEntity = LocalizablePlaceElasticEntity(
             id = event.id,
             name = event.name,
+            alias = event.alias,
             locationPoint = GeoPoint(event.latitude, event.longitude)
         )
         localizablePlaceElasticRepository.save(elasticEntity)

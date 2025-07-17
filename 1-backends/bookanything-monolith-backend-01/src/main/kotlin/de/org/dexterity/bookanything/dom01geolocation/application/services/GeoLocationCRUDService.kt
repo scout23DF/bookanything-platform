@@ -1,27 +1,13 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.services
 
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.CityUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.ContinentUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.CountryUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.DistrictUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.IGeoLocationUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.ProvinceUseCase
-import de.org.dexterity.bookanything.dom01geolocation.application.usecases.RegionUseCase
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.CountryModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.ProvinceModel
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.locationtech.jts.io.WKTReader
 import org.springframework.stereotype.Service
-import java.util.Optional
+import java.util.*
 
 @Service
 class GeoLocationCRUDService(
@@ -100,10 +86,16 @@ class GeoLocationCRUDService(
         useCase.deleteAll()
     }
 
-    fun search(type: GeoLocationType, parentId: Long?, namePrefix: String): List<IGeoLocationModel> {
+    fun searchByParentIdAndNameStartingWith(type: GeoLocationType, parentId: Long?, namePrefix: String): List<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
         val parentGeoLocationId = parentId?.let { GeoLocationId(it) }
         return useCase.findByParentIdAndNameStartingWith(parentGeoLocationId, namePrefix)
+    }
+
+    fun searchByParentIdAndAliasStartingWith(type: GeoLocationType, parentId: Long?, aliasPrefix: String): List<IGeoLocationModel> {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        val parentGeoLocationId = parentId?.let { GeoLocationId(it) }
+        return useCase.findByParentIdAndAliasStartingWith(parentGeoLocationId, aliasPrefix)
     }
 
 }

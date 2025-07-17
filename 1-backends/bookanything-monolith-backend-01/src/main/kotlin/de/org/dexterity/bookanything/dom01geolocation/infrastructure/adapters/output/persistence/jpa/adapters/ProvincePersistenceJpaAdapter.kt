@@ -70,4 +70,9 @@ class ProvincePersistenceJpaAdapter(
         return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix)
             .map { geoLocationJpaMapper.provinceToDomainModel(it) }
     }
+
+    override fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String): List<ProvinceModel> {
+        return provinceJpaRepository.findByCountryIdAndAliasStartingWithIgnoreCase(countryId.id, searchedAlias)
+            .map { geoLocationJpaMapper.provinceToDomainModel(it) }
+    }
 }

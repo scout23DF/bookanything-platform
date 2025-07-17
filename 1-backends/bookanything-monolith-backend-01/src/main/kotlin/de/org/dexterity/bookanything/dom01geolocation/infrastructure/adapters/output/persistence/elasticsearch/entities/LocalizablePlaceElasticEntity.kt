@@ -11,6 +11,7 @@ data class LocalizablePlaceElasticEntity(
     @Id
     val id: UUID,
     val name: String,
+    val alias: String?,
     @GeoPointField
     val locationPoint: GeoPoint
 )

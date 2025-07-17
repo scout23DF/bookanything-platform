@@ -6,5 +6,6 @@ import org.locationtech.jts.geom.Point
 interface LocalizablePlaceElasticRepositoryCustom {
 
     fun findByLocationPointWithin(locationPoint: Point, raioEmKm: Double): List<LocalizablePlaceElasticEntity>
+    fun findByAlias(alias: String): List<LocalizablePlaceElasticEntity>
 
 }

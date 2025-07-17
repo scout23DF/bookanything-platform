@@ -16,12 +16,14 @@ class LocalizablePlaceJpaAdapter(
         val entity = LocalizablePlaceJpaEntity(
             id = localizablePlaceModel.id,
             name = localizablePlaceModel.name,
+            alias = localizablePlaceModel.alias,
             locationPoint = localizablePlaceModel.locationPoint
         )
         val savedEntity = repository.save(entity)
         return LocalizablePlaceModel(
             id = savedEntity.id!!,
             name = savedEntity.name!!,
+            alias = savedEntity.alias,
             locationPoint = savedEntity.locationPoint!!
         )
     }
@@ -35,7 +37,8 @@ class LocalizablePlaceJpaAdapter(
             LocalizablePlaceModel(
                 id = entity.id!!,
                 name = entity.name!!,
-                locationPoint = entity.locationPoint!!
+            alias = entity.alias,
+            locationPoint = entity.locationPoint!!
             )
         }
     }

@@ -7,5 +7,6 @@ import java.util.UUID
 interface LocalizablePlaceReadFeaturePort {
     fun buscarPorId(id: UUID): LocalizablePlaceModel?
     fun buscarTodos(): List<LocalizablePlaceModel>
+    fun buscarPorAliasIniciandoPor(searchedAlias: String): List<LocalizablePlaceModel>
     fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel>
 }
