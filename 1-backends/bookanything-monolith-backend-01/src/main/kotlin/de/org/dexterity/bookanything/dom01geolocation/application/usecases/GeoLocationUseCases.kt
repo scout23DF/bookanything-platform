@@ -14,6 +14,8 @@ interface IGeoLocationUseCase<T : IGeoLocationModel> {
     fun deleteAll()
     fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<T>
     fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<T>
+    fun findDeepById(id: GeoLocationId): Optional<T>
+    fun findDeepByName(name: String): Optional<T>
 }
 
 @Service
@@ -59,6 +61,14 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoL
         return repository.findByAliasStartingWith(aliasPrefix)
     }
 
+    override fun findDeepById(id: GeoLocationId): Optional<ContinentModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<ContinentModel> {
+        return repository.findDeepByName(name)
+    }
+
 }
 
 @Service
@@ -81,6 +91,14 @@ class RegionUseCase(private val repository: IRegionRepositoryPort) : IGeoLocatio
             return emptyList() // Regions must have a parent
         }
         return repository.findByContinentIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
+    override fun findDeepById(id: GeoLocationId): Optional<RegionModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<RegionModel> {
+        return repository.findDeepByName(name)
     }
 
 }
@@ -107,6 +125,14 @@ class CountryUseCase(private val repository: ICountryRepositoryPort) : IGeoLocat
         return repository.findByRegionIdAndAliasStartingWith(parentId, aliasPrefix)
     }
 
+    override fun findDeepById(id: GeoLocationId): Optional<CountryModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<CountryModel> {
+        return repository.findDeepByName(name)
+    }
+
 }
 
 @Service
@@ -129,6 +155,14 @@ class ProvinceUseCase(private val repository: IProvinceRepositoryPort) : IGeoLoc
             return emptyList() // Regions must have a parent
         }
         return repository.findByCountryIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
+    override fun findDeepById(id: GeoLocationId): Optional<ProvinceModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<ProvinceModel> {
+        return repository.findDeepByName(name)
     }
 
 }
@@ -155,6 +189,14 @@ class CityUseCase(private val repository: ICityRepositoryPort) : IGeoLocationUse
         return repository.findByProvinceIdAndAliasStartingWith(parentId, aliasPrefix)
     }
 
+    override fun findDeepById(id: GeoLocationId): Optional<CityModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<CityModel> {
+        return repository.findDeepByName(name)
+    }
+
 }
 
 @Service
@@ -177,6 +219,14 @@ class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLoc
             return emptyList() // Regions must have a parent
         }
         return repository.findByCityIdAndAliasStartingWith(parentId, aliasPrefix)
+    }
+
+    override fun findDeepById(id: GeoLocationId): Optional<DistrictModel> {
+        return repository.findDeepById(id)
+    }
+
+    override fun findDeepByName(name: String): Optional<DistrictModel> {
+        return repository.findDeepByName(name)
     }
 
 }

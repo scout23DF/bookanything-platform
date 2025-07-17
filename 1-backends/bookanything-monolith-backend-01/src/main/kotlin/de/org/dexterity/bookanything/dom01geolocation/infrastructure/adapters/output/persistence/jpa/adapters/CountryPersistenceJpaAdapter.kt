@@ -4,7 +4,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.CountryModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICountryRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CountryEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CountryJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
@@ -14,7 +15,8 @@ import java.util.*
 class CountryPersistenceJpaAdapter(
     val countryJpaRepository: CountryJpaRepository,
     val regionJpaRepository: RegionJpaRepository,
-    val geoLocationJpaMapper: GeoLocationJpaMapper
+    val geoLocationJpaMappers: GeoLocationJpaMappers,
+    val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers
 ) : ICountryRepositoryPort {
 
     override fun saveNew(targetModel: CountryModel): CountryModel {
@@ -25,7 +27,7 @@ class CountryPersistenceJpaAdapter(
             region = regionEntity
         )
         val entitySaved = countryJpaRepository.save(countryEntity)
-        return geoLocationJpaMapper.countryToDomainModel(entitySaved)
+        return geoLocationJpaMappers.countryToDomainModel(entitySaved)
     }
 
     override fun update(targetModel: CountryModel): CountryModel? {
@@ -39,7 +41,7 @@ class CountryPersistenceJpaAdapter(
                 existingEntity.region = regionEntity
                 countryJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+            .map { geoLocationJpaMappers.countryToDomainModel(it) }
             .orElse(null)
     }
 
@@ -50,12 +52,12 @@ class CountryPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<CountryModel> {
         return countryJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+            .map { geoLocationJpaMappers.countryToDomainModel(it) }
     }
 
     override fun findAll(): List<CountryModel> {
         return countryJpaRepository.findAll()
-            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+            .map { geoLocationJpaMappers.countryToDomainModel(it) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -68,11 +70,21 @@ class CountryPersistenceJpaAdapter(
 
     override fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel> {
         return countryJpaRepository.findByRegionIdAndNameStartingWithIgnoreCase(regionId.id, namePrefix)
-            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+            .map { geoLocationJpaMappers.countryToDomainModel(it) }
     }
 
     override fun findByRegionIdAndAliasStartingWith(regionId: GeoLocationId, searchedAlias: String): List<CountryModel> {
         return countryJpaRepository.findByRegionIdAndAliasStartingWithIgnoreCase(regionId.id, searchedAlias)
-            .map { geoLocationJpaMapper.countryToDomainModel(it) }
+            .map { geoLocationJpaMappers.countryToDomainModel(it) }
+    }
+
+    override fun findDeepById(geoLocationId: GeoLocationId): Optional<CountryModel> {
+        return countryJpaRepository.findDeepById(geoLocationId.id)
+            .map { deepGeoLocationJpaMappers.deepCountryToDomainModel(it, true) }
+    }
+
+    override fun findDeepByName(name: String): Optional<CountryModel> {
+        return countryJpaRepository.findDeepByName(name)
+            .map { deepGeoLocationJpaMappers.deepCountryToDomainModel(it, true) }
     }
 }

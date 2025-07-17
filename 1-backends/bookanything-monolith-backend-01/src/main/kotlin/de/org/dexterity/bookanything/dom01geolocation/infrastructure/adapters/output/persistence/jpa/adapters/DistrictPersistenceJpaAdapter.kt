@@ -4,7 +4,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictMode
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IDistrictRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
@@ -14,7 +15,8 @@ import java.util.*
 class DistrictPersistenceJpaAdapter(
     val districtJpaRepository: DistrictJpaRepository,
     val cityJpaRepository: CityJpaRepository,
-    val geoLocationJpaMapper: GeoLocationJpaMapper
+    val geoLocationJpaMappers: GeoLocationJpaMappers,
+    val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers
 ) : IDistrictRepositoryPort {
 
     override fun saveNew(targetModel: DistrictModel): DistrictModel {
@@ -25,7 +27,7 @@ class DistrictPersistenceJpaAdapter(
             city = cityEntity
         )
         val entitySaved = districtJpaRepository.save(districtEntity)
-        return geoLocationJpaMapper.districtToDomainModel(entitySaved)
+        return geoLocationJpaMappers.districtToDomainModel(entitySaved)
     }
 
     override fun update(targetModel: DistrictModel): DistrictModel? {
@@ -39,7 +41,7 @@ class DistrictPersistenceJpaAdapter(
                 existingEntity.city = cityEntity
                 districtJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it) }
             .orElse(null)
     }
 
@@ -50,12 +52,12 @@ class DistrictPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<DistrictModel> {
         return districtJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it) }
     }
 
     override fun findAll(): List<DistrictModel> {
         return districtJpaRepository.findAll()
-            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -68,11 +70,21 @@ class DistrictPersistenceJpaAdapter(
 
     override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel> {
         return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
-            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it) }
     }
 
     override fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel> {
         return districtJpaRepository.findByCityIdAndAliasStartingWithIgnoreCase(cityId.id, searchedAlias)
-            .map { geoLocationJpaMapper.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+    }
+
+    override fun findDeepById(geoLocationId: GeoLocationId): Optional<DistrictModel> {
+        return districtJpaRepository.findDeepById(geoLocationId.id)
+            .map { deepGeoLocationJpaMappers.deepDistrictToDomainModel(it, true) }
+    }
+
+    override fun findDeepByName(name: String): Optional<DistrictModel> {
+        return districtJpaRepository.findDeepByName(name)
+            .map { deepGeoLocationJpaMappers.deepDistrictToDomainModel(it, true) }
     }
 }

@@ -4,7 +4,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICityRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CityEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
@@ -14,7 +15,8 @@ import java.util.*
 class CityPersistenceJpaAdapter(
     val cityJpaRepository: CityJpaRepository,
     val provinceJpaRepository: ProvinceJpaRepository,
-    val geoLocationJpaMapper: GeoLocationJpaMapper
+    val geoLocationJpaMappers: GeoLocationJpaMappers,
+    val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers
 ) : ICityRepositoryPort {
 
     override fun saveNew(targetModel: CityModel): CityModel {
@@ -25,7 +27,7 @@ class CityPersistenceJpaAdapter(
             province = provinceEntity
         )
         val entitySaved = cityJpaRepository.save(cityEntity)
-        return geoLocationJpaMapper.cityToDomainModel(entitySaved)
+        return geoLocationJpaMappers.cityToDomainModel(entitySaved)
     }
 
     override fun update(targetModel: CityModel): CityModel? {
@@ -39,7 +41,7 @@ class CityPersistenceJpaAdapter(
                 existingEntity.province = provinceEntity
                 cityJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it) }
             .orElse(null)
     }
 
@@ -50,12 +52,12 @@ class CityPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<CityModel> {
         return cityJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it) }
     }
 
     override fun findAll(): List<CityModel> {
         return cityJpaRepository.findAll()
-            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -68,11 +70,21 @@ class CityPersistenceJpaAdapter(
 
     override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel> {
         return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix)
-            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it) }
     }
 
     override fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String): List<CityModel> {
         return cityJpaRepository.findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId.id, searchedAlias)
-            .map { geoLocationJpaMapper.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+    }
+
+    override fun findDeepById(geoLocationId: GeoLocationId): Optional<CityModel> {
+        return cityJpaRepository.findDeepById(geoLocationId.id)
+            .map { deepGeoLocationJpaMappers.deepCityToDomainModel(it, true) }
+    }
+
+    override fun findDeepByName(name: String): Optional<CityModel> {
+        return cityJpaRepository.findDeepByName(name)
+            .map { deepGeoLocationJpaMappers.deepCityToDomainModel(it, true) }
     }
 }

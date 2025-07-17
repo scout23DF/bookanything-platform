@@ -4,7 +4,9 @@ import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLo
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.IDeepGeoLocationResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.DeepGeoLocationRestMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import de.org.dexterity.bookanything.shared.mediators.HandlersMediatorManager
 import org.springframework.http.ResponseEntity
@@ -15,7 +17,8 @@ import org.springframework.web.bind.annotation.*
 class GeoLocationController(
     private val geoLocationCRUDService: GeoLocationCRUDService,
     private val handlerMediatorManager: HandlersMediatorManager,
-    private val geoLocationRestMapper: GeoLocationRestMapper
+    private val geoLocationRestMapper: GeoLocationRestMapper,
+    private val deepGeoLocationRestMapper: DeepGeoLocationRestMapper
 ) {
 
     @PostMapping("/{type}")
@@ -77,6 +80,28 @@ class GeoLocationController(
         return geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
 
+    }
+
+    @GetMapping("/{type}/deep-search")
+    fun searchDeep(
+        @PathVariable type: String,
+        @RequestParam(required = false) id: Long?,
+        @RequestParam(required = false) name: String?
+    ): ResponseEntity<IDeepGeoLocationResponse> {
+
+        if (id == null && name == null) {
+            throw IllegalArgumentException("Either ID or name must be provided for deep search.")
+        }
+
+        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
+
+        val foundModel = geoLocationCRUDService.findDeepGeoLocation(geoLocationType, id, name)
+
+        return foundModel?.let {
+            ResponseEntity.ok(
+                deepGeoLocationRestMapper.fromIGeoLocationModelToDeepResponse(it)
+            )
+        } ?: ResponseEntity.notFound().build()
     }
 
     @PutMapping("/{type}/{id}")

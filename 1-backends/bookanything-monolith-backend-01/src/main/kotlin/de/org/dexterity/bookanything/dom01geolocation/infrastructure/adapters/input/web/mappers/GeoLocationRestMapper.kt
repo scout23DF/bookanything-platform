@@ -3,17 +3,20 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.i
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
-import de.org.dexterity.bookanything.shared.annotations.Mapper
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
+import org.locationtech.jts.io.WKTWriter
+import org.springframework.stereotype.Component
 
 
-@Mapper
+@Component
 class GeoLocationRestMapper {
 
     private val wktReader = WKTReader()
+    private val wktWriter = WKTWriter()
 
     private fun String.toGeometry(): Geometry = wktReader.read(this)
+    private fun Geometry.toText(): String = wktWriter.write(this)
 
     fun fromIGeoLocationModelToResponse(sourceModel: IGeoLocationModel) : GeoLocationResponse {
         return GeoLocationResponse(

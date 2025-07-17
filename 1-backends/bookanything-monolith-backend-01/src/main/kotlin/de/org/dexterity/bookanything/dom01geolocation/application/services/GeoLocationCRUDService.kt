@@ -98,4 +98,13 @@ class GeoLocationCRUDService(
         return useCase.findByParentIdAndAliasStartingWith(parentGeoLocationId, aliasPrefix)
     }
 
+    fun findDeepGeoLocation(type: GeoLocationType, id: Long?, name: String?): IGeoLocationModel? {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        return when {
+            id != null -> useCase.findDeepById(GeoLocationId(id)).orElse(null)
+            name != null -> useCase.findDeepByName(name).orElse(null)
+            else -> throw IllegalArgumentException("Either ID or name must be provided for deep search.")
+        }
+    }
+
 }

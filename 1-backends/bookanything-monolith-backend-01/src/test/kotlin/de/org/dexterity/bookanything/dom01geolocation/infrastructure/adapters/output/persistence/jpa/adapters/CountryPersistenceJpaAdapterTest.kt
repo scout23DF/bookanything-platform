@@ -5,7 +5,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationI
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CountryEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.RegionEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CountryJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import io.mockk.every
@@ -22,7 +23,8 @@ class CountryPersistenceJpaAdapterTest {
 
     private val countryJpaRepository: CountryJpaRepository = mockk()
     private val regionJpaRepository: RegionJpaRepository = mockk()
-    private val geoLocationJpaMapper: GeoLocationJpaMapper = mockk()
+    private val geoLocationJpaMappers: GeoLocationJpaMappers = mockk()
+    private val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers = mockk()
 
     private lateinit var adapter: CountryPersistenceJpaAdapter
 
@@ -30,7 +32,7 @@ class CountryPersistenceJpaAdapterTest {
 
     @BeforeEach
     fun setUp() {
-        adapter = CountryPersistenceJpaAdapter(countryJpaRepository, regionJpaRepository, geoLocationJpaMapper)
+        adapter = CountryPersistenceJpaAdapter(countryJpaRepository, regionJpaRepository, geoLocationJpaMappers, deepGeoLocationJpaMappers)
     }
 
     @Test
@@ -39,16 +41,16 @@ class CountryPersistenceJpaAdapterTest {
         val regionEntity = RegionEntity(name = "Southeast Asia", continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
 
         val regionModel = RegionModel(id = GeoLocationId(regionId), name = "Southeast Asia", parentId = 1L, continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
-        every { geoLocationJpaMapper.regionToDomainModel(regionEntity) } returns regionModel
+        every { geoLocationJpaMappers.regionToDomainModel(regionEntity) } returns regionModel
 
-        val model = CountryModel(id = GeoLocationId(0), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
+        val model = CountryModel(id = GeoLocationId(0), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
         val countryEntity = CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
         val savedEntity = CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        val savedModel = CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
+        val savedModel = CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
 
         every { regionJpaRepository.findById(regionId) } returns Optional.of(regionEntity)
         every { countryJpaRepository.save(any<CountryEntity>()) } returns savedEntity
-        every { geoLocationJpaMapper.countryToDomainModel(savedEntity) } returns savedModel
+        every { geoLocationJpaMappers.countryToDomainModel(savedEntity) } returns savedModel
 
         val result = adapter.saveNew(model)
 
@@ -63,17 +65,17 @@ class CountryPersistenceJpaAdapterTest {
         val regionEntity = RegionEntity(name = "Southeast Asia", continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
 
         val regionModel = RegionModel(id = GeoLocationId(regionId), name = "Southeast Asia", parentId = 1L, continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
-        every { geoLocationJpaMapper.regionToDomainModel(regionEntity) } returns regionModel
+        every { geoLocationJpaMappers.regionToDomainModel(regionEntity) } returns regionModel
 
-        val model = CountryModel(id = GeoLocationId(countryId), name = "Updated Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
+        val model = CountryModel(id = GeoLocationId(countryId), name = "Updated Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), provincesList = emptyList())
         val existingEntity = CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
         val updatedEntity = CountryEntity(name = "Updated Thailand", region = regionEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        val updatedModel = CountryModel(id = GeoLocationId(countryId), name = "Updated Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+        val updatedModel = CountryModel(id = GeoLocationId(countryId), name = "Updated Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
 
         every { countryJpaRepository.findById(countryId) } returns Optional.of(existingEntity)
         every { regionJpaRepository.findById(regionId) } returns Optional.of(regionEntity)
         every { countryJpaRepository.save(existingEntity) } returns updatedEntity
-        every { geoLocationJpaMapper.countryToDomainModel(updatedEntity) } returns updatedModel
+        every { geoLocationJpaMappers.countryToDomainModel(updatedEntity) } returns updatedModel
 
         val result = adapter.update(model)
 
@@ -91,12 +93,12 @@ class CountryPersistenceJpaAdapterTest {
         val entity = CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = null, provincesList = emptyList())
 
         val regionModel = RegionModel(id = GeoLocationId(regionId), name = "Southeast Asia", parentId = 1L, continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
-        every { geoLocationJpaMapper.regionToDomainModel(regionEntity) } returns regionModel
+        every { geoLocationJpaMappers.regionToDomainModel(regionEntity) } returns regionModel
 
-        val model = CountryModel(id = GeoLocationId(countryId), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList())
+        val model = CountryModel(id = GeoLocationId(countryId), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList())
 
         every { countryJpaRepository.findById(countryId) } returns Optional.of(entity)
-        every { geoLocationJpaMapper.countryToDomainModel(entity) } returns model
+        every { geoLocationJpaMappers.countryToDomainModel(entity) } returns model
 
         val result = adapter.findById(GeoLocationId(countryId))
 
@@ -111,12 +113,12 @@ class CountryPersistenceJpaAdapterTest {
         val entities = listOf(CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = null, provincesList = emptyList()))
 
         val regionModel = RegionModel(id = GeoLocationId(regionId), name = "Southeast Asia", parentId = 1L, continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
-        every { geoLocationJpaMapper.regionToDomainModel(regionEntity) } returns regionModel
+        every { geoLocationJpaMappers.regionToDomainModel(regionEntity) } returns regionModel
 
-        val models = listOf(CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList()))
+        val models = listOf(CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList()))
 
         every { countryJpaRepository.findAll() } returns entities
-        every { geoLocationJpaMapper.countryToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.countryToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findAll()
 
@@ -142,12 +144,12 @@ class CountryPersistenceJpaAdapterTest {
         val entities = listOf(CountryEntity(name = "Thailand", region = regionEntity, boundaryRepresentation = null, provincesList = emptyList()))
 
         val regionModel = RegionModel(id = GeoLocationId(regionId), name = "Southeast Asia", parentId = 1L, continent = mockk(), boundaryRepresentation = null, countriesList = emptyList())
-        every { geoLocationJpaMapper.regionToDomainModel(regionEntity) } returns regionModel
+        every { geoLocationJpaMappers.regionToDomainModel(regionEntity) } returns regionModel
 
-        val models = listOf(CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMapper.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList()))
+        val models = listOf(CountryModel(id = GeoLocationId(2), name = "Thailand", parentId = regionEntity.id, region = geoLocationJpaMappers.regionToDomainModel(regionEntity), boundaryRepresentation = null, provincesList = emptyList()))
 
         every { countryJpaRepository.findByRegionIdAndNameStartingWithIgnoreCase(regionId, namePrefix) } returns entities
-        every { geoLocationJpaMapper.countryToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.countryToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findByRegionIdAndNameStartingWith(GeoLocationId(regionId), namePrefix)
 

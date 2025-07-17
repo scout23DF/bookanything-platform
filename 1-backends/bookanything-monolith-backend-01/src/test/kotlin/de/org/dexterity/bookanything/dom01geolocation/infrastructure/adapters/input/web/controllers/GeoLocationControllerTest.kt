@@ -6,6 +6,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.DeepGeoLocationRestMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -21,6 +22,7 @@ class GeoLocationControllerTest {
 
     private val geoLocationCRUDService: GeoLocationCRUDService = mockk()
     private val geoLocationRestMapper: GeoLocationRestMapper = mockk()
+    private val deepGeoLocationRestMapper: DeepGeoLocationRestMapper = mockk()
 
     private lateinit var controller: GeoLocationController
 
@@ -29,7 +31,7 @@ class GeoLocationControllerTest {
 
     @BeforeEach
     fun setUp() {
-        controller = GeoLocationController(geoLocationCRUDService, mockk(), geoLocationRestMapper)
+        controller = GeoLocationController(geoLocationCRUDService, mockk(), geoLocationRestMapper, deepGeoLocationRestMapper)
     }
 
     @Test

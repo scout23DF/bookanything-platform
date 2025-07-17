@@ -3,7 +3,8 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.ContinentEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -17,7 +18,8 @@ import java.util.*
 class ContinentPersistenceJpaAdapterTest {
 
     private val continentJpaRepository: ContinentJpaRepository = mockk()
-    private val geoLocationJpaMapper: GeoLocationJpaMapper = mockk()
+    private val geoLocationJpaMappers: GeoLocationJpaMappers = mockk()
+    private val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers = mockk()
 
     private lateinit var adapter: ContinentPersistenceJpaAdapter
 
@@ -25,7 +27,7 @@ class ContinentPersistenceJpaAdapterTest {
 
     @BeforeEach
     fun setUp() {
-        adapter = ContinentPersistenceJpaAdapter(continentJpaRepository, geoLocationJpaMapper)
+        adapter = ContinentPersistenceJpaAdapter(continentJpaRepository, geoLocationJpaMappers, deepGeoLocationJpaMappers)
     }
 
     @Test
@@ -35,9 +37,9 @@ class ContinentPersistenceJpaAdapterTest {
         val savedEntity = ContinentEntity(name = "Asia", boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
         val savedModel = ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
 
-        every { geoLocationJpaMapper.continentToJpaEntity(model) } returns entity
+        every { geoLocationJpaMappers.continentToJpaEntity(model) } returns entity
         every { continentJpaRepository.save(entity) } returns savedEntity
-        every { geoLocationJpaMapper.continentToDomainModel(savedEntity) } returns savedModel
+        every { geoLocationJpaMappers.continentToDomainModel(savedEntity) } returns savedModel
 
         val result = adapter.saveNew(model)
 
@@ -54,7 +56,7 @@ class ContinentPersistenceJpaAdapterTest {
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(existingEntity)
         every { continentJpaRepository.save(existingEntity) } returns updatedEntity
-        every { geoLocationJpaMapper.continentToDomainModel(updatedEntity) } returns updatedModel
+        every { geoLocationJpaMappers.continentToDomainModel(updatedEntity) } returns updatedModel
 
         val result = adapter.update(model)
 
@@ -70,7 +72,7 @@ class ContinentPersistenceJpaAdapterTest {
         val model = ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(entity)
-        every { geoLocationJpaMapper.continentToDomainModel(entity) } returns model
+        every { geoLocationJpaMappers.continentToDomainModel(entity) } returns model
 
         val result = adapter.findById(GeoLocationId(1))
 
@@ -84,7 +86,7 @@ class ContinentPersistenceJpaAdapterTest {
         val models = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findAll() } returns entities
-        every { geoLocationJpaMapper.continentToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.continentToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findAll()
 
@@ -106,7 +108,7 @@ class ContinentPersistenceJpaAdapterTest {
         val models = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findByNameStartingWithIgnoreCase("A") } returns entities
-        every { geoLocationJpaMapper.continentToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.continentToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findByNameStartingWith("A")
 

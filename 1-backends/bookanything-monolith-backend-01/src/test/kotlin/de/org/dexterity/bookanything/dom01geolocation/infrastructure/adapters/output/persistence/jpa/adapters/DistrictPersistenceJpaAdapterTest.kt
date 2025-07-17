@@ -5,7 +5,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationI
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CityEntity
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import io.mockk.every
@@ -21,7 +22,8 @@ class DistrictPersistenceJpaAdapterTest {
 
     private val districtJpaRepository: DistrictJpaRepository = mockk()
     private val cityJpaRepository: CityJpaRepository = mockk()
-    private val geoLocationJpaMapper: GeoLocationJpaMapper = mockk()
+    private val geoLocationJpaMappers: GeoLocationJpaMappers = mockk()
+    private val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers = mockk()
 
     private lateinit var adapter: DistrictPersistenceJpaAdapter
 
@@ -29,7 +31,7 @@ class DistrictPersistenceJpaAdapterTest {
 
     @BeforeEach
     fun setUp() {
-        adapter = DistrictPersistenceJpaAdapter(districtJpaRepository, cityJpaRepository, geoLocationJpaMapper)
+        adapter = DistrictPersistenceJpaAdapter(districtJpaRepository, cityJpaRepository, geoLocationJpaMappers, deepGeoLocationJpaMappers)
     }
 
     @Test
@@ -44,7 +46,7 @@ class DistrictPersistenceJpaAdapterTest {
 
         every { cityJpaRepository.findById(cityId) } returns Optional.of(cityEntity)
         every { districtJpaRepository.save(any<DistrictEntity>()) } returns savedEntity
-        every { geoLocationJpaMapper.districtToDomainModel(savedEntity) } returns savedModel
+        every { geoLocationJpaMappers.districtToDomainModel(savedEntity) } returns savedModel
 
         val result = adapter.saveNew(model)
 
@@ -66,7 +68,7 @@ class DistrictPersistenceJpaAdapterTest {
         every { districtJpaRepository.findById(districtId) } returns Optional.of(existingEntity)
         every { cityJpaRepository.findById(cityId) } returns Optional.of(cityEntity)
         every { districtJpaRepository.save(existingEntity) } returns updatedEntity
-        every { geoLocationJpaMapper.districtToDomainModel(updatedEntity) } returns updatedModel
+        every { geoLocationJpaMappers.districtToDomainModel(updatedEntity) } returns updatedModel
 
         val result = adapter.update(model)
 
@@ -86,7 +88,7 @@ class DistrictPersistenceJpaAdapterTest {
         val model = DistrictModel(id = GeoLocationId(districtId), name = "Sukhumvit", parentId = cityModel.id.id, city = cityModel, boundaryRepresentation = null, addressesList = emptyList())
 
         every { districtJpaRepository.findById(districtId) } returns Optional.of(entity)
-        every { geoLocationJpaMapper.districtToDomainModel(entity) } returns model
+        every { geoLocationJpaMappers.districtToDomainModel(entity) } returns model
 
         val result = adapter.findById(GeoLocationId(districtId))
 
@@ -103,7 +105,7 @@ class DistrictPersistenceJpaAdapterTest {
         val models = listOf(DistrictModel(id = GeoLocationId(2), name = "Sukhumvit", parentId = cityModel.id.id, city = cityModel, boundaryRepresentation = null, addressesList = emptyList()))
 
         every { districtJpaRepository.findAll() } returns entities
-        every { geoLocationJpaMapper.districtToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.districtToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findAll()
 
@@ -132,7 +134,7 @@ class DistrictPersistenceJpaAdapterTest {
 
         every { cityJpaRepository.findById(cityId) } returns Optional.of(cityEntity)
         every { districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId, namePrefix) } returns entities
-        every { geoLocationJpaMapper.districtToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.districtToDomainModel(any()) } answers { models[0] }
 
         val result = adapter.findByCityIdAndNameStartingWith(GeoLocationId(cityId), namePrefix)
 

@@ -5,7 +5,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.shared.annotations.Mapper
 
 @Mapper
-class GeoLocationJpaMapper {
+class GeoLocationJpaMappers {
 
     fun continentToJpaEntity(continentModel: ContinentModel): ContinentEntity {
         return ContinentEntity(

@@ -3,7 +3,8 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IContinentRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import java.util.*
@@ -12,13 +13,14 @@ import java.util.*
 @Adapter
 class ContinentPersistenceJpaAdapter(
     val continentJpaRepository: ContinentJpaRepository,
-    val geoLocationJpaMapper: GeoLocationJpaMapper
+    val geoLocationJpaMappers: GeoLocationJpaMappers,
+    val deepGeoLocationJpaMappers: DeepGeoLocationJpaMappers
 ) : IContinentRepositoryPort {
 
     override fun saveNew(targetModel: ContinentModel): ContinentModel {
-        val convertedEntity = geoLocationJpaMapper.continentToJpaEntity(targetModel)
+        val convertedEntity = geoLocationJpaMappers.continentToJpaEntity(targetModel)
         val entitySaved = continentJpaRepository.save(convertedEntity)
-        return geoLocationJpaMapper.continentToDomainModel(entitySaved)
+        return geoLocationJpaMappers.continentToDomainModel(entitySaved)
     }
 
     override fun update(targetModel: ContinentModel): ContinentModel? {
@@ -30,7 +32,7 @@ class ContinentPersistenceJpaAdapter(
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
                 continentJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+            .map { geoLocationJpaMappers.continentToDomainModel(it) }
             .orElse(null)
     }
 
@@ -41,12 +43,12 @@ class ContinentPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<ContinentModel> {
         return continentJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+            .map { geoLocationJpaMappers.continentToDomainModel(it) }
     }
 
     override fun findAll(): List<ContinentModel> {
         return continentJpaRepository.findAll()
-            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+            .map { geoLocationJpaMappers.continentToDomainModel(it) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -59,11 +61,21 @@ class ContinentPersistenceJpaAdapter(
 
     override fun findByNameStartingWith(namePrefix: String): List<ContinentModel> {
         return continentJpaRepository.findByNameStartingWithIgnoreCase(namePrefix)
-            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+            .map { geoLocationJpaMappers.continentToDomainModel(it) }
     }
 
     override fun findByAliasStartingWith(searchedAlias: String): List<ContinentModel> {
         return continentJpaRepository.findByAliasStartingWithIgnoreCase(searchedAlias)
-            .map { geoLocationJpaMapper.continentToDomainModel(it) }
+            .map { geoLocationJpaMappers.continentToDomainModel(it) }
+    }
+
+    override fun findDeepById(geoLocationId: GeoLocationId): Optional<ContinentModel> {
+        return continentJpaRepository.findDeepById(geoLocationId.id)
+            .map { deepGeoLocationJpaMappers.deepContinentToDomainModel(it, true) }
+    }
+
+    override fun findDeepByName(name: String): Optional<ContinentModel> {
+        return continentJpaRepository.findDeepByName(name)
+            .map { deepGeoLocationJpaMappers.deepContinentToDomainModel(it, true) }
     }
 }

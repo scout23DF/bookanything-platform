@@ -10,7 +10,7 @@ import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 
 @Mapper
-class AddressJpaMapper(private val geoLocationJpaMapper: GeoLocationJpaMapper) {
+class AddressJpaMapper(private val geoLocationJpaMappers: GeoLocationJpaMappers) {
 
     fun addressToJpaEntity(addressModel: AddressModel): AddressEntity {
         return AddressEntity(
@@ -27,7 +27,7 @@ class AddressJpaMapper(private val geoLocationJpaMapper: GeoLocationJpaMapper) {
             countryName = addressModel.countryName,
             coordinates = buildPointFromGeoCoordinate(addressModel.coordinates),
             status = addressModel.status,
-            district = geoLocationJpaMapper.districtToJpaEntity(addressModel.district)
+            district = geoLocationJpaMappers.districtToJpaEntity(addressModel.district)
         )
     }
 
@@ -46,7 +46,7 @@ class AddressJpaMapper(private val geoLocationJpaMapper: GeoLocationJpaMapper) {
             countryName = addressEntity.countryName,
             coordinates = buildGeoCoordinateFromPoint(addressEntity.coordinates),
             status = addressEntity.status,
-            district = geoLocationJpaMapper.districtToDomainModel(addressEntity.district)
+            district = geoLocationJpaMappers.districtToDomainModel(addressEntity.district)
         )
     }
 
@@ -64,25 +64,3 @@ class AddressJpaMapper(private val geoLocationJpaMapper: GeoLocationJpaMapper) {
         }
     }
 }
-
-/*
-@Mapper(componentModel = "spring")
-interface AddressJpaMapper {
-
-    @Mappings(
-        Mapping(target = "id", ignore = true),
-        Mapping(source = "district.id.id", target = "district.id"),
-        Mapping(source = "coordinates.latitude", target = "coordinates.y"),
-        Mapping(source = "coordinates.longitude", target = "coordinates.x")
-    )
-    fun addressToJpaEntity(addressModel: AddressModel): AddressEntity
-
-    @Mappings(
-        Mapping(source = "id", target = "id.id"),
-        Mapping(source = "district.id", target = "district.id.id"),
-        Mapping(source = "coordinates.y", target = "coordinates.latitude"),
-        Mapping(source = "coordinates.x", target = "coordinates.longitude")
-    )
-    fun addressToDomainModel(addressEntity: AddressEntity): AddressModel
-}
-*/

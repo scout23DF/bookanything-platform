@@ -10,6 +10,8 @@ sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
     fun existsGeoLocationById(geoLocationId: GeoLocationId): Boolean
     fun findById(geoLocationId: GeoLocationId): Optional<T>
     fun findAll(): List<T>
+    fun findDeepById(geoLocationId: GeoLocationId): Optional<T>
+    fun findDeepByName(name: String): Optional<T>
     fun deleteById(geoLocationId: GeoLocationId)
     fun deleteAll()
 
