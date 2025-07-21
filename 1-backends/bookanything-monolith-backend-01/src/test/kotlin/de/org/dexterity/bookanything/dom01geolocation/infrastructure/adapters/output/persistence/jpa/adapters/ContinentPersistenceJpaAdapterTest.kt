@@ -39,7 +39,7 @@ class ContinentPersistenceJpaAdapterTest {
 
         every { geoLocationJpaMappers.continentToJpaEntity(model) } returns entity
         every { continentJpaRepository.save(entity) } returns savedEntity
-        every { geoLocationJpaMappers.continentToDomainModel(savedEntity) } returns savedModel
+        every { geoLocationJpaMappers.continentToDomainModel(savedEntity, true) } returns savedModel
 
         val result = adapter.saveNew(model)
 
@@ -56,7 +56,7 @@ class ContinentPersistenceJpaAdapterTest {
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(existingEntity)
         every { continentJpaRepository.save(existingEntity) } returns updatedEntity
-        every { geoLocationJpaMappers.continentToDomainModel(updatedEntity) } returns updatedModel
+        every { geoLocationJpaMappers.continentToDomainModel(updatedEntity, true) } returns updatedModel
 
         val result = adapter.update(model)
 
@@ -72,7 +72,7 @@ class ContinentPersistenceJpaAdapterTest {
         val model = ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(entity)
-        every { geoLocationJpaMappers.continentToDomainModel(entity) } returns model
+        every { geoLocationJpaMappers.continentToDomainModel(entity, true) } returns model
 
         val result = adapter.findById(GeoLocationId(1))
 
@@ -86,7 +86,7 @@ class ContinentPersistenceJpaAdapterTest {
         val models = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findAll() } returns entities
-        every { geoLocationJpaMappers.continentToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }
 
         val result = adapter.findAll()
 
@@ -108,7 +108,7 @@ class ContinentPersistenceJpaAdapterTest {
         val models = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findByNameStartingWithIgnoreCase("A") } returns entities
-        every { geoLocationJpaMappers.continentToDomainModel(any()) } answers { models[0] }
+        every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }
 
         val result = adapter.findByNameStartingWith("A")
 

@@ -27,7 +27,7 @@ class CityPersistenceJpaAdapter(
             province = provinceEntity
         )
         val entitySaved = cityJpaRepository.save(cityEntity)
-        return geoLocationJpaMappers.cityToDomainModel(entitySaved)
+        return geoLocationJpaMappers.cityToDomainModel(entitySaved, true)
     }
 
     override fun update(targetModel: CityModel): CityModel? {
@@ -41,7 +41,7 @@ class CityPersistenceJpaAdapter(
                 existingEntity.province = provinceEntity
                 cityJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
             .orElse(null)
     }
 
@@ -52,12 +52,12 @@ class CityPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<CityModel> {
         return cityJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
     override fun findAll(): List<CityModel> {
         return cityJpaRepository.findAll()
-            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -70,12 +70,12 @@ class CityPersistenceJpaAdapter(
 
     override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel> {
         return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix)
-            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
     override fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String): List<CityModel> {
         return cityJpaRepository.findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId.id, searchedAlias)
-            .map { geoLocationJpaMappers.cityToDomainModel(it) }
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
     override fun findDeepById(geoLocationId: GeoLocationId): Optional<CityModel> {

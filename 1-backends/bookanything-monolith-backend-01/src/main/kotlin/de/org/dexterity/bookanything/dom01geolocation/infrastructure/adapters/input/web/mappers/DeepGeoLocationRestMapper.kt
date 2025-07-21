@@ -35,6 +35,7 @@ class DeepGeoLocationRestMapper {
             alias = continentModel.alias,
             type = continentModel.type,
             boundaryRepresentation = continentModel.boundaryRepresentation?.toText(),
+            parentId = continentModel.parentId,
             regionsList = continentModel.regionsList?.map {
                 fromRegionModelToDeepResponse(it)
             }
@@ -48,6 +49,7 @@ class DeepGeoLocationRestMapper {
             alias = regionModel.alias,
             type = regionModel.type,
             boundaryRepresentation = regionModel.boundaryRepresentation?.toText(),
+            parentId = regionModel.parentId,
             countriesList = regionModel.countriesList?.map {
                 fromCountryModelToDeepResponse(it)
             }
@@ -61,6 +63,7 @@ class DeepGeoLocationRestMapper {
             alias = countryModel.alias,
             type = countryModel.type,
             boundaryRepresentation = countryModel.boundaryRepresentation?.toText(),
+            parentId = countryModel.parentId,
             provincesList = countryModel.provincesList?.map {
                 fromProvinceModelToDeepResponse(it)
             }
@@ -74,6 +77,7 @@ class DeepGeoLocationRestMapper {
             alias = provinceModel.alias,
             type = provinceModel.type,
             boundaryRepresentation = provinceModel.boundaryRepresentation?.toText(),
+            parentId = provinceModel.parentId,
             citiesList = provinceModel.citiesList?.map {
                 fromCityModelToDeepResponse(it)
             }
@@ -87,6 +91,7 @@ class DeepGeoLocationRestMapper {
             alias = cityModel.alias,
             type = cityModel.type,
             boundaryRepresentation = cityModel.boundaryRepresentation?.toText(),
+            parentId = cityModel.parentId,
             isCountryCapital = cityModel.isCountryCapital,
             isProvinceCapital = cityModel.isProvinceCapital,
             districtsList = cityModel.districtsList?.map {
@@ -102,6 +107,7 @@ class DeepGeoLocationRestMapper {
             alias = districtModel.alias,
             type = districtModel.type,
             boundaryRepresentation = districtModel.boundaryRepresentation?.toText(),
+            parentId = districtModel.parentId,
             addressesList = districtModel.addressesList?.map {
                 fromAddressModelToDeepResponse(it)
             }
@@ -117,6 +123,7 @@ class DeepGeoLocationRestMapper {
             doorNumber = addressModel.doorNumber,
             addressLine2 = addressModel.addressLine2,
             postalCode = addressModel.postalCode,
+            districtId = addressModel.district.id.id,
             districtName = addressModel.districtName,
             cityName = addressModel.cityName,
             provinceName = addressModel.provinceName,

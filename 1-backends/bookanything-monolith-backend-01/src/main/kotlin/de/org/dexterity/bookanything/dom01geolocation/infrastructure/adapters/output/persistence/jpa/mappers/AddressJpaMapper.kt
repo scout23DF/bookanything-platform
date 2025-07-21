@@ -46,7 +46,7 @@ class AddressJpaMapper(private val geoLocationJpaMappers: GeoLocationJpaMappers)
             countryName = addressEntity.countryName,
             coordinates = buildGeoCoordinateFromPoint(addressEntity.coordinates),
             status = addressEntity.status,
-            district = geoLocationJpaMappers.districtToDomainModel(addressEntity.district)
+            district = geoLocationJpaMappers.districtToDomainModel(addressEntity.district, false)
         )
     }
 

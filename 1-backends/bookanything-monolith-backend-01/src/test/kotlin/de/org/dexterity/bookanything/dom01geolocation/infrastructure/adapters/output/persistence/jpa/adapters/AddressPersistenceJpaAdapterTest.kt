@@ -45,7 +45,7 @@ class AddressPersistenceJpaAdapterTest {
         val districtEntity = DistrictEntity(name = "Downtown", city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
 
         val districtModel = DistrictModel(id = GeoLocationId(districtId), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
-        every { geoLocationJpaMappers.districtToDomainModel(districtEntity) } returns districtModel
+        every { geoLocationJpaMappers.districtToDomainModel(districtEntity, false) } returns districtModel
 
         val model = AddressModel(
             id = GeoLocationId(0),
@@ -55,7 +55,7 @@ class AddressPersistenceJpaAdapterTest {
             doorNumber = "A",
             addressLine2 = "Apt 1",
             postalCode = "12345",
-            district = geoLocationJpaMappers.districtToDomainModel(districtEntity),
+            district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false),
             districtName = "Downtown",
             cityName = "City",
             provinceName = "Province",
@@ -103,7 +103,7 @@ class AddressPersistenceJpaAdapterTest {
             doorNumber = "A",
             addressLine2 = "Apt 1",
             postalCode = "12345",
-            district = geoLocationJpaMappers.districtToDomainModel(districtEntity),
+            district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false),
             districtName = "Downtown",
             cityName = "City",
             provinceName = "Province",
@@ -133,7 +133,7 @@ class AddressPersistenceJpaAdapterTest {
         val districtEntity = DistrictEntity(name = "Downtown", city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
 
         val districtModel = DistrictModel(id = GeoLocationId(districtId), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
-        every { geoLocationJpaMappers.districtToDomainModel(districtEntity) } returns districtModel
+        every { geoLocationJpaMappers.districtToDomainModel(districtEntity, false) } returns districtModel
 
         val model = AddressModel(
             id = GeoLocationId(addressId),
@@ -143,7 +143,7 @@ class AddressPersistenceJpaAdapterTest {
             doorNumber = "B",
             addressLine2 = "Suite 2",
             postalCode = "54321",
-            district = geoLocationJpaMappers.districtToDomainModel(districtEntity),
+            district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false),
             districtName = "Downtown",
             cityName = "City",
             provinceName = "Province",
@@ -191,7 +191,7 @@ class AddressPersistenceJpaAdapterTest {
             doorNumber = "B",
             addressLine2 = "Suite 2",
             postalCode = "54321",
-            district = geoLocationJpaMappers.districtToDomainModel(districtEntity),
+            district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false),
             districtName = "Downtown",
             cityName = "City",
             provinceName = "Province",
@@ -220,10 +220,10 @@ class AddressPersistenceJpaAdapterTest {
         val districtEntity = DistrictEntity(name = "Downtown", city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
 
         val districtModel = DistrictModel(id = GeoLocationId(1L), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
-        every { geoLocationJpaMappers.districtToDomainModel(districtEntity) } returns districtModel
+        every { geoLocationJpaMappers.districtToDomainModel(districtEntity, false) } returns districtModel
 
         val entity = AddressEntity(streetName = "Main St", houseNumber = "123", postalCode = "12345", district = districtEntity, districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null)
-        val model = AddressModel(id = GeoLocationId(addressId), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null)
+        val model = AddressModel(id = GeoLocationId(addressId), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null)
 
         every { addressJpaRepository.findById(addressId) } returns Optional.of(entity)
         every { addressJpaMapper.addressToDomainModel(entity) } returns model
@@ -239,10 +239,10 @@ class AddressPersistenceJpaAdapterTest {
         val districtEntity = DistrictEntity(name = "Downtown", city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
 
         val districtModel = DistrictModel(id = GeoLocationId(1L), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
-        every { geoLocationJpaMappers.districtToDomainModel(districtEntity) } returns districtModel
+        every { geoLocationJpaMappers.districtToDomainModel(districtEntity, false) } returns districtModel
 
         val entities = listOf(AddressEntity(streetName = "Main St", houseNumber = "123", postalCode = "12345", district = districtEntity, districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
-        val models = listOf(AddressModel(id = GeoLocationId(1), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
+        val models = listOf(AddressModel(id = GeoLocationId(1), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
 
         every { addressJpaRepository.findAll() } returns entities
         every { addressJpaMapper.addressToDomainModel(any()) } answers { models[0] }
@@ -271,9 +271,9 @@ class AddressPersistenceJpaAdapterTest {
         val entities = listOf(AddressEntity(id = 1, streetName = "Main St", houseNumber = "123", postalCode = "12345", district = districtEntity, districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
 
         val districtModel = DistrictModel(id = GeoLocationId(districtId), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
-        every { geoLocationJpaMappers.districtToDomainModel(districtEntity) } returns districtModel
+        every { geoLocationJpaMappers.districtToDomainModel(districtEntity, false) } returns districtModel
 
-        val models = listOf(AddressModel(id = GeoLocationId(1), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
+        val models = listOf(AddressModel(id = GeoLocationId(1), streetName = "Main St", houseNumber = "123", postalCode = "12345", district = geoLocationJpaMappers.districtToDomainModel(districtEntity, false), districtName = "Downtown", cityName = "City", provinceName = "Province", countryName = "Country", floorNumber = null, doorNumber = null, addressLine2 = null, coordinates = null, status = null))
 
         every { addressJpaRepository.findByDistrictIdAndStreetNameStartingWithIgnoreCase(districtId, namePrefix) } returns entities
         every { addressJpaMapper.addressToDomainModel(any()) } answers { models[0] }

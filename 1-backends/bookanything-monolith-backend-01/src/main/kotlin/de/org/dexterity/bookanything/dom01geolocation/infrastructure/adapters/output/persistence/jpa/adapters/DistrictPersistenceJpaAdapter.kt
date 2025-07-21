@@ -27,7 +27,7 @@ class DistrictPersistenceJpaAdapter(
             city = cityEntity
         )
         val entitySaved = districtJpaRepository.save(districtEntity)
-        return geoLocationJpaMappers.districtToDomainModel(entitySaved)
+        return geoLocationJpaMappers.districtToDomainModel(entitySaved, true)
     }
 
     override fun update(targetModel: DistrictModel): DistrictModel? {
@@ -41,7 +41,7 @@ class DistrictPersistenceJpaAdapter(
                 existingEntity.city = cityEntity
                 districtJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
             .orElse(null)
     }
 
@@ -52,12 +52,12 @@ class DistrictPersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<DistrictModel> {
         return districtJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
     override fun findAll(): List<DistrictModel> {
         return districtJpaRepository.findAll()
-            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -70,12 +70,12 @@ class DistrictPersistenceJpaAdapter(
 
     override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel> {
         return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
-            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
     override fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel> {
         return districtJpaRepository.findByCityIdAndAliasStartingWithIgnoreCase(cityId.id, searchedAlias)
-            .map { geoLocationJpaMappers.districtToDomainModel(it) }
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
     override fun findDeepById(geoLocationId: GeoLocationId): Optional<DistrictModel> {

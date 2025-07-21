@@ -5,8 +5,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.DeepGeoLocationRestMapper
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,7 +31,7 @@ class GeoLocationControllerTest {
 
     @BeforeEach
     fun setUp() {
-        controller = GeoLocationController(geoLocationCRUDService, mockk(), geoLocationRestMapper, deepGeoLocationRestMapper)
+        controller = GeoLocationController(geoLocationCRUDService, geoLocationRestMapper, deepGeoLocationRestMapper)
     }
 
     @Test
@@ -85,14 +85,14 @@ class GeoLocationControllerTest {
 
         val result = controller.findAll(type.name)
 
-        assertEquals(2, result.size)
+        assertEquals(2, result.body?.size)
         // Note: Direct comparison of lists of complex objects might fail if equals/hashCode are not properly implemented
         // For simplicity, we're assuming they are for this test.
         // A more robust test would compare properties individually or use a custom matcher.
-        assertEquals(responseList[0].id, result[0].id)
-        assertEquals(responseList[0].name, result[0].name)
-        assertEquals(responseList[1].id, result[1].id)
-        assertEquals(responseList[1].name, result[1].name)
+        assertEquals(responseList[0].id, result.body?.get(0)?.id)
+        assertEquals(responseList[0].name, result.body?.get(0)?.name)
+        assertEquals(responseList[1].id, result.body?.get(1)?.id)
+        assertEquals(responseList[1].name, result.body?.get(1)?.name)
         verify(exactly = 1) { geoLocationCRUDService.findAll(type) }
     }
 
@@ -140,9 +140,9 @@ class GeoLocationControllerTest {
 
         val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix)
 
-        assertEquals(1, result.size)
-        assertEquals(responseList[0].id, result[0].id)
-        assertEquals(responseList[0].name, result[0].name)
+        assertEquals(1, result.body?.size)
+        assertEquals(responseList[0].id, result.body?.get(0)?.id)
+        assertEquals(responseList[0].name, result.body?.get(0)?.name)
         verify(exactly = 1) { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) }
     }
 }

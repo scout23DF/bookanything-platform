@@ -8,7 +8,6 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.DeepGeoLocationRestMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
-import de.org.dexterity.bookanything.shared.mediators.HandlersMediatorManager
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/geolocations")
 class GeoLocationController(
     private val geoLocationCRUDService: GeoLocationCRUDService,
-    private val handlerMediatorManager: HandlersMediatorManager,
     private val geoLocationRestMapper: GeoLocationRestMapper,
     private val deepGeoLocationRestMapper: DeepGeoLocationRestMapper
 ) {
@@ -26,10 +24,8 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestBody request: CreateGeoLocationRequest
     ): ResponseEntity<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
+        val geoLocationType = parseGeoLocationType(type)
         val newCreatedModel = geoLocationCRUDService.create(geoLocationType, request)
-
         return ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(newCreatedModel))
     }
 
@@ -38,20 +34,18 @@ class GeoLocationController(
         @PathVariable type: String,
         @PathVariable id: Long
     ): ResponseEntity<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
+        val geoLocationType = parseGeoLocationType(type)
         return geoLocationCRUDService.findById(geoLocationType, id)
             .map { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it) ) }
             .orElse(ResponseEntity.notFound().build())
     }
 
     @GetMapping("/{type}")
-    fun findAll(@PathVariable type: String): List<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
-        return geoLocationCRUDService.findAll(geoLocationType).map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+    fun findAll(@PathVariable type: String): ResponseEntity<List<GeoLocationResponse>> {
+        val geoLocationType = parseGeoLocationType(type)
+        val results = geoLocationCRUDService.findAll(geoLocationType)
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+        return ResponseEntity.ok(results)
     }
 
     @GetMapping("/{type}/search-by-name")
@@ -59,13 +53,11 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestParam(required = false) parentId: Long?,
         @RequestParam namePrefix: String
-    ): List<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
-        return geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix)
-                                     .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
-
+    ): ResponseEntity<List<GeoLocationResponse>> {
+        val geoLocationType = parseGeoLocationType(type)
+        val results = geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix)
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+        return ResponseEntity.ok(results)
     }
 
     @GetMapping("/{type}/search-by-alias")
@@ -73,13 +65,11 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestParam(required = true) parentId: Long,
         @RequestParam aliasPrefix: String
-    ): List<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
-        return geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
+    ): ResponseEntity<List<GeoLocationResponse>> {
+        val geoLocationType = parseGeoLocationType(type)
+        val results = geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
-
+        return ResponseEntity.ok(results)
     }
 
     @GetMapping("/{type}/deep-search")
@@ -89,12 +79,9 @@ class GeoLocationController(
         @RequestParam(required = false) name: String?
     ): ResponseEntity<IDeepGeoLocationResponse> {
 
-        if (id == null && name == null) {
-            throw IllegalArgumentException("Either ID or name must be provided for deep search.")
-        }
+        require(id != null || name != null) { "Either ID or name must be provided for deep search." }
 
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
+        val geoLocationType = parseGeoLocationType(type)
         val foundModel = geoLocationCRUDService.findDeepGeoLocation(geoLocationType, id, name)
 
         return foundModel?.let {
@@ -110,9 +97,7 @@ class GeoLocationController(
         @PathVariable id: Long,
         @RequestBody request: UpdateGeoLocationRequest
     ): ResponseEntity<GeoLocationResponse> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
+        val geoLocationType = parseGeoLocationType(type)
         val updated = geoLocationCRUDService.update(geoLocationType, id, request)
 
         return updated?.let { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it)) } ?: ResponseEntity.notFound().build()
@@ -123,22 +108,20 @@ class GeoLocationController(
         @PathVariable type: String,
         @PathVariable id: Long
     ): ResponseEntity<Void> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
+        val geoLocationType = parseGeoLocationType(type)
         geoLocationCRUDService.deleteById(geoLocationType, id)
-
         return ResponseEntity.noContent().build()
     }
 
     @DeleteMapping("/{type}/all")
     fun deleteAll(@PathVariable type: String): ResponseEntity<Void> {
-
-        val geoLocationType = GeoLocationType.valueOf(type.uppercase())
-
+        val geoLocationType = parseGeoLocationType(type)
         geoLocationCRUDService.deleteAll(geoLocationType)
-
         return ResponseEntity.noContent().build()
+    }
+
+    private fun parseGeoLocationType(type: String): GeoLocationType {
+        return GeoLocationType.valueOf(type.uppercase())
     }
 
 }

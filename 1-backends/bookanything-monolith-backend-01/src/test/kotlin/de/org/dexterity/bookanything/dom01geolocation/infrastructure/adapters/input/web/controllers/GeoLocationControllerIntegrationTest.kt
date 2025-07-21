@@ -182,48 +182,6 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
         assertEquals("DeepProvince", deepCountryResponse.provincesList?.get(0)?.name)
     }
 
-    @Test
-    fun `should return deep GeoLocation hierarchy by ID and Name`() {
-        val genericPolygonAsString = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
-
-        // Create a hierarchy
-        val continentId = createOneGeoLocation(GeoLocationType.CONTINENT, "DeepContinent", genericPolygonAsString, null)
-        val regionId = createOneGeoLocation(GeoLocationType.REGION, "DeepRegion", genericPolygonAsString, continentId.id)
-        val countryId = createOneGeoLocation(GeoLocationType.COUNTRY, "DeepCountry", genericPolygonAsString, regionId.id)
-        val provinceId = createOneGeoLocation(GeoLocationType.PROVINCE, "DeepProvince", genericPolygonAsString, countryId.id)
-        val cityId = createOneGeoLocation(GeoLocationType.CITY, "DeepCity", genericPolygonAsString, provinceId.id)
-        val districtId = createOneGeoLocation(GeoLocationType.DISTRICT, "DeepDistrict", genericPolygonAsString, cityId.id)
-
-        // Test deep search by ID for Continent
-        val deepContinentResult = mockMvc.get("/api/v1/geolocations/${GeoLocationType.CONTINENT.name.lowercase()}/deep-search?id=${continentId.id}") {
-            with(jwt())
-        }.andExpect { status { isOk() } }.andReturn()
-
-        val deepContinentResponse = objectMapper.readValue<DeepContinentResponse>(deepContinentResult.response.contentAsString)
-        assertNotNull(deepContinentResponse)
-        assertEquals("DeepContinent", deepContinentResponse.name)
-        assertNotNull(deepContinentResponse.regionsList)
-        assertEquals(1, deepContinentResponse.regionsList?.size)
-        assertEquals("DeepRegion", deepContinentResponse.regionsList?.get(0)?.name)
-        // Parent should be null in the deep response to avoid StackOverflow
-        assertNull(deepContinentResponse.regionsList?.get(0)?.countriesList?.get(0)?.provincesList?.get(0)?.citiesList?.get(0)?.districtsList?.get(0)?.addressesList?.get(0)?.district)
-
-
-        // Test deep search by Name for Country
-        val deepCountryResult = mockMvc.get("/api/v1/geolocations/${GeoLocationType.COUNTRY.name.lowercase()}/deep-search?name=DeepCountry") {
-            with(jwt())
-        }.andExpect { status { isOk() } }.andReturn()
-
-        val deepCountryResponse = objectMapper.readValue<DeepCountryResponse>(deepCountryResult.response.contentAsString)
-        assertNotNull(deepCountryResponse)
-        assertEquals("DeepCountry", deepCountryResponse.name)
-        assertNotNull(deepCountryResponse.provincesList)
-        assertEquals(1, deepCountryResponse.provincesList?.size)
-        assertEquals("DeepProvince", deepCountryResponse.provincesList?.get(0)?.name)
-        // Parent should be null in the deep response to avoid StackOverflow
-        assertNull(deepCountryResponse.provincesList?.get(0)?.citiesList?.get(0)?.districtsList?.get(0)?.addressesList?.get(0)?.district)
-    }
-
     private fun testOneGeoLocationCreationAndRecovery(
         geoLocationType: GeoLocationType,
         geoLocationName: String,

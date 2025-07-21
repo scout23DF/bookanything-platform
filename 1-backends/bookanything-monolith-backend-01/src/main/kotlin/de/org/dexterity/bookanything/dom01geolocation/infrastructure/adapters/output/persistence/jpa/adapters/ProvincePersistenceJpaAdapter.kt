@@ -27,7 +27,7 @@ class ProvincePersistenceJpaAdapter(
             country = countryEntity
         )
         val entitySaved = provinceJpaRepository.save(provinceEntity)
-        return geoLocationJpaMappers.provinceToDomainModel(entitySaved)
+        return geoLocationJpaMappers.provinceToDomainModel(entitySaved, true)
     }
 
     override fun update(targetModel: ProvinceModel): ProvinceModel? {
@@ -41,7 +41,7 @@ class ProvincePersistenceJpaAdapter(
                 existingEntity.country = countryEntity
                 provinceJpaRepository.save(existingEntity)
             }
-            .map { geoLocationJpaMappers.provinceToDomainModel(it) }
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
             .orElse(null)
     }
 
@@ -52,12 +52,12 @@ class ProvincePersistenceJpaAdapter(
 
     override fun findById(geoLocationId: GeoLocationId): Optional<ProvinceModel> {
         return provinceJpaRepository.findById(geoLocationId.id)
-            .map { geoLocationJpaMappers.provinceToDomainModel(it) }
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
     override fun findAll(): List<ProvinceModel> {
         return provinceJpaRepository.findAll()
-            .map { geoLocationJpaMappers.provinceToDomainModel(it) }
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
     override fun deleteById(geoLocationId: GeoLocationId) {
@@ -70,12 +70,12 @@ class ProvincePersistenceJpaAdapter(
 
     override fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel> {
         return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix)
-            .map { geoLocationJpaMappers.provinceToDomainModel(it) }
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
     override fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String): List<ProvinceModel> {
         return provinceJpaRepository.findByCountryIdAndAliasStartingWithIgnoreCase(countryId.id, searchedAlias)
-            .map { geoLocationJpaMappers.provinceToDomainModel(it) }
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
     override fun findDeepById(geoLocationId: GeoLocationId): Optional<ProvinceModel> {
