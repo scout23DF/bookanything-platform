@@ -9,6 +9,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
+import org.locationtech.jts.geom.Geometry
 import java.util.*
 
 @Adapter
@@ -23,11 +24,13 @@ class RegionPersistenceJpaAdapter(
         val continentEntity = continentJpaRepository.findById(targetModel.continent.id.id).orElseThrow()
         val regionEntity = RegionEntity(
             name = targetModel.name,
+            alias = targetModel.alias,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             continent = continentEntity
         )
         val entitySaved = regionJpaRepository.save(regionEntity)
-        return geoLocationJpaMappers.regionToDomainModel(entitySaved, true)
+        val savedModel = geoLocationJpaMappers.regionToDomainModel(entitySaved, true)
+        return savedModel
     }
 
     override fun update(targetModel: RegionModel): RegionModel? {
@@ -36,9 +39,21 @@ class RegionPersistenceJpaAdapter(
         return regionJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+                existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
                 val continentEntity = continentJpaRepository.findById(targetModel.continent.id.id).orElseThrow()
                 existingEntity.continent = continentEntity
+                val savedEntity = regionJpaRepository.save(existingEntity)
+                val savedModel = geoLocationJpaMappers.regionToDomainModel(savedEntity, true)
+                savedModel
+            }
+            .orElse(null)
+    }
+
+    override fun updateBoundary(id: GeoLocationId, boundary: Geometry): RegionModel? {
+        return regionJpaRepository.findById(id.id)
+            .map { existingEntity ->
+                existingEntity.boundaryRepresentation = boundary
                 regionJpaRepository.save(existingEntity)
             }
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }

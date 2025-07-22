@@ -117,14 +117,24 @@ spring:
             lifecycle-management: start-and-stop
             start:
                 log-level: debug
-langchain4j:
-    open-ai:
-        chat-model:
-            # You can temporarily use 'demo' key, which is provided for free for demonstration purposes
-            api-key: demo
-            log-requests: 'true'
-            log-responses: 'true'
-            model-name: gpt-4o-mini
+
+    ai:
+        vertex:
+            ai:
+                gemini:
+                    project-id: alns-dexterity-labs-01
+                    credentials-uri: file:/home/andre.nascimento/.config/gcloud/application_default_credentials.json
+                    # credentials-uri: file:/home/andre.nascimento/.config/gcloud/client_secret_25147608565_credential.json
+                    location: europe-west1
+                    chat:
+                        options:
+                            max-output-tokens: 256
+                            model: gemini-2.0-flash
+                            temperature: 0.2
+                            top-k: 5
+                            top-p: 0.95
+
+
 management:
     endpoint:
         health:
@@ -160,3 +170,4 @@ springdoc:
             realm: dexterity-apps-01
     oauth2:
         authorization-url: http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/auth
+

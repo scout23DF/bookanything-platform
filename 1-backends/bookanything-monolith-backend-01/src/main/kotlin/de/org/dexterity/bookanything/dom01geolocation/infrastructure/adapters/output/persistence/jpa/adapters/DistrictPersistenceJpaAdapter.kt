@@ -9,6 +9,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
+import org.locationtech.jts.geom.Geometry
 import java.util.*
 
 @Adapter
@@ -23,11 +24,13 @@ class DistrictPersistenceJpaAdapter(
         val cityEntity = cityJpaRepository.findById(targetModel.city.id.id).orElseThrow()
         val districtEntity = DistrictEntity(
             name = targetModel.name,
+            alias = targetModel.alias,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             city = cityEntity
         )
         val entitySaved = districtJpaRepository.save(districtEntity)
-        return geoLocationJpaMappers.districtToDomainModel(entitySaved, true)
+        val savedModel = geoLocationJpaMappers.districtToDomainModel(entitySaved, true)
+        return savedModel
     }
 
     override fun update(targetModel: DistrictModel): DistrictModel? {
@@ -36,9 +39,21 @@ class DistrictPersistenceJpaAdapter(
         return districtJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
                 val cityEntity = cityJpaRepository.findById(targetModel.city.id.id).orElseThrow()
                 existingEntity.city = cityEntity
+                val savedEntity = districtJpaRepository.save(existingEntity)
+                val savedModel = geoLocationJpaMappers.districtToDomainModel(savedEntity, true)
+                savedModel
+            }
+            .orElse(null)
+    }
+
+    override fun updateBoundary(id: GeoLocationId, boundary: Geometry): DistrictModel? {
+        return districtJpaRepository.findById(id.id)
+            .map { existingEntity ->
+                existingEntity.boundaryRepresentation = boundary
                 districtJpaRepository.save(existingEntity)
             }
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }

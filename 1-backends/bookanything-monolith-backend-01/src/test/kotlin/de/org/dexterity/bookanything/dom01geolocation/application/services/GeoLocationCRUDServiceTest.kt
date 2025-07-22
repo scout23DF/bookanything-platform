@@ -2,6 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.application.services
 
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
@@ -24,6 +25,7 @@ class GeoLocationCRUDServiceTest {
     private val cityUseCase: CityUseCase = mockk()
     private val districtUseCase: DistrictUseCase = mockk()
     private val geoLocationRestMapper: GeoLocationRestMapper = mockk()
+    private val eventPublisherPort: EventPublisherPort = mockk()
 
     private lateinit var service: GeoLocationCRUDService
 
@@ -39,7 +41,8 @@ class GeoLocationCRUDServiceTest {
             provinceUseCase,
             cityUseCase,
             districtUseCase,
-            geoLocationRestMapper
+            geoLocationRestMapper,
+            eventPublisherPort
         )
     }
 

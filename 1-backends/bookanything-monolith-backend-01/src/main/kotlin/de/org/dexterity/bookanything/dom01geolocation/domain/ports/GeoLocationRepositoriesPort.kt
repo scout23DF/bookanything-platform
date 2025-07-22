@@ -1,12 +1,14 @@
 package de.org.dexterity.bookanything.dom01geolocation.domain.ports
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import org.locationtech.jts.geom.Geometry
 import java.util.*
 
 sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
 
     fun saveNew(targetModel: T): T
     fun update(targetModel: T): T?
+    fun updateBoundary(id: GeoLocationId, boundary: Geometry): T?
     fun existsGeoLocationById(geoLocationId: GeoLocationId): Boolean
     fun findById(geoLocationId: GeoLocationId): Optional<T>
     fun findAll(): List<T>

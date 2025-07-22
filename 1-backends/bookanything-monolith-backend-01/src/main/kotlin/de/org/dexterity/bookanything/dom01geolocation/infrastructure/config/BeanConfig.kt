@@ -3,7 +3,9 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.config
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.ia.gemini.VertexGeminiIAProxyAdapter
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
+import org.springframework.ai.chat.client.ChatClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -62,7 +64,8 @@ class BeanConfig {
         provinceUseCase: ProvinceUseCase,
         cityUseCase: CityUseCase,
         districtUseCase: DistrictUseCase,
-        geoLocationRestMapper: GeoLocationRestMapper
+        geoLocationRestMapper: GeoLocationRestMapper,
+        eventPublisher: EventPublisherPort
     ): GeoLocationCRUDService = GeoLocationCRUDService(
         continentUseCase,
         regionUseCase,
@@ -70,7 +73,18 @@ class BeanConfig {
         provinceUseCase,
         cityUseCase,
         districtUseCase,
-        geoLocationRestMapper
+        geoLocationRestMapper,
+        eventPublisher
     )
-}
 
+    @Bean
+    fun getSpringAIChatClient(chatClientBuilder: ChatClient.Builder): ChatClient {
+        return chatClientBuilder.build()
+    }
+
+    @Bean
+    fun getSearchEngineInIAProxyPort(chatClient: ChatClient): SearchEngineInIAProxyPort {
+        return VertexGeminiIAProxyAdapter(chatClient)
+    }
+
+}

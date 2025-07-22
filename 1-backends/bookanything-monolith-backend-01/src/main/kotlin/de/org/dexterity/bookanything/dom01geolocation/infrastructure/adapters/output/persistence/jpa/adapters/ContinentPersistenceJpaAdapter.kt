@@ -7,6 +7,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ContinentJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
+import org.locationtech.jts.geom.Geometry
 import java.util.*
 
 
@@ -20,7 +21,8 @@ class ContinentPersistenceJpaAdapter(
     override fun saveNew(targetModel: ContinentModel): ContinentModel {
         val convertedEntity = geoLocationJpaMappers.continentToJpaEntity(targetModel)
         val entitySaved = continentJpaRepository.save(convertedEntity)
-        return geoLocationJpaMappers.continentToDomainModel(entitySaved, true)
+        val savedModel = geoLocationJpaMappers.continentToDomainModel(entitySaved, true)
+        return savedModel
     }
 
     override fun update(targetModel: ContinentModel): ContinentModel? {
@@ -29,7 +31,19 @@ class ContinentPersistenceJpaAdapter(
         return continentJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+                existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
+                val savedEntity = continentJpaRepository.save(existingEntity)
+                val savedModel = geoLocationJpaMappers.continentToDomainModel(savedEntity, true)
+                savedModel
+            }
+            .orElse(null)
+    }
+
+    override fun updateBoundary(id: GeoLocationId, boundary: Geometry): ContinentModel? {
+        return continentJpaRepository.findById(id.id)
+            .map { existingEntity ->
+                existingEntity.boundaryRepresentation = boundary
                 continentJpaRepository.save(existingEntity)
             }
             .map { geoLocationJpaMappers.continentToDomainModel(it, true) }

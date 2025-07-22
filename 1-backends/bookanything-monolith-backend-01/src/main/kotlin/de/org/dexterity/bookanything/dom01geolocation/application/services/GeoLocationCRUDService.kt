@@ -1,7 +1,9 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.services
 
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.events.GeoLocationEnrichmentEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
@@ -17,7 +19,8 @@ class GeoLocationCRUDService(
     private val provinceUseCase: ProvinceUseCase,
     private val cityUseCase: CityUseCase,
     private val districtUseCase: DistrictUseCase,
-    private val geoLocationRestMapper: GeoLocationRestMapper
+    private val geoLocationRestMapper: GeoLocationRestMapper,
+    private val eventPublisherPort: EventPublisherPort
 ) {
 
     private val useCaseMap: Map<GeoLocationType, IGeoLocationUseCase<out IGeoLocationModel>> = mapOf(
@@ -47,8 +50,10 @@ class GeoLocationCRUDService(
                 else -> null
             }
         }
-        val model = geoLocationRestMapper.fromCreateGeoLocationRequestToModel(type, request, parent)
-        return useCase.create(model)
+        var savedModel : IGeoLocationModel = geoLocationRestMapper.fromCreateGeoLocationRequestToModel(type, request, parent)
+        savedModel = useCase.create(savedModel)
+        eventPublisherPort.publish(GeoLocationEnrichmentEvent(savedModel.id.id, savedModel.type))
+        return savedModel
     }
 
     fun findById(type: GeoLocationType, id: Long): Optional<out IGeoLocationModel> {
@@ -65,7 +70,7 @@ class GeoLocationCRUDService(
         val useCase = getUseCase<IGeoLocationModel>(type)
         val existingModel = useCase.findById(GeoLocationId(id)).orElse(null) ?: return null
 
-        val updatedModel = when (type) {
+        var updatedModel : IGeoLocationModel = when (type) {
             GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
             GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
             GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
@@ -73,7 +78,13 @@ class GeoLocationCRUDService(
             GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
             GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
         }
-        return useCase.update(updatedModel)
+
+        updatedModel = useCase.update(updatedModel)!!
+
+        eventPublisherPort.publish(GeoLocationEnrichmentEvent(updatedModel.id.id, updatedModel.type))
+
+        return updatedModel
+
     }
 
     fun deleteById(type: GeoLocationType, id: Long) {

@@ -43,6 +43,7 @@
 		<json-web-token.version>0.12.6</json-web-token.version>
 		<jts-core.version>1.19.0</jts-core.version>
 		<geojson-jackson.version>1.14</geojson-jackson.version>
+		<spring-ai.version>1.0.0-M6</spring-ai.version>
 
 		<!--
         <jib-maven-plugin.version>3.4.5</jib-maven-plugin.version>
@@ -67,7 +68,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-bom</artifactId>
+				<version>${spring-ai.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<!--
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -152,25 +159,16 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-
-		<!--
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-		</dependency>
-		-->
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
-
-		
 
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -206,7 +204,6 @@
 			<artifactId>jackson-datatype-jts</artifactId>
 			<version>${jackson-datatype-jts.version}</version>
 		</dependency>
-
 
 		<!-- Dependencies for Testing -->
 		<dependency>

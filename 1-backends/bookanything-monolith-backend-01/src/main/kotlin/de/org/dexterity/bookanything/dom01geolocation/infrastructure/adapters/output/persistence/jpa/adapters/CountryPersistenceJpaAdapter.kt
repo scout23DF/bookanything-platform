@@ -9,6 +9,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CountryJpaRepository
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
+import org.locationtech.jts.geom.Geometry
 import java.util.*
 
 @Adapter
@@ -23,11 +24,13 @@ class CountryPersistenceJpaAdapter(
         val regionEntity = regionJpaRepository.findById(targetModel.region.id.id).orElseThrow()
         val countryEntity = CountryEntity(
             name = targetModel.name,
+            alias = targetModel.alias,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             region = regionEntity
         )
         val entitySaved = countryJpaRepository.save(countryEntity)
-        return geoLocationJpaMappers.countryToDomainModel(entitySaved, true)
+        val savedModel = geoLocationJpaMappers.countryToDomainModel(entitySaved, true)
+        return savedModel
     }
 
     override fun update(targetModel: CountryModel): CountryModel? {
@@ -36,9 +39,21 @@ class CountryPersistenceJpaAdapter(
         return countryJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+                existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
                 val regionEntity = regionJpaRepository.findById(targetModel.region.id.id).orElseThrow()
                 existingEntity.region = regionEntity
+                val savedEntity = countryJpaRepository.save(existingEntity)
+                val savedModel = geoLocationJpaMappers.countryToDomainModel(savedEntity, true)
+                savedModel
+            }
+            .orElse(null)
+    }
+
+    override fun updateBoundary(id: GeoLocationId, boundary: Geometry): CountryModel? {
+        return countryJpaRepository.findById(id.id)
+            .map { existingEntity ->
+                existingEntity.boundaryRepresentation = boundary
                 countryJpaRepository.save(existingEntity)
             }
             .map { geoLocationJpaMappers.countryToDomainModel(it, true) }

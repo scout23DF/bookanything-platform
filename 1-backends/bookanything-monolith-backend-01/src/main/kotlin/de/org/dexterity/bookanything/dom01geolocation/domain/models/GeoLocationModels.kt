@@ -23,6 +23,8 @@ sealed interface IGeoLocationModel {
     val type: GeoLocationType
     val boundaryRepresentation: Geometry?
     val parentId: Long?
+
+    fun humanReadableName(): String
 }
 
 data class ContinentModel (
@@ -34,6 +36,7 @@ data class ContinentModel (
     val regionsList: List<RegionModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.CONTINENT
+    override fun humanReadableName(): String = "Continent: $name"
 }
 
 data class RegionModel (
@@ -46,6 +49,7 @@ data class RegionModel (
     val countriesList: List<CountryModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.REGION
+    override fun humanReadableName(): String = "Region: $name, ${continent.humanReadableName()}"
 }
 
 data class CountryModel (
@@ -58,6 +62,7 @@ data class CountryModel (
     val provincesList: List<ProvinceModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.COUNTRY
+    override fun humanReadableName(): String = "Country: $name - ($alias), ${region.humanReadableName()}"
 }
 
 data class ProvinceModel (
@@ -70,6 +75,7 @@ data class ProvinceModel (
     val citiesList: List<CityModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.PROVINCE
+    override fun humanReadableName(): String = "Province: $name - ($alias), ${country.humanReadableName()}"
 }
 
 data class CityModel (
@@ -84,6 +90,7 @@ data class CityModel (
     val districtsList: List<DistrictModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.CITY
+    override fun humanReadableName(): String = "City: $name, ${province.humanReadableName()}"
 }
 
 data class DistrictModel (
@@ -96,4 +103,5 @@ data class DistrictModel (
     val addressesList: List<AddressModel>? = null
 ) : IGeoLocationModel {
     override val type = GeoLocationType.DISTRICT
+    override fun humanReadableName(): String = "District: $name, ${city.humanReadableName()}"
 }
