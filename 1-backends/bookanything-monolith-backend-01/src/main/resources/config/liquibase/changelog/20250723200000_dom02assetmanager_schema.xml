@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250723200000-1" author="gemini">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS dom02assetmanager;
+        </sql>
+        <comment>Create schema for asset management domain</comment>
+    </changeSet>
+
+    <changeSet id="20250723200000-2" author="gemini">
+        <createTable tableName="asset_bucket" schemaName="dom02assetmanager">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="provider" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <comment>Create asset_bucket table</comment>
+    </changeSet>
+
+    <changeSet id="20250723200000-3" author="gemini">
+        <createTable tableName="asset" schemaName="dom02assetmanager">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bucket_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_asset_bucket" references="dom02assetmanager.asset_bucket(id)"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="storage_key" type="varchar(1024)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="mime_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata" type="jsonb"/>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <comment>Create asset table</comment>
+    </changeSet>
+
+</databaseChangeLog>

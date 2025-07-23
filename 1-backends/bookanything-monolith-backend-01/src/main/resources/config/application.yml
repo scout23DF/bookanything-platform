@@ -123,7 +123,7 @@ spring:
             ai:
                 gemini:
                     project-id: alns-dexterity-labs-01
-                    credentials-uri: file:~/.config/gcloud/application_default_credentials.json
+                    credentials-uri: file:/home/andre.nascimento/.config/gcloud/application_default_credentials.json
                     # credentials-uri: file:~/.config/gcloud/client_secret_25147608565_credential.json
                     location: europe-west1
                     chat:
@@ -169,6 +169,12 @@ application:
         geolocation:
             update-boundary-via-ia:
                 feature-enabled: true
+        asset-mgmnt:
+            storage-providers:
+                minio:
+                    url: http://localhost:9900
+                    access-key: admin@dexterity.org.de
+                    secret-key: admin_1a88a1
 
 springdoc:
     enable-native-support: true
