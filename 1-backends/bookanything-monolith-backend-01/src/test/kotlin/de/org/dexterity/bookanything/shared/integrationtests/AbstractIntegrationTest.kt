@@ -48,6 +48,8 @@ abstract class AbstractIntegrationTest {
             registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { keycloak.authServerUrl + "/realms/dexterity-apps-01" }
             registry.add("spring.security.oauth2.client.provider.oidc.issuer-uri") { keycloak.authServerUrl + "/realms/dexterity-apps-01" }
+
+            registry.add("application.domain-settings.geolocation.update-boundary-via-ia.feature-enabled") { "false" }
         }
     }
 }

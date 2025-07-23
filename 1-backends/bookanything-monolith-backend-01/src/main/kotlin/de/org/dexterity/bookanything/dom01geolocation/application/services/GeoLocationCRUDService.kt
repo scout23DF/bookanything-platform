@@ -8,6 +8,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.locationtech.jts.io.WKTReader
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -22,6 +23,9 @@ class GeoLocationCRUDService(
     private val geoLocationRestMapper: GeoLocationRestMapper,
     private val eventPublisherPort: EventPublisherPort
 ) {
+
+    @Value("\${application.domain-settings.geolocation.update-boundary-via-ia.feature-enabled}")
+    private val shouldUpdateBoundaryViaIA: Boolean = true
 
     private val useCaseMap: Map<GeoLocationType, IGeoLocationUseCase<out IGeoLocationModel>> = mapOf(
         GeoLocationType.CONTINENT to continentUseCase,
@@ -52,7 +56,11 @@ class GeoLocationCRUDService(
         }
         var savedModel : IGeoLocationModel = geoLocationRestMapper.fromCreateGeoLocationRequestToModel(type, request, parent)
         savedModel = useCase.create(savedModel)
-        eventPublisherPort.publish(GeoLocationEnrichmentEvent(savedModel.id.id, savedModel.type))
+
+        if (shouldUpdateBoundaryViaIA) {
+            eventPublisherPort.publish(GeoLocationEnrichmentEvent(savedModel.id.id, savedModel.type))
+        }
+
         return savedModel
     }
 
@@ -81,7 +89,9 @@ class GeoLocationCRUDService(
 
         updatedModel = useCase.update(updatedModel)!!
 
-        eventPublisherPort.publish(GeoLocationEnrichmentEvent(updatedModel.id.id, updatedModel.type))
+        if (shouldUpdateBoundaryViaIA) {
+            eventPublisherPort.publish(GeoLocationEnrichmentEvent(updatedModel.id.id, updatedModel.type))
+        }
 
         return updatedModel
 

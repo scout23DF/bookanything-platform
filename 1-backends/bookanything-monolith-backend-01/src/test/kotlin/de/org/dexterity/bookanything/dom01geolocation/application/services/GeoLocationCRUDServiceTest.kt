@@ -52,6 +52,7 @@ class GeoLocationCRUDServiceTest {
         val continentModel = ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
 
         every { geoLocationRestMapper.fromCreateGeoLocationRequestToModel(GeoLocationType.CONTINENT, request, null) } returns continentModel
+        every { eventPublisherPort.publish(any()) } returns Unit
         every { continentUseCase.create(continentModel) } returns continentModel
 
         val result = service.create(GeoLocationType.CONTINENT, request)
@@ -69,6 +70,7 @@ class GeoLocationCRUDServiceTest {
 
         every { continentUseCase.findById(GeoLocationId(continentId)) } returns Optional.of(continentModel)
         every { geoLocationRestMapper.fromCreateGeoLocationRequestToModel(GeoLocationType.REGION, request, continentModel) } returns regionModel
+        every { eventPublisherPort.publish(any()) } returns Unit
         every { regionUseCase.create(regionModel) } returns regionModel
 
         val result = service.create(GeoLocationType.REGION, request)
@@ -116,6 +118,7 @@ class GeoLocationCRUDServiceTest {
         val updatedContinent = existingContinent.copy(name = "Updated Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"))
 
         every { continentUseCase.findById(GeoLocationId(continentId)) } returns Optional.of(existingContinent)
+        every { eventPublisherPort.publish(any()) } returns Unit
         every { continentUseCase.update(any()) } returns updatedContinent
 
         val result = service.update(GeoLocationType.CONTINENT, continentId, request)

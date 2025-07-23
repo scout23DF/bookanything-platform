@@ -1,7 +1,9 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.controllers
 
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
@@ -10,10 +12,9 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.io.WKTReader
 import org.springframework.http.HttpStatus
 import java.util.*
@@ -26,7 +27,6 @@ class GeoLocationControllerTest {
 
     private lateinit var controller: GeoLocationController
 
-    private val geometryFactory = GeometryFactory()
     private val wktReader = WKTReader()
 
     @BeforeEach

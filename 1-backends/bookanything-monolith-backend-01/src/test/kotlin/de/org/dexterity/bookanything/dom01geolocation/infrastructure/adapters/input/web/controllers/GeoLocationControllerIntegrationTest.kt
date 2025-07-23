@@ -147,6 +147,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun shouldReturnDeepGeoLocationHierarchyByIdOrName() {
+
         val genericPolygonAsString = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
 
         // Create a hierarchy

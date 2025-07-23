@@ -10,7 +10,9 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.ports.ICountryRepos
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IDistrictRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IProvinceRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.IRegionRepositoryPort
+import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -27,11 +29,16 @@ class GeoLocationEnrichmentKafkaConsumer(
     private val aiService: GetGeoLocationBoundaryViaAIService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val wktReader = WKTReader()
 
     @KafkaListener(topics = ["geolocation-enrichment-request-topic"], groupId = "geolocation-enricher")
     fun listen(request: GeoLocationEnrichmentEvent) {
+
+        var messageToLog : String = "===> "
+
         val geoLocationId = GeoLocationId(request.id)
+
         val geoLocation = when (request.type) {
             GeoLocationType.CONTINENT -> continentRepository.findById(geoLocationId).orElse(null)
             GeoLocationType.REGION -> regionRepository.findById(geoLocationId).orElse(null)
@@ -42,15 +49,29 @@ class GeoLocationEnrichmentKafkaConsumer(
         }
 
         if (geoLocation != null) {
-            val boundaryWkt = aiService.generateBoundary(geoLocation)
-            val boundary = wktReader.read(boundaryWkt)
+
+            var geometryBoundary: Geometry? = null
+
+            try {
+
+                val boundaryWkt = aiService.generateBoundary(geoLocation)
+                messageToLog += "For the GeoLocation: [$geoLocation] the IA Proxy returned the boundaryWkt: [$boundaryWkt]."
+                geometryBoundary = wktReader.read(boundaryWkt)
+
+            } catch (ex: Exception) {
+                geometryBoundary = wktReader.read("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))")
+                messageToLog += " ::> Error occurred: '${ex.message}' --> Adopting the default boundaryGeometry: [POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))]."
+            }
+
+            logger.info(messageToLog)
+
             when (request.type) {
-                GeoLocationType.CONTINENT -> continentRepository.updateBoundary(geoLocationId, boundary)
-                GeoLocationType.REGION -> regionRepository.updateBoundary(geoLocationId, boundary)
-                GeoLocationType.COUNTRY -> countryRepository.updateBoundary(geoLocationId, boundary)
-                GeoLocationType.PROVINCE -> provinceRepository.updateBoundary(geoLocationId, boundary)
-                GeoLocationType.CITY -> cityRepository.updateBoundary(geoLocationId, boundary)
-                GeoLocationType.DISTRICT -> districtRepository.updateBoundary(geoLocationId, boundary)
+                GeoLocationType.CONTINENT -> continentRepository.updateBoundary(geoLocationId, geometryBoundary)
+                GeoLocationType.REGION -> regionRepository.updateBoundary(geoLocationId, geometryBoundary)
+                GeoLocationType.COUNTRY -> countryRepository.updateBoundary(geoLocationId, geometryBoundary)
+                GeoLocationType.PROVINCE -> provinceRepository.updateBoundary(geoLocationId, geometryBoundary)
+                GeoLocationType.CITY -> cityRepository.updateBoundary(geoLocationId, geometryBoundary)
+                GeoLocationType.DISTRICT -> districtRepository.updateBoundary(geoLocationId, geometryBoundary)
             }
         }
     }
