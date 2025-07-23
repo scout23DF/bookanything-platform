@@ -123,8 +123,8 @@ spring:
             ai:
                 gemini:
                     project-id: alns-dexterity-labs-01
-                    credentials-uri: file:/home/andre.nascimento/.config/gcloud/application_default_credentials.json
-                    # credentials-uri: file:/home/andre.nascimento/.config/gcloud/client_secret_25147608565_credential.json
+                    credentials-uri: file:~/.config/gcloud/application_default_credentials.json
+                    # credentials-uri: file:~/.config/gcloud/client_secret_25147608565_credential.json
                     location: europe-west1
                     chat:
                         options:
