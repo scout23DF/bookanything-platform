@@ -11,7 +11,7 @@ data class AssetDto(
     val size: Long,
     val category: AssetCategory,
     val status: AssetStatus,
-    val metadata: Map<String, Any>,
+    val metadataMap: Map<String, Any>,
     val bucket: String,
     val createdAt: Instant,
     val updatedAt: Instant
@@ -21,4 +21,9 @@ data class UploadAssetResponseDto(
     val assetId: Long,
     val status: AssetStatus,
     val message: String
+)
+
+data class UpdateAssetDto(
+    val fileName: String?,
+    val metadataMap: Map<String, Any>?
 )

@@ -33,7 +33,7 @@ class AssetJpaMapper {
         mimeType = entity.mimeType,
         size = entity.size,
         category = entity.category,
-        metadata = entity.metadata,
+        metadataMap = entity.metadata,
         status = entity.status,
         createdAt = entity.createdAt,
         updatedAt = entity.updatedAt
@@ -47,7 +47,7 @@ class AssetJpaMapper {
         mimeType = domain.mimeType,
         size = domain.size,
         category = domain.category,
-        metadata = domain.metadata,
+        metadata = domain.metadataMap,
         status = domain.status,
         createdAt = domain.createdAt,
         updatedAt = domain.updatedAt

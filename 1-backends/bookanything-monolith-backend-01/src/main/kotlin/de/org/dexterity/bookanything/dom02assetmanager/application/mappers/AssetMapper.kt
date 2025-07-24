@@ -15,7 +15,7 @@ class AssetMapper {
             size = asset.size,
             category = asset.category,
             status = asset.status,
-            metadata = asset.metadata,
+            metadataMap = asset.metadataMap,
             bucket = asset.bucket.name,
             createdAt = asset.createdAt,
             updatedAt = asset.updatedAt

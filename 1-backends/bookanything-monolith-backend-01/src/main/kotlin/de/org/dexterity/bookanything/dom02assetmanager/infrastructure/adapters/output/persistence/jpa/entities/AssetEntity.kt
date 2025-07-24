@@ -15,39 +15,40 @@ class AssetEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bucket_id", nullable = false)
-    val bucket: BucketEntity,
-
-    @Column(nullable = false)
+    @Column(name = "ds_filename", nullable = false)
     val fileName: String,
 
-    @Column(nullable = false, unique = true)
+    @Column(name="ds_storage_key", nullable = false, unique = true)
     val storageKey: String,
 
-    @Column(nullable = false)
+    @Column(name="ds_mime_type", nullable = false)
     val mimeType: String,
 
-    @Column(nullable = false)
+    @Column(name="vr_file_size", nullable = false)
     val size: Long,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name="tp_category", nullable = false)
     val category: AssetCategory,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name="json_metadata", columnDefinition = "jsonb")
     val metadata: Map<String, Any> = mutableMapOf(),
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name="cd_status", nullable = false)
     var status: AssetStatus,
 
-    @Column(nullable = false, updatable = false)
+    @Column(name="ts_created_at", nullable = false, updatable = false)
     val createdAt: Instant = Instant.now(),
 
-    @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
+    @Column(name="ts_updated_at", nullable = false)
+    var updatedAt: Instant = Instant.now(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bucket_id", nullable = false)
+    val bucket: BucketEntity
+
 ) {
     @PreUpdate
     fun onUpdate() {

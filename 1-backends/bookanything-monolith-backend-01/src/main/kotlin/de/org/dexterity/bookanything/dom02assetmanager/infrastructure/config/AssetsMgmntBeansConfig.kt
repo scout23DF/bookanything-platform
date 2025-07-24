@@ -1,6 +1,7 @@
 package de.org.dexterity.bookanything.dom02assetmanager.infrastructure.config
 
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.AssetCRUDService
+import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetEventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
@@ -8,7 +9,6 @@ import io.minio.MinioClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 
 @Configuration
 class AssetsMgmntBeansConfig {
@@ -17,13 +17,15 @@ class AssetsMgmntBeansConfig {
     fun assetCRUDService(
         assetPersistRepositoryPort: AssetPersistRepositoryPort,
         bucketPersistRepositoryPort: BucketPersistRepositoryPort,
-        storageProviderPort: StorageProviderPort
+        storageProviderPort: StorageProviderPort,
+        assetEventPublisherPort: AssetEventPublisherPort
     ): AssetCRUDService {
 
         return AssetCRUDService(
             assetPersistRepositoryPort,
             bucketPersistRepositoryPort,
-            storageProviderPort
+            storageProviderPort,
+            assetEventPublisherPort
         )
     }
 }

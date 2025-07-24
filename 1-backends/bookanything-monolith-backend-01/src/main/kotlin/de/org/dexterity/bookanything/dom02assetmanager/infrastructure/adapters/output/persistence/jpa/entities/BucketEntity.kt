@@ -12,13 +12,13 @@ class BucketEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
+    @Column(name="ds_bucket_name", nullable = false, unique = true)
     val name: String,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name="tp_storage_provider", nullable = false)
     val provider: StorageProviderType,
 
-    @Column(nullable = false, updatable = false)
+    @Column(name="ts_created_at", nullable = false, updatable = false)
     val createdAt: Instant = Instant.now()
 )
