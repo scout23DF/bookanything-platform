@@ -21,7 +21,7 @@ sealed interface IGeoLocationModel {
     val friendlyId: String
     val name: String
     val alias: String?
-    val propertiesDetailsMap: Map<String, Any>?
+    val additionalDetailsMap: Map<String, Any>?
     val type: GeoLocationType
     val boundaryRepresentation: Geometry?
     val parentId: Long?
@@ -34,7 +34,7 @@ data class ContinentModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long? = null,
     val regionsList: List<RegionModel>? = null
@@ -48,7 +48,7 @@ data class RegionModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val continent: ContinentModel,
@@ -63,7 +63,7 @@ data class CountryModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val region: RegionModel,
@@ -78,7 +78,7 @@ data class ProvinceModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val country: CountryModel,
@@ -93,7 +93,7 @@ data class CityModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     val isCountryCapital: Boolean? = false,
     val isProvinceCapital: Boolean? = false,
@@ -110,7 +110,7 @@ data class DistrictModel (
     override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
-    override val propertiesDetailsMap: Map<String, Any>? = null,
+    override val additionalDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val city: CityModel,

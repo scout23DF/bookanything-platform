@@ -124,4 +124,27 @@ class GeoLocationController(
         return GeoLocationType.valueOf(type.uppercase())
     }
 
+    @GetMapping("/{type}/search-by-friendlyid")
+    fun searchByFriendlyId(
+        @PathVariable type: String,
+        @RequestParam friendlyId: String
+    ): ResponseEntity<List<GeoLocationResponse>> {
+        val geoLocationType = parseGeoLocationType(type)
+        val results = geoLocationCRUDService.findByFriendlyId(geoLocationType, friendlyId)
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+        return ResponseEntity.ok(results)
+    }
+
+    @GetMapping("/{type}/search-by-additional-detail")
+    fun searchByAdditionalProperty(
+        @PathVariable type: String,
+        @RequestParam key: String,
+        @RequestParam value: String
+    ): ResponseEntity<List<GeoLocationResponse>> {
+        val geoLocationType = parseGeoLocationType(type)
+        val results = geoLocationCRUDService.findByPropertiesDetailsMap(geoLocationType, key, value)
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+        return ResponseEntity.ok(results)
+    }
+
 }

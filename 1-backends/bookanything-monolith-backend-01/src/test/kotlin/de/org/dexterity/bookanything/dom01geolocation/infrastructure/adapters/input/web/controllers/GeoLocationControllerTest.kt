@@ -37,9 +37,9 @@ class GeoLocationControllerTest {
     @Test
     fun `create should return created GeoLocation`() {
         val type = GeoLocationType.CONTINENT
-        val request = CreateGeoLocationRequest(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
-        val continentModel = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
-        val responseDto = GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
+        val request = CreateGeoLocationRequest(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
+        val continentModel = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
+        val responseDto = GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
 
         every { geoLocationCRUDService.create(type, request) } returns continentModel
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel) } returns responseDto
@@ -55,8 +55,8 @@ class GeoLocationControllerTest {
     fun `findById should return GeoLocation if found`() {
         val type = GeoLocationType.CONTINENT
         val id = 1L
-        val continentModel = ContinentModel(id = GeoLocationId(id), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
-        val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, parentId = null)
+        val continentModel = ContinentModel(id = GeoLocationId(id), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null)
 
         every { geoLocationCRUDService.findById(type, id) } returns Optional.of(continentModel)
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel) } returns responseDto
@@ -72,12 +72,12 @@ class GeoLocationControllerTest {
     fun `findAll should return list of GeoLocations`() {
         val type = GeoLocationType.CONTINENT
         val continents = listOf(
-            ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()),
-            ContinentModel(id = GeoLocationId(2), friendlyId = "europe", name = "Europe", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+            ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()),
+            ContinentModel(id = GeoLocationId(2), friendlyId = "europe", name = "Europe", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
         )
         val responseList = listOf(
-            GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, parentId = null),
-            GeoLocationResponse(type = type, id = 2, friendlyId = "europe", name = "Europe", propertiesDetailsMap = null, boundaryRepresentation = null, parentId = null)
+            GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null),
+            GeoLocationResponse(type = type, id = 2, friendlyId = "europe", name = "Europe", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null)
         )
 
         every { geoLocationCRUDService.findAll(type) } returns continents
@@ -100,10 +100,10 @@ class GeoLocationControllerTest {
     fun `update should return updated GeoLocation`() {
         val type = GeoLocationType.CONTINENT
         val id = 1L
-        val request = UpdateGeoLocationRequest(friendlyId = "asia-updated", name = "Updated Asia", propertiesDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
-        val existingModel = ContinentModel(id = GeoLocationId(id), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val request = UpdateGeoLocationRequest(friendlyId = "asia-updated", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
+        val existingModel = ContinentModel(id = GeoLocationId(id), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
         val updatedModel = existingModel.copy(friendlyId = "asia-updated", name = "Updated Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"))
-        val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia-updated", name = "Updated Asia", propertiesDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
+        val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia-updated", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
 
         every { geoLocationCRUDService.update(type, id, request) } returns updatedModel
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(updatedModel) } returns responseDto
@@ -132,8 +132,8 @@ class GeoLocationControllerTest {
     fun `search should return list of GeoLocations`() {
         val type = GeoLocationType.CONTINENT
         val namePrefix = "A"
-        val continents = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
-        val responseList = listOf(GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, parentId = null))
+        val continents = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val responseList = listOf(GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null))
 
         every { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) } returns continents
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any()) } answers { callOriginal() }

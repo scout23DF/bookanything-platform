@@ -34,7 +34,7 @@ class ContinentPersistenceJpaAdapter(
                 existingEntity.friendlyId = targetModel.friendlyId
                 existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
-                existingEntity.propertiesDetailsMap = targetModel.propertiesDetailsMap
+                existingEntity.additionalDetailsMap = targetModel.additionalDetailsMap
                 val savedEntity = continentJpaRepository.save(existingEntity)
                 val savedModel = geoLocationJpaMappers.continentToDomainModel(savedEntity, true)
                 savedModel
@@ -93,5 +93,15 @@ class ContinentPersistenceJpaAdapter(
     override fun findDeepByName(name: String): Optional<ContinentModel> {
         return continentJpaRepository.findDeepByName(name)
             .map { deepGeoLocationJpaMappers.deepContinentToDomainModel(it, true) }
+    }
+
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ContinentModel> {
+        return continentJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+            .map { geoLocationJpaMappers.continentToDomainModel(it, true) }
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentModel> {
+        return continentJpaRepository.findByPropertiesDetailsMapContains(key, value)
+            .map { geoLocationJpaMappers.continentToDomainModel(it, true) }
     }
 }

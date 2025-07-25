@@ -27,7 +27,7 @@ class LocalizablePlaceRestMapper {
             locationName = sourceRequestDTO.name,
             alias = sourceRequestDTO.alias,
             friendlyId = sourceRequestDTO.friendlyId,
-            propertiesDetailsMap = sourceRequestDTO.propertiesDetailsMap,
+            additionalDetailsMap = sourceRequestDTO.additionalDetailsMap,
             locationPoint = pointLocationTmp,
         )
     }
@@ -38,7 +38,7 @@ class LocalizablePlaceRestMapper {
             friendlyId = sourceDomainModel.friendlyId,
             name = sourceDomainModel.name,
             alias = sourceDomainModel.alias,
-            propertiesDetailsMap = sourceDomainModel.propertiesDetailsMap,
+            additionalDetailsMap = sourceDomainModel.additionalDetailsMap,
             latitude = sourceDomainModel.locationPoint.y,
             longitude = sourceDomainModel.locationPoint.x
         )

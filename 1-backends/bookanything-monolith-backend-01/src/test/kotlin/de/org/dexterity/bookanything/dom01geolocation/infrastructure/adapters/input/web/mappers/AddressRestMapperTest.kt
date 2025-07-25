@@ -56,7 +56,7 @@ class AddressRestMapperTest {
     fun `fromCreateAddressRequestToAddressModel should map CreateAddressRequest correctly`() {
 
         val continentModel = ContinentModel(id = GeoLocationId(1), friendlyId = "europe", name = "Europe", parentId = null)
-        val regionModel = RegionModel(id = GeoLocationId(2), friendlyId = "eu-central", name = "EU Central", propertiesDetailsMap = null, parentId = 1L, continent = continentModel)
+        val regionModel = RegionModel(id = GeoLocationId(2), friendlyId = "eu-central", name = "EU Central", additionalDetailsMap = null, parentId = 1L, continent = continentModel)
         val countryModel = CountryModel(id = GeoLocationId(3), friendlyId = "germany", name = "Germany", parentId = 2L, region = regionModel)
         val provinceModel = ProvinceModel(id = GeoLocationId(4), friendlyId = "berlin-province", name = "Berlin", parentId = 3L, country = countryModel)
         val cityModel = CityModel(id = GeoLocationId(5), friendlyId = "berlin-city", name = "Berlin", parentId = 4L, province = provinceModel)

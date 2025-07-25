@@ -128,4 +128,14 @@ class GeoLocationCRUDService(
         }
     }
 
+    fun findByFriendlyId(type: GeoLocationType, friendlyId: String): List<IGeoLocationModel> {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        return useCase.findByFriendlyIdContaining(friendlyId)
+    }
+
+    fun findByPropertiesDetailsMap(type: GeoLocationType, key: String, value: String): List<IGeoLocationModel> {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        return useCase.findByPropertiesDetailsMapContains(key, value)
+    }
+
 }

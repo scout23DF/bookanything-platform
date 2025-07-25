@@ -164,4 +164,34 @@ class LocalizablePlaceController(
 
     }
 
+    @GetMapping("/search-by-friendlyid")
+    fun searchByFriendlyId(@RequestParam friendlyId: String): ResponseEntity<List<LocalizablePlaceRestResponse>> {
+        val cqrsRequest = GetByFriendlyIdLocalizablePlacesCQRSRequest(
+            commandId = UUID.randomUUID(),
+            friendlyId = friendlyId
+        )
+        val cqrsResponse: GetByFriendlyIdLocalizablePlacesCQRSResponse? = handlerMediatorManager.dispatch(cqrsRequest)
+        val responseList = cqrsResponse?.localizablePlacesModelsList?.map {
+            localizablePlaceRestMapper.fromDomainToRestResponse(it)
+        }
+        return ResponseEntity.ok(responseList)
+    }
+
+    @GetMapping("/search-by-additional-detail")
+    fun searchByAdditionalProperty(
+        @RequestParam key: String,
+        @RequestParam value: String
+    ): ResponseEntity<List<LocalizablePlaceRestResponse>> {
+        val cqrsRequest = GetByPropertyLocalizablePlacesCQRSRequest(
+            commandId = UUID.randomUUID(),
+            key = key,
+            value = value
+        )
+        val cqrsResponse: GetByPropertyLocalizablePlacesCQRSResponse? = handlerMediatorManager.dispatch(cqrsRequest)
+        val responseList = cqrsResponse?.localizablePlacesModelsList?.map {
+            localizablePlaceRestMapper.fromDomainToRestResponse(it)
+        }
+        return ResponseEntity.ok(responseList)
+    }
+
 }

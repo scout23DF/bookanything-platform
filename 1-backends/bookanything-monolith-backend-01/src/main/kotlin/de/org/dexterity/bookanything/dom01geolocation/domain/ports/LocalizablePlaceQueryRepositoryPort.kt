@@ -13,4 +13,7 @@ interface LocalizablePlaceQueryRepositoryPort {
     fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList: List<LocalizablePlaceModel>?): Map<String, Int>
     fun deletarTodos()
 
+    fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel>
+
 }

@@ -26,7 +26,7 @@ class ProvincePersistenceJpaAdapter(
             friendlyId = targetModel.friendlyId,
             name = targetModel.name,
             alias = targetModel.alias,
-            propertiesDetailsMap = targetModel.propertiesDetailsMap,
+            additionalDetailsMap = targetModel.additionalDetailsMap,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             country = countryEntity
         )
@@ -44,7 +44,7 @@ class ProvincePersistenceJpaAdapter(
                 existingEntity.friendlyId = targetModel.friendlyId
                 existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
-                existingEntity.propertiesDetailsMap = targetModel.propertiesDetailsMap
+                existingEntity.additionalDetailsMap = targetModel.additionalDetailsMap
                 val countryEntity = countryJpaRepository.findById(targetModel.country.id.id).orElseThrow()
                 existingEntity.country = countryEntity
                 val savedEntity = provinceJpaRepository.save(existingEntity)
@@ -105,5 +105,15 @@ class ProvincePersistenceJpaAdapter(
     override fun findDeepByName(name: String): Optional<ProvinceModel> {
         return provinceJpaRepository.findDeepByName(name)
             .map { deepGeoLocationJpaMappers.deepProvinceToDomainModel(it, true) }
+    }
+
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel> {
+        return provinceJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
+        return provinceJpaRepository.findByPropertiesDetailsMapContains(key, value)
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 }

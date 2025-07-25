@@ -18,7 +18,7 @@ class LocalizablePlaceJpaAdapter(
             friendlyId = localizablePlaceModel.friendlyId,
             name = localizablePlaceModel.name,
             alias = localizablePlaceModel.alias,
-            propertiesDetailsMap = localizablePlaceModel.propertiesDetailsMap,
+            additionalDetailsMap = localizablePlaceModel.additionalDetailsMap,
             locationPoint = localizablePlaceModel.locationPoint
         )
         val savedEntity = repository.save(entity)
@@ -27,7 +27,7 @@ class LocalizablePlaceJpaAdapter(
             friendlyId = savedEntity.friendlyId,
             name = savedEntity.name!!,
             alias = savedEntity.alias,
-            propertiesDetailsMap = savedEntity.propertiesDetailsMap,
+            additionalDetailsMap = savedEntity.additionalDetailsMap,
             locationPoint = savedEntity.locationPoint!!
         )
     }
@@ -43,7 +43,7 @@ class LocalizablePlaceJpaAdapter(
                 friendlyId = entity.friendlyId,
                 name = entity.name!!,
                 alias = entity.alias,
-                propertiesDetailsMap = entity.propertiesDetailsMap,
+                additionalDetailsMap = entity.additionalDetailsMap,
                 locationPoint = entity.locationPoint!!
             )
         }

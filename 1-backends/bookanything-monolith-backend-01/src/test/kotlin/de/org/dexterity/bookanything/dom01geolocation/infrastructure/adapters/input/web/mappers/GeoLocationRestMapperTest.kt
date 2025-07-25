@@ -58,7 +58,7 @@ class GeoLocationRestMapperTest {
     @Test
     fun `fromIGeoLocationModelToResponse should map RegionModel correctly`() {
         val continentModel = ContinentModel(id = GeoLocationId(100), friendlyId = "asia", name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
-        val model = RegionModel(id = GeoLocationId(1), friendlyId = "southeast-asia", name = "Southeast Asia", propertiesDetailsMap = null, parentId = continentModel.id.id, continent = continentModel, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), countriesList = emptyList())
+        val model = RegionModel(id = GeoLocationId(1), friendlyId = "southeast-asia", name = "Southeast Asia", additionalDetailsMap = null, parentId = continentModel.id.id, continent = continentModel, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), countriesList = emptyList())
         val response = mapper.fromIGeoLocationModelToResponse(model)
 
         assertEquals(model.id.id, response.id)

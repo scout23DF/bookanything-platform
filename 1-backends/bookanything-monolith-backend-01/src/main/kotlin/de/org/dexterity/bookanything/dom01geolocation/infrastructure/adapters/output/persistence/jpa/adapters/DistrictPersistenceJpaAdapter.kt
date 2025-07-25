@@ -26,7 +26,7 @@ class DistrictPersistenceJpaAdapter(
             friendlyId = targetModel.friendlyId,
             name = targetModel.name,
             alias = targetModel.alias,
-            propertiesDetailsMap = targetModel.propertiesDetailsMap,
+            additionalDetailsMap = targetModel.additionalDetailsMap,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             city = cityEntity
         )
@@ -44,7 +44,7 @@ class DistrictPersistenceJpaAdapter(
                 existingEntity.friendlyId = targetModel.friendlyId
                 existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
-                existingEntity.propertiesDetailsMap = targetModel.propertiesDetailsMap
+                existingEntity.additionalDetailsMap = targetModel.additionalDetailsMap
                 val cityEntity = cityJpaRepository.findById(targetModel.city.id.id).orElseThrow()
                 existingEntity.city = cityEntity
                 val savedEntity = districtJpaRepository.save(existingEntity)
@@ -105,5 +105,15 @@ class DistrictPersistenceJpaAdapter(
     override fun findDeepByName(name: String): Optional<DistrictModel> {
         return districtJpaRepository.findDeepByName(name)
             .map { deepGeoLocationJpaMappers.deepDistrictToDomainModel(it, true) }
+    }
+
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictModel> {
+        return districtJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictModel> {
+        return districtJpaRepository.findByPropertiesDetailsMapContains(key, value)
+            .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 }

@@ -27,7 +27,7 @@ class LocalizablePlaceCRUDUseCase(
             friendlyId = friendlyId,
             name = nome,
             alias = alias,
-            propertiesDetailsMap = propertiesDetailsMap,
+            additionalDetailsMap = propertiesDetailsMap,
             locationPoint = localizacao
         )
         val savedCentroDistribuicao = localizablePlacePersistRepositoryPort.salvar(localizablePlaceModel)
@@ -37,7 +37,7 @@ class LocalizablePlaceCRUDUseCase(
                 friendlyId = savedCentroDistribuicao.friendlyId,
                 name = savedCentroDistribuicao.name,
                 alias = savedCentroDistribuicao.alias,
-                propertiesDetailsMap = savedCentroDistribuicao.propertiesDetailsMap,
+                propertiesDetailsMap = savedCentroDistribuicao.additionalDetailsMap,
                 latitude = savedCentroDistribuicao.locationPoint.y,
                 longitude = savedCentroDistribuicao.locationPoint.x
             )
@@ -75,6 +75,14 @@ class LocalizablePlaceCRUDUseCase(
     override fun deletarTodos() {
         localizablePlacePersistRepositoryPort.deletarTodos()
         eventPublisherPort.publish(LocalizablePlacesAllDeletedEvent())
+    }
+
+    fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.findByFriendlyIdContaining(friendlyId)
+    }
+
+    fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.findByPropertiesDetailsMapContains(key, value)
     }
 
 }

@@ -8,6 +8,6 @@ data class LocalizablePlaceModel(
     val friendlyId: String,
     val name: String,
     val alias: String?,
-    val propertiesDetailsMap: Map<String, Any>?,
+    val additionalDetailsMap: Map<String, Any>?,
     val locationPoint: Point
 )

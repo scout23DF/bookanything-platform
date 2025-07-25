@@ -5,7 +5,6 @@ import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.locationtech.jts.geom.Geometry
-import java.sql.Types
 import java.util.*
 
 @Entity
@@ -20,7 +19,7 @@ abstract class AbstractBaseGeoLocationEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     open val id: Long? = null,
 
-    @Column("friendly_id", nullable = false, length = 40)
+    @Column("ds_friendly_id", nullable = false, length = 40)
     open var friendlyId: String,
 
     @Column("ds_name")
@@ -30,8 +29,8 @@ abstract class AbstractBaseGeoLocationEntity(
     open var alias: String? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "json_properties_details", columnDefinition = "jsonb")
-    open var propertiesDetailsMap: Map<String, Any>? = null,
+    @Column(name = "json_additional_details", columnDefinition = "jsonb")
+    open var additionalDetailsMap: Map<String, Any>? = null,
 
     @Column("tp_geo_location", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -63,7 +62,7 @@ open class ContinentEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = RegionEntity::class)
@@ -72,7 +71,7 @@ open class ContinentEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.CONTINENT,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -83,7 +82,7 @@ open class RegionEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -96,7 +95,7 @@ open class RegionEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.REGION,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -107,7 +106,7 @@ open class CountryEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -120,7 +119,7 @@ open class CountryEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.COUNTRY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -131,7 +130,7 @@ open class ProvinceEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -144,7 +143,7 @@ open class ProvinceEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.PROVINCE,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -155,7 +154,7 @@ open class CityEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -168,7 +167,7 @@ open class CityEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.CITY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -179,7 +178,7 @@ open class DistrictEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    propertiesDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -192,7 +191,7 @@ open class DistrictEntity(
     friendlyId = friendlyId,
     name = name,
     alias = alias,
-    propertiesDetailsMap = propertiesDetailsMap,
+    additionalDetailsMap = additionalDetailsMap,
     type = GeoLocationType.DISTRICT,
     boundaryRepresentation = boundaryRepresentation
 )

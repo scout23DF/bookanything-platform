@@ -44,7 +44,7 @@ class AddressControllerTest {
             longitude = 2.0,
             status = "ACTIVE"
         )
-        val districtModel = DistrictModel(id = GeoLocationId(districtId), friendlyId = "downtown", name = "Downtown", propertiesDetailsMap = null, parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
+        val districtModel = DistrictModel(id = GeoLocationId(districtId), friendlyId = "downtown", name = "Downtown", additionalDetailsMap = null, parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
         val addressModel = AddressModel(
             id = GeoLocationId(1),
             streetName = "Main St",

@@ -13,7 +13,7 @@ class GeoLocationJpaMappers {
             friendlyId = continentModel.friendlyId,
             name = continentModel.name,
             alias = continentModel.alias,
-            propertiesDetailsMap = continentModel.propertiesDetailsMap,
+            additionalDetailsMap = continentModel.additionalDetailsMap,
             boundaryRepresentation = continentModel.boundaryRepresentation,
             regionsList = emptyList() // continentModel.regionsList?.map { regionToJpaEntity(it) } ?: emptyList()
         )
@@ -25,7 +25,7 @@ class GeoLocationJpaMappers {
             friendlyId = continentEntity.friendlyId,
             name = continentEntity.name,
             alias = continentEntity.alias,
-            propertiesDetailsMap = continentEntity.propertiesDetailsMap,
+            additionalDetailsMap = continentEntity.additionalDetailsMap,
             boundaryRepresentation = continentEntity.boundaryRepresentation,
             regionsList = when (shouldLoadChildrenList) {
                 true -> continentEntity.regionsList?.map { regionToDomainModel(it, true) } ?: emptyList()
@@ -39,7 +39,7 @@ class GeoLocationJpaMappers {
             friendlyId = regionModel.friendlyId,
             name = regionModel.name,
             alias = regionModel.alias,
-            propertiesDetailsMap = regionModel.propertiesDetailsMap,
+            additionalDetailsMap = regionModel.additionalDetailsMap,
             boundaryRepresentation = regionModel.boundaryRepresentation,
             continent = continentToJpaEntity(regionModel.continent),
             countriesList = emptyList() // regionModel.countriesList?.map { countryToJpaEntity(it) } ?: emptyList()
@@ -52,7 +52,7 @@ class GeoLocationJpaMappers {
             friendlyId = regionEntity.friendlyId,
             name = regionEntity.name,
             alias = regionEntity.alias,
-            propertiesDetailsMap = regionEntity.propertiesDetailsMap,
+            additionalDetailsMap = regionEntity.additionalDetailsMap,
             boundaryRepresentation = regionEntity.boundaryRepresentation,
             parentId = regionEntity.continent.id,
             continent = continentToDomainModel(regionEntity.continent, false),
@@ -69,7 +69,7 @@ class GeoLocationJpaMappers {
             friendlyId = countryModel.friendlyId,
             name = countryModel.name,
             alias = countryModel.alias,
-            propertiesDetailsMap = countryModel.propertiesDetailsMap,
+            additionalDetailsMap = countryModel.additionalDetailsMap,
             boundaryRepresentation = countryModel.boundaryRepresentation,
             region = regionToJpaEntity(countryModel.region),
             provincesList = emptyList() // countryModel.provincesList?.map { provinceToJpaEntity(it) } ?: emptyList()
@@ -82,7 +82,7 @@ class GeoLocationJpaMappers {
             friendlyId = countryEntity.friendlyId,
             name = countryEntity.name,
             alias = countryEntity.alias,
-            propertiesDetailsMap = countryEntity.propertiesDetailsMap,
+            additionalDetailsMap = countryEntity.additionalDetailsMap,
             boundaryRepresentation = countryEntity.boundaryRepresentation,
             parentId = countryEntity.region.id,
             region = regionToDomainModel(countryEntity.region, false),
@@ -99,7 +99,7 @@ class GeoLocationJpaMappers {
             friendlyId = provinceModel.friendlyId,
             name = provinceModel.name,
             alias = provinceModel.alias,
-            propertiesDetailsMap = provinceModel.propertiesDetailsMap,
+            additionalDetailsMap = provinceModel.additionalDetailsMap,
             boundaryRepresentation = provinceModel.boundaryRepresentation,
             country = countryToJpaEntity(provinceModel.country),
             citiesList = emptyList() // provinceModel.citiesList?.map { cityToJpaEntity(it) } ?: emptyList()
@@ -112,7 +112,7 @@ class GeoLocationJpaMappers {
             friendlyId = provinceEntity.friendlyId,
             name = provinceEntity.name,
             alias = provinceEntity.alias,
-            propertiesDetailsMap = provinceEntity.propertiesDetailsMap,
+            additionalDetailsMap = provinceEntity.additionalDetailsMap,
             boundaryRepresentation = provinceEntity.boundaryRepresentation,
             parentId = provinceEntity.country.id,
             country = countryToDomainModel(provinceEntity.country, false),
@@ -128,7 +128,7 @@ class GeoLocationJpaMappers {
             friendlyId = cityModel.friendlyId,
             name = cityModel.name,
             alias = cityModel.alias,
-            propertiesDetailsMap = cityModel.propertiesDetailsMap,
+            additionalDetailsMap = cityModel.additionalDetailsMap,
             boundaryRepresentation = cityModel.boundaryRepresentation,
             province = provinceToJpaEntity(cityModel.province),
             districtsList = emptyList() // cityModel.districtsList?.map { districtToJpaEntity(it) } ?: emptyList()
@@ -141,7 +141,7 @@ class GeoLocationJpaMappers {
             friendlyId = cityEntity.friendlyId,
             name = cityEntity.name,
             alias = cityEntity.alias,
-            propertiesDetailsMap = cityEntity.propertiesDetailsMap,
+            additionalDetailsMap = cityEntity.additionalDetailsMap,
             boundaryRepresentation = cityEntity.boundaryRepresentation,
             parentId = cityEntity.province.id,
             province = provinceToDomainModel(cityEntity.province, false),
@@ -157,7 +157,7 @@ class GeoLocationJpaMappers {
             friendlyId = districtModel.friendlyId,
             name = districtModel.name,
             alias = districtModel.alias,
-            propertiesDetailsMap = districtModel.propertiesDetailsMap,
+            additionalDetailsMap = districtModel.additionalDetailsMap,
             boundaryRepresentation = districtModel.boundaryRepresentation,
             city = cityToJpaEntity(districtModel.city),
             addressesList = emptyList() // districtModel.addressesList?.map { addressToJpaEntity(it) } ?: emptyList()
@@ -170,7 +170,7 @@ class GeoLocationJpaMappers {
             friendlyId = districtEntity.friendlyId,
             name = districtEntity.name,
             alias = districtEntity.alias,
-            propertiesDetailsMap = districtEntity.propertiesDetailsMap,
+            additionalDetailsMap = districtEntity.additionalDetailsMap,
             boundaryRepresentation = districtEntity.boundaryRepresentation,
             parentId = districtEntity.city.id,
             city = cityToDomainModel(districtEntity.city, false),

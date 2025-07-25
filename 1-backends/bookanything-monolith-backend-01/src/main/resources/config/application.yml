@@ -109,12 +109,13 @@ spring:
     docker:
         compose:
             readiness:
-                # tcp:
-                #     connect-timeout: 10000ms
-                #     read-timeout: 10000ms
+                tcp:
+                    connect-timeout: 60000ms
+                    read-timeout: 60000ms
                 wait: never
                 timeout: 15s
-            lifecycle-management: start-and-stop
+            # lifecycle-management: start-and-stop
+            lifecycle-management: start_only
             start:
                 log-level: debug
 

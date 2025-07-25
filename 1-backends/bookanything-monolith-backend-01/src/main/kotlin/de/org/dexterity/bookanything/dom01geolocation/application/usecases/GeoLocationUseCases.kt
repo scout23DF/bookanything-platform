@@ -16,6 +16,8 @@ interface IGeoLocationUseCase<T : IGeoLocationModel> {
     fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<T>
     fun findDeepById(id: GeoLocationId): Optional<T>
     fun findDeepByName(name: String): Optional<T>
+    fun findByFriendlyIdContaining(friendlyId: String): List<T>
+    fun findByPropertiesDetailsMapContains(key: String, value: String): List<T>
 }
 
 @Service
@@ -69,6 +71,14 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoL
         return repository.findDeepByName(name)
     }
 
+    override fun findByFriendlyIdContaining(friendlyId: String): List<ContinentModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
+    }
+
 }
 
 @Service
@@ -99,6 +109,14 @@ class RegionUseCase(private val repository: IRegionRepositoryPort) : IGeoLocatio
 
     override fun findDeepByName(name: String): Optional<RegionModel> {
         return repository.findDeepByName(name)
+    }
+
+    override fun findByFriendlyIdContaining(friendlyId: String): List<RegionModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
     }
 
 }
@@ -133,6 +151,14 @@ class CountryUseCase(private val repository: ICountryRepositoryPort) : IGeoLocat
         return repository.findDeepByName(name)
     }
 
+    override fun findByFriendlyIdContaining(friendlyId: String): List<CountryModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<CountryModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
+    }
+
 }
 
 @Service
@@ -163,6 +189,14 @@ class ProvinceUseCase(private val repository: IProvinceRepositoryPort) : IGeoLoc
 
     override fun findDeepByName(name: String): Optional<ProvinceModel> {
         return repository.findDeepByName(name)
+    }
+
+    override fun findByFriendlyIdContaining(friendlyId: String): List<ProvinceModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
     }
 
 }
@@ -197,6 +231,14 @@ class CityUseCase(private val repository: ICityRepositoryPort) : IGeoLocationUse
         return repository.findDeepByName(name)
     }
 
+    override fun findByFriendlyIdContaining(friendlyId: String): List<CityModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
+    }
+
 }
 
 @Service
@@ -227,6 +269,14 @@ class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLoc
 
     override fun findDeepByName(name: String): Optional<DistrictModel> {
         return repository.findDeepByName(name)
+    }
+
+    override fun findByFriendlyIdContaining(friendlyId: String): List<DistrictModel> {
+        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictModel> {
+        return repository.findByPropertiesDetailsMapContains(key, value)
     }
 
 }

@@ -114,3 +114,50 @@ class GetByAliasCentroDistribuicaoHandler(
     }
 
 }
+
+data class GetByFriendlyIdLocalizablePlacesCQRSResponse(val localizablePlacesModelsList: List<LocalizablePlaceModel>)
+
+data class GetByFriendlyIdLocalizablePlacesCQRSRequest(
+    override val commandId: UUID,
+    val friendlyId: String
+) : IGenericDataRequest<GetByFriendlyIdLocalizablePlacesCQRSResponse?>
+
+@Component
+class GetByFriendlyIdLocalizablePlacesHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetByFriendlyIdLocalizablePlacesCQRSRequest, GetByFriendlyIdLocalizablePlacesCQRSResponse> {
+
+    override fun getRequestType(): Class<GetByFriendlyIdLocalizablePlacesCQRSRequest> {
+        return GetByFriendlyIdLocalizablePlacesCQRSRequest::class.java
+    }
+
+    override fun handleRequest(requestHolder: GetByFriendlyIdLocalizablePlacesCQRSRequest): GetByFriendlyIdLocalizablePlacesCQRSResponse? {
+        val allFoundModelsList = localizablePlaceCRUDUseCase.findByFriendlyIdContaining(requestHolder.friendlyId)
+        return GetByFriendlyIdLocalizablePlacesCQRSResponse(allFoundModelsList)
+    }
+
+}
+
+data class GetByPropertyLocalizablePlacesCQRSResponse(val localizablePlacesModelsList: List<LocalizablePlaceModel>)
+
+data class GetByPropertyLocalizablePlacesCQRSRequest(
+    override val commandId: UUID,
+    val key: String,
+    val value: String
+) : IGenericDataRequest<GetByPropertyLocalizablePlacesCQRSResponse?>
+
+@Component
+class GetByPropertyLocalizablePlacesHandler(
+    val localizablePlaceCRUDUseCase: LocalizablePlaceCRUDUseCase
+) : IGenericRequestHandler<GetByPropertyLocalizablePlacesCQRSRequest, GetByPropertyLocalizablePlacesCQRSResponse> {
+
+    override fun getRequestType(): Class<GetByPropertyLocalizablePlacesCQRSRequest> {
+        return GetByPropertyLocalizablePlacesCQRSRequest::class.java
+    }
+
+    override fun handleRequest(requestHolder: GetByPropertyLocalizablePlacesCQRSRequest): GetByPropertyLocalizablePlacesCQRSResponse? {
+        val allFoundModelsList = localizablePlaceCRUDUseCase.findByPropertiesDetailsMapContains(requestHolder.key, requestHolder.value)
+        return GetByPropertyLocalizablePlacesCQRSResponse(allFoundModelsList)
+    }
+
+}

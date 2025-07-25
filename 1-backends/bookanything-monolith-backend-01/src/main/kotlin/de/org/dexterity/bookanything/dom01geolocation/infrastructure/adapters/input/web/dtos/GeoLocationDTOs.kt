@@ -7,7 +7,7 @@ data class CreateGeoLocationRequest(
     val name: String,
     val alias: String? = null,
     val friendlyId: String,
-    val propertiesDetailsMap: Map<String, Any>? = null,
+    val additionalDetailsMap: Map<String, Any>? = null,
     val boundaryRepresentation: String? = null,
     val parentId: Long? = null
 )
@@ -16,7 +16,7 @@ data class UpdateGeoLocationRequest(
     val name: String,
     val alias: String? = null,
     val friendlyId: String,
-    val propertiesDetailsMap: Map<String, Any>? = null,
+    val additionalDetailsMap: Map<String, Any>? = null,
     val boundaryRepresentation: String? = null,
     val parentId: Long? = null
 )
@@ -28,7 +28,7 @@ data class GeoLocationResponse(
     val friendlyId: String,
     val name: String,
     val alias: String? = null,
-    val propertiesDetailsMap: Map<String, Any>? = null,
+    val additionalDetailsMap: Map<String, Any>? = null,
     val boundaryRepresentation: String? = null,
     val parentId: Long? = null
 )

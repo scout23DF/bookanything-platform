@@ -32,10 +32,10 @@ class ContinentPersistenceJpaAdapterTest {
 
     @Test
     fun `saveNew should save and return ContinentModel`() {
-        val model = ContinentModel(id = GeoLocationId(0), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
-        val entity = ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
-        val savedEntity = ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
-        val savedModel = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
+        val model = ContinentModel(id = GeoLocationId(0), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
+        val entity = ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
+        val savedEntity = ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
+        val savedModel = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
 
         every { geoLocationJpaMappers.continentToJpaEntity(model) } returns entity
         every { continentJpaRepository.save(entity) } returns savedEntity
@@ -49,10 +49,10 @@ class ContinentPersistenceJpaAdapterTest {
 
     @Test
     fun `update should update and return ContinentModel`() {
-        val model = ContinentModel(id = GeoLocationId(1), friendlyId = "updated-asia", name = "Updated Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
-        val existingEntity = ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
-        val updatedEntity = ContinentEntity(friendlyId = "updated-asia", name = "Updated Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
-        val updatedModel = ContinentModel(id = GeoLocationId(1), friendlyId = "updated-asia", name = "Updated Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
+        val model = ContinentModel(id = GeoLocationId(1), friendlyId = "updated-asia", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
+        val existingEntity = ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), regionsList = emptyList())
+        val updatedEntity = ContinentEntity(friendlyId = "updated-asia", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
+        val updatedModel = ContinentModel(id = GeoLocationId(1), friendlyId = "updated-asia", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(existingEntity)
         every { continentJpaRepository.save(existingEntity) } returns updatedEntity
@@ -68,8 +68,8 @@ class ContinentPersistenceJpaAdapterTest {
 
     @Test
     fun `findById should return ContinentModel if found`() {
-        val entity = ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
-        val model = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val entity = ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val model = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
 
         every { continentJpaRepository.findById(1L) } returns Optional.of(entity)
         every { geoLocationJpaMappers.continentToDomainModel(entity, true) } returns model
@@ -82,8 +82,8 @@ class ContinentPersistenceJpaAdapterTest {
 
     @Test
     fun `findAll should return list of ContinentModels`() {
-        val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
-        val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findAll() } returns entities
         every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }
@@ -104,8 +104,8 @@ class ContinentPersistenceJpaAdapterTest {
 
     @Test
     fun `findByNameStartingWith should return filtered list`() {
-        val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
-        val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentJpaRepository.findByNameStartingWithIgnoreCase("A") } returns entities
         every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }

@@ -25,7 +25,7 @@ class LocalizablePlaceElasticSearchAdapter(
                     friendlyId = elasticEntity.friendlyId,
                     name = elasticEntity.name,
                     alias = elasticEntity.alias,
-                    propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
+                    additionalDetailsMap = elasticEntity.propertiesDetailsMap,
                     locationPoint = GeometryFactory().createPoint(
                         Coordinate(
                             elasticEntity.locationPoint.lon,
@@ -46,7 +46,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -65,7 +65,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -87,7 +87,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -116,7 +116,7 @@ class LocalizablePlaceElasticSearchAdapter(
                     friendlyId = oneLocalizablePlaceFromDB.friendlyId,
                     name = oneLocalizablePlaceFromDB.name,
                     alias = oneLocalizablePlaceFromDB.alias,
-                    propertiesDetailsMap = oneLocalizablePlaceFromDB.propertiesDetailsMap,
+                    propertiesDetailsMap = oneLocalizablePlaceFromDB.additionalDetailsMap,
                     locationPoint = GeoPoint(
                         oneLocalizablePlaceFromDB.locationPoint.y,
                         oneLocalizablePlaceFromDB.locationPoint.x
@@ -135,5 +135,13 @@ class LocalizablePlaceElasticSearchAdapter(
 
     override fun deletarTodos() {
         localizablePlaceElasticRepository.deleteAll()
+    }
+
+    override fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
+        TODO("Not yet implemented")
+    }
+
+    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
+        TODO("Not yet implemented")
     }
 }
