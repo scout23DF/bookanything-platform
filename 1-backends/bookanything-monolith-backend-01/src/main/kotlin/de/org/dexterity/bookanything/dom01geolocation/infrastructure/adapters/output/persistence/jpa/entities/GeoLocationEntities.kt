@@ -2,23 +2,36 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.locationtech.jts.geom.Geometry
+import java.sql.Types
 import java.util.*
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tp_geo_location", discriminatorType = DiscriminatorType.STRING)
-@Table(name = "tb_geo_location")
+@Table(
+    name = "tb_geo_location",
+    indexes = [Index(name = "idx_friendly_id", columnList = "friendly_id")]
+)
 abstract class AbstractBaseGeoLocationEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     open val id: Long? = null,
+
+    @Column("friendly_id", nullable = false, length = 40)
+    open var friendlyId: String,
 
     @Column("ds_name")
     open var name: String,
 
     @Column("ds_alias", nullable = true, length = 20)
     open var alias: String? = null,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "json_properties_details", columnDefinition = "jsonb")
+    open var propertiesDetailsMap: Map<String, Any>? = null,
 
     @Column("tp_geo_location", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -47,15 +60,19 @@ abstract class AbstractBaseGeoLocationEntity(
 @Entity
 @DiscriminatorValue("CONTINENT")
 open class ContinentEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = RegionEntity::class)
     open var regionsList: List<RegionEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.CONTINENT,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -63,8 +80,10 @@ open class ContinentEntity(
 @Entity
 @DiscriminatorValue("REGION")
 open class RegionEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -74,8 +93,10 @@ open class RegionEntity(
     @OneToMany(mappedBy = "region", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = CountryEntity::class)
     open var countriesList: List<CountryEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.REGION,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -83,8 +104,10 @@ open class RegionEntity(
 @Entity
 @DiscriminatorValue("COUNTRY")
 open class CountryEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -94,8 +117,10 @@ open class CountryEntity(
     @OneToMany(mappedBy = "country", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = ProvinceEntity::class)
     open var provincesList: List<ProvinceEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.COUNTRY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -103,8 +128,10 @@ open class CountryEntity(
 @Entity
 @DiscriminatorValue("PROVINCE")
 open class ProvinceEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -114,8 +141,10 @@ open class ProvinceEntity(
     @OneToMany(mappedBy = "province", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = CityEntity::class)
     open var citiesList: List<CityEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.PROVINCE,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -123,8 +152,10 @@ open class ProvinceEntity(
 @Entity
 @DiscriminatorValue("CITY")
 open class CityEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -134,8 +165,10 @@ open class CityEntity(
     @OneToMany(mappedBy = "city", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = DistrictEntity::class)
     open var districtsList: List<DistrictEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.CITY,
     boundaryRepresentation = boundaryRepresentation
 )
@@ -143,8 +176,10 @@ open class CityEntity(
 @Entity
 @DiscriminatorValue("DISTRICT")
 open class DistrictEntity(
+    friendlyId: String,
     name: String,
     alias: String? = null,
+    propertiesDetailsMap: Map<String, Any>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -154,8 +189,10 @@ open class DistrictEntity(
     @OneToMany(mappedBy = "district", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = AddressEntity::class)
     open var addressesList: List<AddressEntity>? = emptyList()
 ) : AbstractBaseGeoLocationEntity(
+    friendlyId = friendlyId,
     name = name,
     alias = alias,
+    propertiesDetailsMap = propertiesDetailsMap,
     type = GeoLocationType.DISTRICT,
     boundaryRepresentation = boundaryRepresentation
 )

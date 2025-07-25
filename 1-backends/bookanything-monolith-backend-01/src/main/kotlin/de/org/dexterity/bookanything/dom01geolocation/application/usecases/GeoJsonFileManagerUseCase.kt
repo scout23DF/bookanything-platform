@@ -96,7 +96,7 @@ class GeoJsonFileManagerUseCase(
                     )
 
                     try {
-                        centroDistribuicaoCRUDUseCase.cadastrar(nome, null, locationCoords)
+                        centroDistribuicaoCRUDUseCase.cadastrar(nome, null, "friendly-id-from-geojson", oneFeature.properties, locationCoords)
                         logger.info("==> SUCCESS :: O seguinte Centro de Distribuição foi cadastrado com sucesso: {} - Coordenadas: {}", nome, locationCoords)
                     } catch (ex: IllegalArgumentException) {
                         logger.warn("==> FAIL :: Verificação de Duplicação de Centro de Distribuição: {}", ex.message)

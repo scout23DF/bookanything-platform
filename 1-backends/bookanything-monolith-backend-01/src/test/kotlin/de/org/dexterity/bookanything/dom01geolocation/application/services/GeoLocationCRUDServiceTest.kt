@@ -48,8 +48,8 @@ class GeoLocationCRUDServiceTest {
 
     @Test
     fun `create Continent should call continentUseCase create`() {
-        val request = CreateGeoLocationRequest(name = "Asia", boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
-        val continentModel = ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
+        val request = CreateGeoLocationRequest(friendlyId = "asia", name = "Asia", boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
+        val continentModel = ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"), regionsList = emptyList())
 
         every { geoLocationRestMapper.fromCreateGeoLocationRequestToModel(GeoLocationType.CONTINENT, request, null) } returns continentModel
         every { eventPublisherPort.publish(any()) } returns Unit
@@ -64,9 +64,9 @@ class GeoLocationCRUDServiceTest {
     @Test
     fun `create Region should call regionUseCase create with parent Continent`() {
         val continentId = 1L
-        val request = CreateGeoLocationRequest(name = "Southeast Asia", parentId = continentId, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
-        val continentModel = ContinentModel(id = GeoLocationId(continentId), name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
-        val regionModel = RegionModel(id = GeoLocationId(2), name = "Southeast Asia", parentId = continentModel.id.id, continent = continentModel, boundaryRepresentation = null, countriesList = emptyList())
+        val request = CreateGeoLocationRequest(friendlyId = "sea", name = "Southeast Asia", parentId = continentId, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
+        val continentModel = ContinentModel(id = GeoLocationId(continentId), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val regionModel = RegionModel(id = GeoLocationId(2), friendlyId = "sea", name = "Southeast Asia", propertiesDetailsMap = null, parentId = continentModel.id.id, continent = continentModel, boundaryRepresentation = null, countriesList = emptyList())
 
         every { continentUseCase.findById(GeoLocationId(continentId)) } returns Optional.of(continentModel)
         every { geoLocationRestMapper.fromCreateGeoLocationRequestToModel(GeoLocationType.REGION, request, continentModel) } returns regionModel
@@ -83,7 +83,7 @@ class GeoLocationCRUDServiceTest {
     @Test
     fun `findById should return model if found`() {
         val continentId = 1L
-        val continentModel = ContinentModel(id = GeoLocationId(continentId), name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
+        val continentModel = ContinentModel(id = GeoLocationId(continentId), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
 
         every { continentUseCase.findById(GeoLocationId(continentId)) } returns Optional.of(continentModel)
 
@@ -97,8 +97,8 @@ class GeoLocationCRUDServiceTest {
     @Test
     fun `findAll should return all models`() {
         val continents = listOf(
-            ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()),
-            ContinentModel(id = GeoLocationId(2), name = "Europe", boundaryRepresentation = null, regionsList = emptyList())
+            ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()),
+            ContinentModel(id = GeoLocationId(2), friendlyId = "europe", name = "Europe", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
         )
 
         every { continentUseCase.findAll() } returns continents
@@ -113,9 +113,9 @@ class GeoLocationCRUDServiceTest {
     @Test
     fun `update Continent should call continentUseCase update`() {
         val continentId = 1L
-        val request = UpdateGeoLocationRequest(name = "Updated Asia", boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
-        val existingContinent = ContinentModel(id = GeoLocationId(continentId), name = "Asia", boundaryRepresentation = null, regionsList = emptyList())
-        val updatedContinent = existingContinent.copy(name = "Updated Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"))
+        val request = UpdateGeoLocationRequest(friendlyId = "asia-updated", name = "Updated Asia", boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))")
+        val existingContinent = ContinentModel(id = GeoLocationId(continentId), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
+        val updatedContinent = existingContinent.copy(friendlyId = "asia-updated", name = "Updated Asia", boundaryRepresentation = wktReader.read("POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"))
 
         every { continentUseCase.findById(GeoLocationId(continentId)) } returns Optional.of(existingContinent)
         every { eventPublisherPort.publish(any()) } returns Unit
@@ -142,7 +142,7 @@ class GeoLocationCRUDServiceTest {
     @Test
     fun searchByParentIdAndNameStartingWith() {
         val namePrefix = "A"
-        val continents = listOf(ContinentModel(id = GeoLocationId(1), name = "Asia", boundaryRepresentation = null, regionsList = emptyList()))
+        val continents = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", propertiesDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
         every { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix) } returns continents
 

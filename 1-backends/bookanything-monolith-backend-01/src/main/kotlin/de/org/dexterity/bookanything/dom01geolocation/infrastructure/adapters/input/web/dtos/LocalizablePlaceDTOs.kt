@@ -9,6 +9,8 @@ data class CreateLocalizablePlaceRestRequest(
     val name: String,
     @field:Size(max = 20)
     val alias: String? = null,
+    val friendlyId: String,
+    val propertiesDetailsMap: Map<String, Any>? = null,
     val latitude: Double,
     val longitude: Double
 )
@@ -17,8 +19,10 @@ data class CreateLocalizablePlaceRestRequest(
 // --- Response DTOs ---
 data class LocalizablePlaceRestResponse(
     val id: UUID,
+    val friendlyId: String,
     val name: String,
     val alias: String?,
+    val propertiesDetailsMap: Map<String, Any>? = null,
     val latitude: Double,
     val longitude: Double
 )

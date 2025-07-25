@@ -16,6 +16,8 @@ data class CreateLocalizablePlaceCQRSRequest(
     override val commandId: UUID,
     val locationName: String,
     val alias: String?,
+    val friendlyId: String,
+    val propertiesDetailsMap: Map<String, Any>?,
     val locationPoint: Point
 ) : IGenericDataRequest<CreateLocalizablePlaceCQRSResponse?>
 
@@ -32,6 +34,8 @@ class CreateCentroDistribuicaoHandler(
         val centroDistribuicaoModelResult = centroDistribuicaoCRUDUseCase.cadastrar(
             requestHolder.locationName,
             requestHolder.alias,
+            requestHolder.friendlyId,
+            requestHolder.propertiesDetailsMap,
             requestHolder.locationPoint
         )
 

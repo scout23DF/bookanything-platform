@@ -15,15 +15,19 @@ class LocalizablePlaceJpaAdapter(
     override fun salvar(localizablePlaceModel: LocalizablePlaceModel): LocalizablePlaceModel {
         val entity = LocalizablePlaceJpaEntity(
             id = localizablePlaceModel.id,
+            friendlyId = localizablePlaceModel.friendlyId,
             name = localizablePlaceModel.name,
             alias = localizablePlaceModel.alias,
+            propertiesDetailsMap = localizablePlaceModel.propertiesDetailsMap,
             locationPoint = localizablePlaceModel.locationPoint
         )
         val savedEntity = repository.save(entity)
         return LocalizablePlaceModel(
             id = savedEntity.id!!,
+            friendlyId = savedEntity.friendlyId,
             name = savedEntity.name!!,
             alias = savedEntity.alias,
+            propertiesDetailsMap = savedEntity.propertiesDetailsMap,
             locationPoint = savedEntity.locationPoint!!
         )
     }
@@ -36,9 +40,11 @@ class LocalizablePlaceJpaAdapter(
         return repository.findAll().map { entity ->
             LocalizablePlaceModel(
                 id = entity.id!!,
+                friendlyId = entity.friendlyId,
                 name = entity.name!!,
-            alias = entity.alias,
-            locationPoint = entity.locationPoint!!
+                alias = entity.alias,
+                propertiesDetailsMap = entity.propertiesDetailsMap,
+                locationPoint = entity.locationPoint!!
             )
         }
     }

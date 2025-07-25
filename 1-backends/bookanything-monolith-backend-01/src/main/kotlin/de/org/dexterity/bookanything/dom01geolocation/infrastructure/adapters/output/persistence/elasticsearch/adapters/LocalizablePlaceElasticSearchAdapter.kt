@@ -22,8 +22,10 @@ class LocalizablePlaceElasticSearchAdapter(
             .map { elasticEntity ->
                 LocalizablePlaceModel(
                     id = elasticEntity.id,
+                    friendlyId = elasticEntity.friendlyId,
                     name = elasticEntity.name,
                     alias = elasticEntity.alias,
+                    propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
                     locationPoint = GeometryFactory().createPoint(
                         Coordinate(
                             elasticEntity.locationPoint.lon,
@@ -41,8 +43,10 @@ class LocalizablePlaceElasticSearchAdapter(
         return localizablePlaceElasticRepository.findAll().map { elasticEntity ->
             LocalizablePlaceModel(
                 id = elasticEntity.id,
+                friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
+                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -58,8 +62,10 @@ class LocalizablePlaceElasticSearchAdapter(
         return localizablePlaceElasticRepository.findByAliasStartingWith(alias).map { elasticEntity ->
             LocalizablePlaceModel(
                 id = elasticEntity.id,
+                friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
+                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -78,8 +84,10 @@ class LocalizablePlaceElasticSearchAdapter(
         return localizablePlaceElasticRepository.findByLocationPointWithin(locationPoint, raioEmKm).map { elasticEntity ->
             LocalizablePlaceModel(
                 id = elasticEntity.id,
+                friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
+                propertiesDetailsMap = elasticEntity.propertiesDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -105,8 +113,10 @@ class LocalizablePlaceElasticSearchAdapter(
             val elasticEntitiesList = localizablePlaceFromDBList.map { oneLocalizablePlaceFromDB ->
                 LocalizablePlaceElasticEntity(
                     id = oneLocalizablePlaceFromDB.id,
+                    friendlyId = oneLocalizablePlaceFromDB.friendlyId,
                     name = oneLocalizablePlaceFromDB.name,
                     alias = oneLocalizablePlaceFromDB.alias,
+                    propertiesDetailsMap = oneLocalizablePlaceFromDB.propertiesDetailsMap,
                     locationPoint = GeoPoint(
                         oneLocalizablePlaceFromDB.locationPoint.y,
                         oneLocalizablePlaceFromDB.locationPoint.x

@@ -79,12 +79,12 @@ class GeoLocationCRUDService(
         val existingModel = useCase.findById(GeoLocationId(id)).orElse(null) ?: return null
 
         var updatedModel : IGeoLocationModel = when (type) {
-            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
         }
 
         updatedModel = useCase.update(updatedModel)!!

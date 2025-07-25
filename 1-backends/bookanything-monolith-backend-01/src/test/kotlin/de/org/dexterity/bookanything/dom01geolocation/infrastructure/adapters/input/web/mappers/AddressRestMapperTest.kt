@@ -20,7 +20,7 @@ class AddressRestMapperTest {
 
     @Test
     fun `fromAddressModelToResponse should map AddressModel correctly`() {
-        val districtModel = DistrictModel(id = GeoLocationId(1), name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
+        val districtModel = DistrictModel(id = GeoLocationId(1), friendlyId = "downtown", name = "Downtown", parentId = 1L, city = mockk(), boundaryRepresentation = null, addressesList = emptyList())
         val model = AddressModel(
             id = GeoLocationId(100),
             streetName = "Main St",
@@ -55,12 +55,12 @@ class AddressRestMapperTest {
     @Test
     fun `fromCreateAddressRequestToAddressModel should map CreateAddressRequest correctly`() {
 
-        val continentModel = ContinentModel(id = GeoLocationId(1), name = "Europe", parentId = null)
-        val regionModel = RegionModel(id = GeoLocationId(2), name = "EU Central", parentId = 1L, continent = continentModel)
-        val countryModel = CountryModel(id = GeoLocationId(3), name = "Germany", parentId = 2L, region = regionModel)
-        val provinceModel = ProvinceModel(id = GeoLocationId(4), name = "Berlin", parentId = 3L, country = countryModel)
-        val cityModel = CityModel(id = GeoLocationId(5), name = "Berlin", parentId = 4L, province = provinceModel)
-        val districtModel = DistrictModel(id = GeoLocationId(6), name = "Downtown", parentId = 5L, city = cityModel, boundaryRepresentation = null, addressesList = emptyList())
+        val continentModel = ContinentModel(id = GeoLocationId(1), friendlyId = "europe", name = "Europe", parentId = null)
+        val regionModel = RegionModel(id = GeoLocationId(2), friendlyId = "eu-central", name = "EU Central", propertiesDetailsMap = null, parentId = 1L, continent = continentModel)
+        val countryModel = CountryModel(id = GeoLocationId(3), friendlyId = "germany", name = "Germany", parentId = 2L, region = regionModel)
+        val provinceModel = ProvinceModel(id = GeoLocationId(4), friendlyId = "berlin-province", name = "Berlin", parentId = 3L, country = countryModel)
+        val cityModel = CityModel(id = GeoLocationId(5), friendlyId = "berlin-city", name = "Berlin", parentId = 4L, province = provinceModel)
+        val districtModel = DistrictModel(id = GeoLocationId(6), friendlyId = "downtown", name = "Downtown", parentId = 5L, city = cityModel, boundaryRepresentation = null, addressesList = emptyList())
 
         val request = CreateAddressRequest(
             streetName = "New St",

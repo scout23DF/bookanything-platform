@@ -22,8 +22,10 @@ class GeoLocationRestMapper {
         return GeoLocationResponse(
             type = sourceModel.type,
             id = sourceModel.id.id,
+            friendlyId = sourceModel.friendlyId,
             name = sourceModel.name,
             alias = sourceModel.alias,
+            propertiesDetailsMap = sourceModel.propertiesDetailsMap,
             boundaryRepresentation = sourceModel.boundaryRepresentation?.toText(),
             parentId = sourceModel.parentId
         )
@@ -38,12 +40,12 @@ class GeoLocationRestMapper {
         val boundary = createRequest.boundaryRepresentation?.toGeometry()
 
         return when (type) {
-            GeoLocationType.CONTINENT -> ContinentModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary)
-            GeoLocationType.REGION -> RegionModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary, parentId = parent?.id?.id, continent = parent as ContinentModel)
-            GeoLocationType.COUNTRY -> CountryModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary, parentId = parent?.id?.id, region = parent as RegionModel)
-            GeoLocationType.PROVINCE -> ProvinceModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary, parentId = parent?.id?.id, country = parent as CountryModel)
-            GeoLocationType.CITY -> CityModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary, parentId = parent?.id?.id, province = parent as ProvinceModel)
-            GeoLocationType.DISTRICT -> DistrictModel(id = GeoLocationId(0), name = createRequest.name, alias = createRequest.alias, boundaryRepresentation = boundary, parentId = parent?.id?.id, city = parent as CityModel)
+            GeoLocationType.CONTINENT -> ContinentModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary)
+            GeoLocationType.REGION -> RegionModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary, parentId = parent?.id?.id, continent = parent as ContinentModel)
+            GeoLocationType.COUNTRY -> CountryModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary, parentId = parent?.id?.id, region = parent as RegionModel)
+            GeoLocationType.PROVINCE -> ProvinceModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary, parentId = parent?.id?.id, country = parent as CountryModel)
+            GeoLocationType.CITY -> CityModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary, parentId = parent?.id?.id, province = parent as ProvinceModel)
+            GeoLocationType.DISTRICT -> DistrictModel(id = GeoLocationId(0), friendlyId = createRequest.friendlyId, name = createRequest.name, alias = createRequest.alias, propertiesDetailsMap = createRequest.propertiesDetailsMap, boundaryRepresentation = boundary, parentId = parent?.id?.id, city = parent as CityModel)
         }
     }
 

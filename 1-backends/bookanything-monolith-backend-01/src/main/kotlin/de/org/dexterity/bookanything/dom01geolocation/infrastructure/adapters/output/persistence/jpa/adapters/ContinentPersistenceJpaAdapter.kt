@@ -31,8 +31,10 @@ class ContinentPersistenceJpaAdapter(
         return continentJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+                existingEntity.friendlyId = targetModel.friendlyId
                 existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
+                existingEntity.propertiesDetailsMap = targetModel.propertiesDetailsMap
                 val savedEntity = continentJpaRepository.save(existingEntity)
                 val savedModel = geoLocationJpaMappers.continentToDomainModel(savedEntity, true)
                 savedModel

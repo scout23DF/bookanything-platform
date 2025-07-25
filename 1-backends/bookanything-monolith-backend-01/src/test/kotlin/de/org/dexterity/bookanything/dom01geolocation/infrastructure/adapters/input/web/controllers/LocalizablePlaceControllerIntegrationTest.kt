@@ -106,6 +106,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
     fun shouldCreateANewLocalizablePlace() {
         val requestBody = """
             {
+                "friendlyId": "cd-teste",
                 "name": "CD Teste",
                 "latitude": -23.55052,
                 "longitude": -46.633308
@@ -125,12 +126,14 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         val savedCenters = localizablePlaceJpaRepository.findAll()
         assertEquals(1, savedCenters.size)
         assertEquals("CD Teste", savedCenters[0].name)
+        assertEquals("cd-teste", savedCenters[0].friendlyId)
     }
 
     @Test
     fun shouldPublishOneLocalizablePlaceCreateEventToKafka() {
         val requestBody = """
             {
+                "friendlyId": "cd-kafka-teste",
                 "name": "CD Kafka Teste",
                 "latitude": -20.0,
                 "longitude": -40.0
@@ -147,6 +150,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         val createdResponse = objectMapper.readValue<LocalizablePlaceRestResponse>(createResult.response.contentAsString)
         assertNotNull(createdResponse.id)
         assertEquals("CD Kafka Teste", createdResponse.name)
+        assertEquals("cd-kafka-teste", createdResponse.friendlyId)
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
@@ -183,7 +187,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun shouldDeleteALocalizablePlaceById() {
         // Given
-        val request = CreateLocalizablePlaceRestRequest(name = "LocalizablePlace To Delete", latitude = -23.55051, longitude = -46.633307)
+        val request = CreateLocalizablePlaceRestRequest(friendlyId = "to-delete", name = "LocalizablePlace To Delete", latitude = -23.55051, longitude = -46.633307)
         val result = createDistributionCenter(request)
         val response = objectMapper.readValue(result.response.contentAsString, LocalizablePlaceRestResponse::class.java)
 
@@ -211,6 +215,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         IntRange(0, (newItemsToCreateCount - 1)).forEach { i ->
             createDistributionCenter(
                 CreateLocalizablePlaceRestRequest(
+                    friendlyId = "new-place-$i",
                     name = "One New LocalizablePlace - No.: ${i}",
                     latitude = Random.nextDouble(-23.55999, -23.55000 ),
                     longitude = Random.nextDouble(-46.633999, -46.633000)
@@ -275,10 +280,10 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         }
 
         // Given
-        createDistributionCenter(CreateLocalizablePlaceRestRequest(name = "CD Proximo 0", latitude = -23.55051, longitude = -46.633307))
-        createDistributionCenter(CreateLocalizablePlaceRestRequest(name = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
-        createDistributionCenter(CreateLocalizablePlaceRestRequest(name = "CD Proximo 2", latitude = -23.55053, longitude = -46.633309))
-        createDistributionCenter(CreateLocalizablePlaceRestRequest(name = "CD Longe", latitude = -22.9068, longitude = -43.1729))
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(friendlyId = "proximo-0", name = "CD Proximo 0", latitude = -23.55051, longitude = -46.633307))
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(friendlyId = "proximo-1", name = "CD Proximo 1", latitude = -23.55052, longitude = -46.633308))
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(friendlyId = "proximo-2", name = "CD Proximo 2", latitude = -23.55053, longitude = -46.633309))
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(friendlyId = "longe", name = "CD Longe", latitude = -22.9068, longitude = -43.1729))
 
         // Wait for Kafka and Elasticsearch to process the events
         await().atMost(Duration.ofSeconds(30)).untilAsserted {
@@ -325,6 +330,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         IntRange(0, (newItemsToCreateCount - 1)).forEach {
             val centroDistribuicao = LocalizablePlaceJpaEntity(
                 id = UUID.randomUUID(),
+                friendlyId = "new-place-$it",
                 name = "One New LocalizablePlace - No.: ${it}",
                 locationPoint = geometryFactory.createPoint(
                     Coordinate(

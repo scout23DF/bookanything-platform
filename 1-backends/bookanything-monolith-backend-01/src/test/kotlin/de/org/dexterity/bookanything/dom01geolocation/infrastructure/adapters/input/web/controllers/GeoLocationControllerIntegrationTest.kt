@@ -53,12 +53,12 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
         val genericPolygonAsString : String = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
 
-        val newContinentId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.CONTINENT, "Continent-1", genericPolygonAsString, null)
-        val newRegionId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.REGION, "Region-1", genericPolygonAsString, newContinentId.id)
-        val newCountryId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.COUNTRY, "Country-1", genericPolygonAsString, newRegionId.id)
-        val newProvinceId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.PROVINCE, "Province-1", genericPolygonAsString, newCountryId.id)
-        val newCityId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.CITY, "City-1", genericPolygonAsString, newProvinceId.id)
-        val newDistrictId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.DISTRICT, "District-1", genericPolygonAsString, newCityId.id)
+        val newContinentId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.CONTINENT, "Continent-1", "continent-1", genericPolygonAsString, null)
+        val newRegionId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.REGION, "Region-1", "region-1", genericPolygonAsString, newContinentId.id)
+        val newCountryId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.COUNTRY, "Country-1", "country-1", genericPolygonAsString, newRegionId.id)
+        val newProvinceId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.PROVINCE, "Province-1", "province-1", genericPolygonAsString, newCountryId.id)
+        val newCityId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.CITY, "City-1", "city-1", genericPolygonAsString, newProvinceId.id)
+        val newDistrictId : GeoLocationId = testOneGeoLocationCreationAndRecovery(GeoLocationType.DISTRICT, "District-1", "district-1", genericPolygonAsString, newCityId.id)
 
         // Deleting By Id
         deleteGeoLocationById(GeoLocationType.DISTRICT, newDistrictId)
@@ -76,13 +76,14 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
         IntStream.range(1, 3).forEach { idxContinent ->
             val newContinentId: GeoLocationId =
-                createOneGeoLocation(GeoLocationType.CONTINENT, "Continent-$idxContinent", genericPolygonAsString, null)
+                createOneGeoLocation(GeoLocationType.CONTINENT, "Continent-$idxContinent", "continent-$idxContinent", genericPolygonAsString, null)
 
             IntStream.range(1, 3).forEach { idxRegion ->
 
                 val newRegionId : GeoLocationId = createOneGeoLocation(
                     GeoLocationType.REGION,
                     "Region-$idxContinent.$idxRegion",
+                    "region-$idxContinent.$idxRegion",
                     genericPolygonAsString,
                     newContinentId.id
                 )
@@ -92,6 +93,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
                     val newCountryId : GeoLocationId = createOneGeoLocation(
                         GeoLocationType.COUNTRY,
                         "Country-$idxContinent.$idxRegion.$idxCountry",
+                        "country-$idxContinent.$idxRegion.$idxCountry",
                         genericPolygonAsString,
                         newRegionId.id
                     )
@@ -101,6 +103,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
                         val newProvinceId : GeoLocationId = createOneGeoLocation(
                             GeoLocationType.PROVINCE,
                             "Province-$idxContinent.$idxRegion.$idxCountry.$idxProvince",
+                            "province-$idxContinent.$idxRegion.$idxCountry.$idxProvince",
                             genericPolygonAsString,
                             newCountryId.id
                         )
@@ -110,6 +113,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
                             val newCityId : GeoLocationId = createOneGeoLocation(
                                 GeoLocationType.CITY,
                                 "City-$idxContinent.$idxRegion.$idxCountry.$idxCity",
+                                "city-$idxContinent.$idxRegion.$idxCountry.$idxCity",
                                 genericPolygonAsString,
                                 newProvinceId.id
                             )
@@ -119,6 +123,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
                                 val newDistrictId : GeoLocationId = createOneGeoLocation(
                                     GeoLocationType.DISTRICT,
                                     "District-$idxContinent.$idxRegion.$idxCountry.$idxCity.$idxDistrict",
+                                    "district-$idxContinent.$idxRegion.$idxCountry.$idxCity.$idxDistrict",
                                     genericPolygonAsString,
                                     newCityId.id
                                 )
@@ -151,12 +156,12 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
         val genericPolygonAsString = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
 
         // Create a hierarchy
-        val newContinentId : GeoLocationId = createOneGeoLocation(GeoLocationType.CONTINENT, "DeepContinent", genericPolygonAsString, null)
-        val newRegionId : GeoLocationId = createOneGeoLocation(GeoLocationType.REGION, "DeepRegion", genericPolygonAsString, newContinentId.id)
-        val newCountryId : GeoLocationId = createOneGeoLocation(GeoLocationType.COUNTRY, "DeepCountry", genericPolygonAsString, newRegionId.id)
-        val newProvinceId : GeoLocationId = createOneGeoLocation(GeoLocationType.PROVINCE, "DeepProvince", genericPolygonAsString, newCountryId.id)
-        val newCityId : GeoLocationId = createOneGeoLocation(GeoLocationType.CITY, "DeepCity", genericPolygonAsString, newProvinceId.id)
-        val newDistrictId : GeoLocationId = createOneGeoLocation(GeoLocationType.DISTRICT, "DeepDistrict", genericPolygonAsString, newCityId.id)
+        val newContinentId : GeoLocationId = createOneGeoLocation(GeoLocationType.CONTINENT, "DeepContinent", "deep-continent", genericPolygonAsString, null)
+        val newRegionId : GeoLocationId = createOneGeoLocation(GeoLocationType.REGION, "DeepRegion", "deep-region", genericPolygonAsString, newContinentId.id)
+        val newCountryId : GeoLocationId = createOneGeoLocation(GeoLocationType.COUNTRY, "DeepCountry", "deep-country", genericPolygonAsString, newRegionId.id)
+        val newProvinceId : GeoLocationId = createOneGeoLocation(GeoLocationType.PROVINCE, "DeepProvince", "deep-province", genericPolygonAsString, newCountryId.id)
+        val newCityId : GeoLocationId = createOneGeoLocation(GeoLocationType.CITY, "DeepCity", "deep-city", genericPolygonAsString, newProvinceId.id)
+        val newDistrictId : GeoLocationId = createOneGeoLocation(GeoLocationType.DISTRICT, "DeepDistrict", "deep-district", genericPolygonAsString, newCityId.id)
 
         // Test deep search by ID for Continent
         val deepContinentResult = mockMvc.get("/api/v1/geolocations/${GeoLocationType.CONTINENT.name.lowercase()}/deep-search?id=${newContinentId.id}") {
@@ -186,12 +191,13 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
     private fun testOneGeoLocationCreationAndRecovery(
         geoLocationType: GeoLocationType,
         geoLocationName: String,
+        friendlyId: String,
         polygonAsString: String,
         parentId : Long?
     ): GeoLocationId {
 
         // 1. Create
-        val createRequest = CreateGeoLocationRequest(name = geoLocationName, boundaryRepresentation = polygonAsString, parentId = parentId)
+        val createRequest = CreateGeoLocationRequest(friendlyId = friendlyId, name = geoLocationName, boundaryRepresentation = polygonAsString, parentId = parentId)
 
         val createResult = mockMvc.post("/api/v1/geolocations/" + geoLocationType.name.lowercase()) {
             contentType = MediaType.APPLICATION_JSON
@@ -216,8 +222,9 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
         // 3. Update
         val updatedGeoLocationName : String = "Updated - $geoLocationName"
+        val updatedFriendlyId : String = "updated-$friendlyId"
         val updatedPolygonAreaAsString : String = "POLYGON ((15 15, 15 25, 25 25, 25 15, 15 15))"
-        val updateRequest = UpdateGeoLocationRequest(name = updatedGeoLocationName, boundaryRepresentation = updatedPolygonAreaAsString, parentId = parentId)
+        val updateRequest = UpdateGeoLocationRequest(friendlyId = updatedFriendlyId, name = updatedGeoLocationName, boundaryRepresentation = updatedPolygonAreaAsString, parentId = parentId)
 
         val updateResult = mockMvc.put("/api/v1/geolocations/" + geoLocationType.name.lowercase() + "/${createdResponse.id}") {
             contentType = MediaType.APPLICATION_JSON
@@ -229,6 +236,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
         println("===> GeoLocation Updated: $updatedResponse")
         assertEquals(createdResponse.id, updatedResponse.id)
         assertEquals(updatedGeoLocationName, updatedResponse.name)
+        assertEquals(updatedFriendlyId, updatedResponse.friendlyId)
         assertEquals(updatedPolygonAreaAsString, updatedResponse.boundaryRepresentation)
 
 
@@ -240,15 +248,16 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
         val foundAllResponse = objectMapper.readValue<List<GeoLocationResponse>>(findAllResult.response.contentAsString)
         assertEquals(1, foundAllResponse.size)
         assertEquals(updatedGeoLocationName, foundAllResponse[0].name)
+        assertEquals(updatedFriendlyId, foundAllResponse[0].friendlyId)
         assertEquals(updatedPolygonAreaAsString, foundAllResponse[0].boundaryRepresentation)
 
         return GeoLocationId(createdResponse.id)
     }
 
-    private fun createOneGeoLocation(geoLocationType: GeoLocationType, geoLocationName: String, polygonAsString: String, parentId : Long?): GeoLocationId {
+    private fun createOneGeoLocation(geoLocationType: GeoLocationType, geoLocationName: String, friendlyId: String, polygonAsString: String, parentId : Long?): GeoLocationId {
 
         // 1. Create
-        val createRequest = CreateGeoLocationRequest(name = geoLocationName, boundaryRepresentation = polygonAsString, parentId = parentId)
+        val createRequest = CreateGeoLocationRequest(friendlyId = friendlyId, name = geoLocationName, boundaryRepresentation = polygonAsString, parentId = parentId)
 
         val createResult = mockMvc.post("/api/v1/geolocations/" + geoLocationType.name.lowercase()) {
             contentType = MediaType.APPLICATION_JSON

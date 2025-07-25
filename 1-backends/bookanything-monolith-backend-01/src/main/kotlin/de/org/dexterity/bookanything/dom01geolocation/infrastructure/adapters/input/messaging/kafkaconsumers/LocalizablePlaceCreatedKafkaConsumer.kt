@@ -20,8 +20,10 @@ class LocalizablePlaceCreatedKafkaConsumer(
         logger.info("Received one Event about the creation of a new Localizable Place: id={}, nome={}", event.id, event.name)
         val elasticEntity = LocalizablePlaceElasticEntity(
             id = event.id,
+            friendlyId = "friendly-id-from-event", // TODO: Adicionar friendlyId ao evento
             name = event.name,
             alias = event.alias,
+            propertiesDetailsMap = null, // TODO: Adicionar propertiesDetailsMap ao evento
             locationPoint = GeoPoint(event.latitude, event.longitude)
         )
         localizablePlaceElasticRepository.save(elasticEntity)

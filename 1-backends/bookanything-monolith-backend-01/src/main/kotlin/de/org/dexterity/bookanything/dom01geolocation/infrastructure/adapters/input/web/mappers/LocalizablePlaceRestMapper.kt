@@ -26,6 +26,8 @@ class LocalizablePlaceRestMapper {
             commandId = UUID.randomUUID(),
             locationName = sourceRequestDTO.name,
             alias = sourceRequestDTO.alias,
+            friendlyId = sourceRequestDTO.friendlyId,
+            propertiesDetailsMap = sourceRequestDTO.propertiesDetailsMap,
             locationPoint = pointLocationTmp,
         )
     }
@@ -33,8 +35,10 @@ class LocalizablePlaceRestMapper {
     fun fromDomainToRestResponse(sourceDomainModel: LocalizablePlaceModel): LocalizablePlaceRestResponse {
         return LocalizablePlaceRestResponse(
             id = sourceDomainModel.id,
+            friendlyId = sourceDomainModel.friendlyId,
             name = sourceDomainModel.name,
             alias = sourceDomainModel.alias,
+            propertiesDetailsMap = sourceDomainModel.propertiesDetailsMap,
             latitude = sourceDomainModel.locationPoint.y,
             longitude = sourceDomainModel.locationPoint.x
         )

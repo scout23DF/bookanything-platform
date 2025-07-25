@@ -37,15 +37,15 @@ class CityPersistenceJpaAdapterTest {
     @Test
     fun `saveNew should save and return CityModel`() {
         val provinceId = 1L
-        val provinceEntity = ProvinceEntity(name = "Bangkok", country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
 
-        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), name = "Bangkok", parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
-        val model = CityModel(id = GeoLocationId(0), name = "Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
-        val cityEntity = CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
-        val savedEntity = CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        val savedModel = CityModel(id = GeoLocationId(2), name = "Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
+        val model = CityModel(id = GeoLocationId(0), friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
+        val cityEntity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
+        val savedEntity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+        val savedModel = CityModel(id = GeoLocationId(2), friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
 
         every { provinceJpaRepository.findById(provinceId) } returns Optional.of(provinceEntity)
         every { cityJpaRepository.save(any<CityEntity>()) } returns savedEntity
@@ -61,15 +61,15 @@ class CityPersistenceJpaAdapterTest {
     fun `update should update and return CityModel`() {
         val provinceId = 1L
         val cityId = 2L
-        val provinceEntity = ProvinceEntity(name = "Bangkok", country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
 
-        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), name = "Bangkok", parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
-        val model = CityModel(id = GeoLocationId(cityId), name = "Updated Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
-        val existingEntity = CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        val updatedEntity = CityEntity(name = "Updated Bangkok City", province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        val updatedModel = CityModel(id = GeoLocationId(cityId), name = "Updated Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+        val model = CityModel(id = GeoLocationId(cityId), friendlyId = "updated-bangkok-city", name = "Updated Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"), districtsList = emptyList())
+        val existingEntity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+        val updatedEntity = CityEntity(friendlyId = "updated-bangkok-city", name = "Updated Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+        val updatedModel = CityModel(id = GeoLocationId(cityId), friendlyId = "updated-bangkok-city", name = "Updated Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = wktReader.read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
 
         every { cityJpaRepository.findById(cityId) } returns Optional.of(existingEntity)
         every { provinceJpaRepository.findById(provinceId) } returns Optional.of(provinceEntity)
@@ -88,13 +88,13 @@ class CityPersistenceJpaAdapterTest {
     fun `findById should return CityModel if found`() {
         val provinceId = 1L
         val cityId = 2L
-        val provinceEntity = ProvinceEntity(name = "Bangkok", country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
-        val entity = CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList())
+        val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val entity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList())
 
-        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), name = "Bangkok", parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
-        val model = CityModel(id = GeoLocationId(cityId), name = "Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList())
+        val model = CityModel(id = GeoLocationId(cityId), friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList())
 
         every { cityJpaRepository.findById(cityId) } returns Optional.of(entity)
         every { geoLocationJpaMappers.cityToDomainModel(entity, true) } returns model
@@ -108,13 +108,13 @@ class CityPersistenceJpaAdapterTest {
     @Test
     fun `findAll should return list of CityModels`() {
         val provinceId = 1L
-        val provinceEntity = ProvinceEntity(name = "Bangkok", country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
-        val entities = listOf(CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
+        val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val entities = listOf(CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
 
-        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), name = "Bangkok", parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
-        val models = listOf(CityModel(id = GeoLocationId(2), name = "Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
+        val models = listOf(CityModel(id = GeoLocationId(2), friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
 
         every { cityJpaRepository.findAll() } returns entities
         every { geoLocationJpaMappers.cityToDomainModel(any(), true) } answers { models[0] }
@@ -139,13 +139,13 @@ class CityPersistenceJpaAdapterTest {
     fun `findByProvinceIdAndNameStartingWith should return filtered list`() {
         val provinceId = 1L
         val namePrefix = "B"
-        val provinceEntity = ProvinceEntity(name = "Bangkok", country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
-        val entities = listOf(CityEntity(name = "Bangkok City", province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
+        val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val entities = listOf(CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
 
-        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), name = "Bangkok", parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
+        val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", propertiesDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
-        val models = listOf(CityModel(id = GeoLocationId(2), name = "Bangkok City", parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
+        val models = listOf(CityModel(id = GeoLocationId(2), friendlyId = "bangkok-city", name = "Bangkok City", propertiesDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
 
         every { cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId, namePrefix) } returns entities
         every { geoLocationJpaMappers.cityToDomainModel(any(), true) } answers { models[0] }

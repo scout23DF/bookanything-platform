@@ -23,8 +23,10 @@ class CountryPersistenceJpaAdapter(
     override fun saveNew(targetModel: CountryModel): CountryModel {
         val regionEntity = regionJpaRepository.findById(targetModel.region.id.id).orElseThrow()
         val countryEntity = CountryEntity(
+            friendlyId = targetModel.friendlyId,
             name = targetModel.name,
             alias = targetModel.alias,
+            propertiesDetailsMap = targetModel.propertiesDetailsMap,
             boundaryRepresentation = targetModel.boundaryRepresentation,
             region = regionEntity
         )
@@ -39,8 +41,10 @@ class CountryPersistenceJpaAdapter(
         return countryJpaRepository.findById(entityId)
             .map { existingEntity ->
                 existingEntity.name = targetModel.name
+                existingEntity.friendlyId = targetModel.friendlyId
                 existingEntity.alias = targetModel.alias
                 existingEntity.boundaryRepresentation = targetModel.boundaryRepresentation
+                existingEntity.propertiesDetailsMap = targetModel.propertiesDetailsMap
                 val regionEntity = regionJpaRepository.findById(targetModel.region.id.id).orElseThrow()
                 existingEntity.region = regionEntity
                 val savedEntity = countryJpaRepository.save(existingEntity)

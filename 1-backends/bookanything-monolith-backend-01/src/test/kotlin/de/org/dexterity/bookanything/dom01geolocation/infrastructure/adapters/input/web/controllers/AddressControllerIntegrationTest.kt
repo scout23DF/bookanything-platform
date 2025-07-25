@@ -62,12 +62,12 @@ class AddressControllerIntegrationTest : AbstractIntegrationTest() {
     fun setUp() {
         testDatabaseCleaner.cleanAndResetDatabase()
 
-        val continent = continentJpaRepository.save(ContinentEntity(name = "South America", boundaryRepresentation = null))
-        val region = regionJpaRepository.save(RegionEntity(name = "South America", continent = continent, boundaryRepresentation = null))
-        val country = countryJpaRepository.save(CountryEntity(name = "Brazil", region = region, boundaryRepresentation = null))
-        val province = provinceJpaRepository.save(ProvinceEntity(name = "São Paulo", country = country, boundaryRepresentation = null))
-        val city = cityJpaRepository.save(CityEntity(name = "São Paulo", province = province, boundaryRepresentation = null))
-        testDistrict = districtJpaRepository.save(DistrictEntity(name = "Vila Madalena", city = city, boundaryRepresentation = null))
+        val continent = continentJpaRepository.save(ContinentEntity(friendlyId = "south-america", name = "South America", boundaryRepresentation = null))
+        val region = regionJpaRepository.save(RegionEntity(friendlyId = "south-america-region", name = "South America", continent = continent, boundaryRepresentation = null))
+        val country = countryJpaRepository.save(CountryEntity(friendlyId = "brazil", name = "Brazil", region = region, boundaryRepresentation = null))
+        val province = provinceJpaRepository.save(ProvinceEntity(friendlyId = "sao-paulo-province", name = "São Paulo", country = country, boundaryRepresentation = null))
+        val city = cityJpaRepository.save(CityEntity(friendlyId = "sao-paulo-city", name = "São Paulo", province = province, boundaryRepresentation = null))
+        testDistrict = districtJpaRepository.save(DistrictEntity(friendlyId = "vila-madalena", name = "Vila Madalena", city = city, boundaryRepresentation = null))
     }
 
     @AfterEach

@@ -18,8 +18,10 @@ data class GeoLocationId(val id: Long)
 
 sealed interface IGeoLocationModel {
     val id: GeoLocationId
+    val friendlyId: String
     val name: String
     val alias: String?
+    val propertiesDetailsMap: Map<String, Any>?
     val type: GeoLocationType
     val boundaryRepresentation: Geometry?
     val parentId: Long?
@@ -29,8 +31,10 @@ sealed interface IGeoLocationModel {
 
 data class ContinentModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long? = null,
     val regionsList: List<RegionModel>? = null
@@ -41,8 +45,10 @@ data class ContinentModel (
 
 data class RegionModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val continent: ContinentModel,
@@ -54,8 +60,10 @@ data class RegionModel (
 
 data class CountryModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val region: RegionModel,
@@ -67,8 +75,10 @@ data class CountryModel (
 
 data class ProvinceModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val country: CountryModel,
@@ -80,8 +90,10 @@ data class ProvinceModel (
 
 data class CityModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     val isCountryCapital: Boolean? = false,
     val isProvinceCapital: Boolean? = false,
@@ -95,8 +107,10 @@ data class CityModel (
 
 data class DistrictModel (
     override val id: GeoLocationId,
+    override val friendlyId: String,
     override val name: String,
     override val alias: String? = null,
+    override val propertiesDetailsMap: Map<String, Any>? = null,
     override val boundaryRepresentation: Geometry? = null,
     override val parentId: Long?,
     val city: CityModel,

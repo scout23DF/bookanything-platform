@@ -18,22 +18,26 @@ class LocalizablePlaceCRUDUseCase(
     private val eventPublisherPort: EventPublisherPort
 ) : LocalizablePlaceWriteFeaturePort, LocalizablePlaceReadFeaturePort {
 
-    override fun cadastrar(nome: String, alias: String?, localizacao: Point): LocalizablePlaceModel {
+    override fun cadastrar(nome: String, alias: String?, friendlyId: String, propertiesDetailsMap: Map<String, Any>?, localizacao: Point): LocalizablePlaceModel {
         if (localizablePlacePersistRepositoryPort.existsByName(nome)) {
             throw IllegalArgumentException("Centro de Distribuição com o nome '$nome' já existe.")
         }
         val localizablePlaceModel = LocalizablePlaceModel(
             id = UUID.randomUUID(),
+            friendlyId = friendlyId,
             name = nome,
             alias = alias,
+            propertiesDetailsMap = propertiesDetailsMap,
             locationPoint = localizacao
         )
         val savedCentroDistribuicao = localizablePlacePersistRepositoryPort.salvar(localizablePlaceModel)
         eventPublisherPort.publish(
             LocalizablePlaceCreatedEvent(
                 id = savedCentroDistribuicao.id,
+                friendlyId = savedCentroDistribuicao.friendlyId,
                 name = savedCentroDistribuicao.name,
                 alias = savedCentroDistribuicao.alias,
+                propertiesDetailsMap = savedCentroDistribuicao.propertiesDetailsMap,
                 latitude = savedCentroDistribuicao.locationPoint.y,
                 longitude = savedCentroDistribuicao.locationPoint.x
             )
