@@ -67,7 +67,6 @@ spring:
         oauth2:
             resource-server:
                 jwt:
-
                     jwk-set-uri: http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/certs
             client:
                 provider:
@@ -188,4 +187,18 @@ springdoc:
             realm: dexterity-apps-01
     oauth2:
         authorization-url: http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/auth
+
+gadm:
+    api:
+        base-url: https://geodata.ucdavis.edu/gadm/gadm4.1/json
+        file-template: gadm41_[COUNTRY_ALIAS]_[LEVEL_NUMBER].json
+
+topics:
+    geolocation:
+        geojson-download:
+            requested: "geolocation.geojson-download.requested"
+            country-data-required: "geolocation.geojson-download.country-data-required"
+            failed: "geolocation.geojson-download.failed"
+        geojson-file:
+            downloaded: "geolocation.geojson-file.downloaded"
 

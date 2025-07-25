@@ -13,7 +13,7 @@ data class LocalizablePlaceElasticEntity(
     val friendlyId: String,
     val name: String,
     val alias: String?,
-    val propertiesDetailsMap: Map<String, Any>?,
+    val additionalDetailsMap: Map<String, Any>?,
     @GeoPointField
     val locationPoint: GeoPoint
 )

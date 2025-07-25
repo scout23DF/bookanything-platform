@@ -1,6 +1,6 @@
 package de.org.dexterity.bookanything.dom02assetmanager.application.mappers
 
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.AssetDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.AssetDto
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
 import de.org.dexterity.bookanything.shared.annotations.Mapper
 

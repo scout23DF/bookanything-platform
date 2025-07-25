@@ -8,9 +8,17 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class GeoLocationBeansConfig {
+
+    @Bean
+    fun webClient(): WebClient {
+        return WebClient.builder()
+            .defaultHeader("User-Agent", "BookAnythingBackendApplication/1.0")
+            .build()
+    }
 
     @Bean
     fun localizablePlaceCRUDUseCase(

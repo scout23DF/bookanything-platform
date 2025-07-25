@@ -1,0 +1,46 @@
+
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+    <changeSet id="20250726100000-1" author="gemini">
+        <createTable tableName="tb_geojson_import">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ds_file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_original_content_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ts_import" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="en_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ds_status_details" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250726100000-2" author="gemini">
+        <createTable tableName="tb_geojson_feature">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="import_id" type="UUID">
+                <constraints nullable="false" foreignKeyName="fk_feature_import" references="tb_geojson_import(id)"/>
+            </column>
+            <column name="ge_geometry" type="GEOMETRY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="js_properties" type="JSONB"/>
+        </createTable>
+    </changeSet>
+    -->
+
+</databaseChangeLog>

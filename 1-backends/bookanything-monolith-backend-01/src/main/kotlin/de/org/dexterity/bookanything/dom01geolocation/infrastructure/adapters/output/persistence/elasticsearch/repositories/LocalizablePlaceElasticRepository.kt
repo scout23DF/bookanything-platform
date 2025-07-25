@@ -8,4 +8,6 @@ import java.util.UUID
 @Repository
 interface LocalizablePlaceElasticRepository : ElasticsearchRepository<LocalizablePlaceElasticEntity, UUID>, LocalizablePlaceElasticRepositoryCustom {
     fun findByAliasStartingWith(searchedAlias: String): List<LocalizablePlaceElasticEntity>
+    fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceElasticEntity>
+    fun findByAdditionalDetailsMapContains(key: String, value: String): List<LocalizablePlaceElasticEntity>
 }

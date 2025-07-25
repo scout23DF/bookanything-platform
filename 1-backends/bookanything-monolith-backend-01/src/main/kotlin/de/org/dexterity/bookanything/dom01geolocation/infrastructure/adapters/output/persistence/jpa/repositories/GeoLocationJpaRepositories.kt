@@ -14,7 +14,7 @@ interface ContinentJpaRepository : JpaRepository<ContinentEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ContinentEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'CONTINENT'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'CONTINENT'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentEntity>
 
     @Query("SELECT c FROM ContinentEntity c LEFT JOIN FETCH c.regionsList WHERE c.id = :id")
@@ -31,7 +31,7 @@ interface RegionJpaRepository : JpaRepository<RegionEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<RegionEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'REGION'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'REGION'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionEntity>
 
     @Query("SELECT r FROM RegionEntity r LEFT JOIN FETCH r.countriesList WHERE r.id = :id")
@@ -48,7 +48,7 @@ interface CountryJpaRepository : JpaRepository<CountryEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CountryEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'COUNTRY'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'COUNTRY'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<CountryEntity>
 
     @Query("SELECT c FROM CountryEntity c LEFT JOIN FETCH c.provincesList WHERE c.id = :id")
@@ -65,7 +65,7 @@ interface ProvinceJpaRepository : JpaRepository<ProvinceEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'PROVINCE'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'PROVINCE'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceEntity>
 
     @Query("SELECT p FROM ProvinceEntity p LEFT JOIN FETCH p.citiesList WHERE p.id = :id")
@@ -82,7 +82,7 @@ interface CityJpaRepository : JpaRepository<CityEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CityEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'CITY'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'CITY'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityEntity>
 
     @Query("SELECT c FROM CityEntity c LEFT JOIN FETCH c.districtsList WHERE c.id = :id")
@@ -99,7 +99,7 @@ interface DistrictJpaRepository : JpaRepository<DistrictEntity, Long> {
 
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictEntity>
 
-    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_properties_details ->> ?1 = ?2 AND g.tp_geo_location = 'DISTRICT'", nativeQuery = true)
+    @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'DISTRICT'", nativeQuery = true)
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictEntity>
 
     @Query("SELECT d FROM DistrictEntity d LEFT JOIN FETCH d.addressesList WHERE d.id = :id")

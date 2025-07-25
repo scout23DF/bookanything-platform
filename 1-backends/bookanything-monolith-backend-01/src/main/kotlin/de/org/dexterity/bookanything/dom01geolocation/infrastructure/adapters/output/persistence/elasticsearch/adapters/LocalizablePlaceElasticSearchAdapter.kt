@@ -25,7 +25,7 @@ class LocalizablePlaceElasticSearchAdapter(
                     friendlyId = elasticEntity.friendlyId,
                     name = elasticEntity.name,
                     alias = elasticEntity.alias,
-                    additionalDetailsMap = elasticEntity.propertiesDetailsMap,
+                    additionalDetailsMap = elasticEntity.additionalDetailsMap,
                     locationPoint = GeometryFactory().createPoint(
                         Coordinate(
                             elasticEntity.locationPoint.lon,
@@ -46,7 +46,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.additionalDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -65,7 +65,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.additionalDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -87,7 +87,7 @@ class LocalizablePlaceElasticSearchAdapter(
                 friendlyId = elasticEntity.friendlyId,
                 name = elasticEntity.name,
                 alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.propertiesDetailsMap,
+                additionalDetailsMap = elasticEntity.additionalDetailsMap,
                 locationPoint = GeometryFactory().createPoint(
                     Coordinate(
                         elasticEntity.locationPoint.lon,
@@ -116,7 +116,7 @@ class LocalizablePlaceElasticSearchAdapter(
                     friendlyId = oneLocalizablePlaceFromDB.friendlyId,
                     name = oneLocalizablePlaceFromDB.name,
                     alias = oneLocalizablePlaceFromDB.alias,
-                    propertiesDetailsMap = oneLocalizablePlaceFromDB.additionalDetailsMap,
+                    additionalDetailsMap = oneLocalizablePlaceFromDB.additionalDetailsMap,
                     locationPoint = GeoPoint(
                         oneLocalizablePlaceFromDB.locationPoint.y,
                         oneLocalizablePlaceFromDB.locationPoint.x
@@ -138,10 +138,42 @@ class LocalizablePlaceElasticSearchAdapter(
     }
 
     override fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
-        TODO("Not yet implemented")
+
+        return localizablePlaceElasticRepository.findByFriendlyIdContaining(friendlyId).map { elasticEntity ->
+            LocalizablePlaceModel(
+                id = elasticEntity.id,
+                friendlyId = elasticEntity.friendlyId,
+                name = elasticEntity.name,
+                alias = elasticEntity.alias,
+                additionalDetailsMap = elasticEntity.additionalDetailsMap,
+                locationPoint = GeometryFactory().createPoint(
+                    Coordinate(
+                        elasticEntity.locationPoint.lon,
+                        elasticEntity.locationPoint.lat
+                    )
+                )
+            )
+        }.toList()
+
     }
 
     override fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
-        TODO("Not yet implemented")
+
+        return localizablePlaceElasticRepository.findByAdditionalDetailsMapContains(key, value).map { elasticEntity ->
+            LocalizablePlaceModel(
+                id = elasticEntity.id,
+                friendlyId = elasticEntity.friendlyId,
+                name = elasticEntity.name,
+                alias = elasticEntity.alias,
+                additionalDetailsMap = elasticEntity.additionalDetailsMap,
+                locationPoint = GeometryFactory().createPoint(
+                    Coordinate(
+                        elasticEntity.locationPoint.lon,
+                        elasticEntity.locationPoint.lat
+                    )
+                )
+            )
+        }.toList()
+
     }
 }

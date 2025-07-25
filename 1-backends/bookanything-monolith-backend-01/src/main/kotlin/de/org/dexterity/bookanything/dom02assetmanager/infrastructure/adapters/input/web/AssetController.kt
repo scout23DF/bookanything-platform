@@ -3,9 +3,9 @@ package de.org.dexterity.bookanything.dom02assetmanager.infrastructure.adapters.
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import de.org.dexterity.bookanything.dom02assetmanager.application.usecases.AssetUseCase
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.AssetDto
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.UpdateAssetDto
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.UploadAssetResponseDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.AssetDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.UpdateAssetDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.UploadAssetResponseDto
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetCategory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

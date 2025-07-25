@@ -1,12 +1,10 @@
 package de.org.dexterity.bookanything.dom02assetmanager.application.services
 
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.UpdateAssetDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericAssetUploadRequestDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericUploadedAssetResponseDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.UpdateAssetDto
 import de.org.dexterity.bookanything.dom02assetmanager.domain.events.AssetUploadedEvent
-import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetCategory
-import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
-import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetStatus
-import de.org.dexterity.bookanything.dom02assetmanager.domain.models.BucketModel
-import de.org.dexterity.bookanything.dom02assetmanager.domain.models.StorageProviderType
+import de.org.dexterity.bookanything.dom02assetmanager.domain.models.*
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetEventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
@@ -28,44 +26,25 @@ class AssetCRUDService(
 ) {
 
     @Transactional
-    suspend fun uploadAsset(
-        file: MultipartFile,
+    suspend fun uploadAssetFromMultipartFile(
+        uploadedMultipartFile: MultipartFile,
         bucketName: String?,
         category: AssetCategory,
         metadata: Map<String, Any>
     ): AssetModel {
-        val targetBucketName = bucketName ?: inferBucketName(category)
-        storageProvider.createBucketIfNotExists(targetBucketName)
 
-        val bucket = bucketRepository.findByName(targetBucketName).orElseGet {
-            bucketRepository.save(BucketModel(name = targetBucketName, provider = StorageProviderType.MINIO)) // Assuming Minio for now
-        }
-
-        val originalFileName = file.originalFilename ?: "unknown-file"
-        val storageKey = generateStorageKey(category, originalFileName)
-
-        var asset = AssetModel(
-            bucket = bucket,
-            fileName = originalFileName,
-            storageKey = storageKey,
-            mimeType = file.contentType ?: "application/octet-stream",
-            size = file.size,
+        val genericAssetUploadRequestDto = GenericAssetUploadRequestDto(
+            bucketName = bucketName,
             category = category,
-            metadataMap = metadata,
-            status = AssetStatus.PENDING
+            fileName = uploadedMultipartFile.originalFilename ?: "unknown-file",
+            filesize = uploadedMultipartFile.size,
+            contentType = uploadedMultipartFile.contentType ?: "application/octet-stream",
+            fileContentAsBytes = uploadedMultipartFile.bytes,
+            metadataMap = metadata
         )
-        asset = assetRepository.save(asset)
 
-        val tempDir = File(System.getProperty("java.io.tmpdir"), "bookanything-assets")
-        if (!tempDir.exists()) {
-            tempDir.mkdirs()
-        }
-        val tempFile = File(tempDir, "${asset.id}-${file.originalFilename}")
-        file.transferTo(tempFile)
+        return uploadGenericAsset(genericAssetUploadRequestDto).createdAsset
 
-        eventPublisher.publishAssetUploadedEvent(AssetUploadedEvent(asset.id!!, tempFile.absolutePath))
-        
-        return asset
     }
 
     @Transactional
@@ -123,6 +102,49 @@ class AssetCRUDService(
         return assetRepository.findByMetadataContains(key, value, pageable)
     }
 
+    suspend fun uploadGenericAsset(assetUploadRequestDto: GenericAssetUploadRequestDto): GenericUploadedAssetResponseDto {
+
+        val targetBucketName = assetUploadRequestDto.bucketName ?: inferBucketName(assetUploadRequestDto.category)
+
+        storageProvider.createBucketIfNotExists(targetBucketName)
+
+        val bucket = bucketRepository.findByName(targetBucketName).orElseGet {
+            bucketRepository.save(BucketModel(name = targetBucketName, provider = StorageProviderType.MINIO)) // Assuming Minio for now
+        }
+
+        val originalFileName = assetUploadRequestDto.fileName
+        val storageKey = generateStorageKey(assetUploadRequestDto.category, originalFileName)
+
+        var asset = AssetModel(
+            bucket = bucket,
+            fileName = originalFileName,
+            storageKey = storageKey,
+            mimeType = assetUploadRequestDto.contentType,
+            size = assetUploadRequestDto.filesize,
+            category = assetUploadRequestDto.category,
+            metadataMap = assetUploadRequestDto.metadataMap,
+            status = AssetStatus.PROCESSING
+        )
+        asset = assetRepository.save(asset)
+
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "bookanything-assets")
+        if (!tempDir.exists()) {
+            tempDir.mkdirs()
+        }
+        val tempFile = File(tempDir, "${asset.id}-${originalFileName}")
+        tempFile.writeBytes(assetUploadRequestDto.fileContentAsBytes)
+
+        eventPublisher.publishAssetUploadedEvent(AssetUploadedEvent(asset.id!!, tempFile.absolutePath))
+
+        return GenericUploadedAssetResponseDto(
+            createdAsset = asset,
+            status = AssetStatus.PENDING,
+            message = "Asset upload processed. Final status: ${asset.status}",
+            absolutePathTempFile = tempFile.absolutePath
+        )
+    }
+
+
     private fun inferBucketName(category: AssetCategory): String {
         return when (category) {
             AssetCategory.IMAGE -> "bookanything-images"
@@ -136,4 +158,5 @@ class AssetCRUDService(
         val uuid = UUID.randomUUID().toString()
         return "${category.name.lowercase()}/$uuid-$fileName"
     }
+
 }

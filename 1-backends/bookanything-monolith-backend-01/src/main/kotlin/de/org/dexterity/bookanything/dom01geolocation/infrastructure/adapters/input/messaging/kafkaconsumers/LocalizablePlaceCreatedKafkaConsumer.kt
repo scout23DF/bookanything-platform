@@ -23,7 +23,7 @@ class LocalizablePlaceCreatedKafkaConsumer(
             friendlyId = "friendly-id-from-event", // TODO: Adicionar friendlyId ao evento
             name = event.name,
             alias = event.alias,
-            propertiesDetailsMap = null, // TODO: Adicionar propertiesDetailsMap ao evento
+            additionalDetailsMap = null, // TODO: Adicionar propertiesDetailsMap ao evento
             locationPoint = GeoPoint(event.latitude, event.longitude)
         )
         localizablePlaceElasticRepository.save(elasticEntity)

@@ -2,9 +2,7 @@ package de.org.dexterity.bookanything.dom02assetmanager.application.usecases
 
 import de.org.dexterity.bookanything.dom02assetmanager.application.mappers.AssetMapper
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.AssetCRUDService
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.AssetDto
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.UpdateAssetDto
-import de.org.dexterity.bookanything.dom02assetmanager.domain.dtos.UploadAssetResponseDto
+import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.*
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetCategory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -23,7 +21,7 @@ class AssetUseCase(
         category: AssetCategory,
         metadata: Map<String, Any>
     ): UploadAssetResponseDto {
-        val asset = assetCRUDService.uploadAsset(file, bucketName, category, metadata)
+        val asset = assetCRUDService.uploadAssetFromMultipartFile(file, bucketName, category, metadata)
         return UploadAssetResponseDto(
             assetId = asset.id!!,
             status = asset.status,
@@ -66,5 +64,11 @@ class AssetUseCase(
     fun handleFindByMetadataContains(key: String, value: String, pageable: Pageable): Page<AssetDto> {
         return assetCRUDService.findByMetadataContains(key, value, pageable).map { assetMapper.toDto(it) }
     }
+
+    suspend fun uploadGenericAsset(assetUploadRequestDto: GenericAssetUploadRequestDto): GenericUploadedAssetResponseDto {
+        return assetCRUDService.uploadGenericAsset(assetUploadRequestDto)
+    }
+
+
 }
 
