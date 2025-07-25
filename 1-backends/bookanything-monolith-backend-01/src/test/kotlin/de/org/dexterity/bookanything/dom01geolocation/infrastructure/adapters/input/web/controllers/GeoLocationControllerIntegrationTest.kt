@@ -323,4 +323,43 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
     }
 
+    @Test
+    fun shouldSearchByFriendlyId() {
+        val genericPolygonAsString = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
+        createOneGeoLocation(GeoLocationType.CONTINENT, "SearchContinent", "search-continent", genericPolygonAsString, null)
+
+        val result = mockMvc.get("/api/v1/geolocations/${GeoLocationType.CONTINENT.name.lowercase()}/search-by-friendlyid?friendlyId=search") {
+            with(jwt())
+        }.andExpect { status { isOk() } }.andReturn()
+
+        val response = objectMapper.readValue<List<GeoLocationResponse>>(result.response.contentAsString)
+        assertEquals(1, response.size)
+        assertEquals("SearchContinent", response[0].name)
+    }
+
+    @Test
+    fun shouldSearchByAdditionalDetail() {
+        val genericPolygonAsString = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
+        val createRequest = CreateGeoLocationRequest(
+            friendlyId = "prop-continent",
+            name = "PropContinent",
+            boundaryRepresentation = genericPolygonAsString,
+            additionalDetailsMap = mapOf("key1" to "value1")
+        )
+
+        mockMvc.post("/api/v1/geolocations/${GeoLocationType.CONTINENT.name.lowercase()}") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(createRequest)
+            with(jwt())
+        }.andExpect { status { isOk() } }
+
+        val result = mockMvc.get("/api/v1/geolocations/${GeoLocationType.CONTINENT.name.lowercase()}/search-by-additional-detail?key=key1&value=value1") {
+            with(jwt())
+        }.andExpect { status { isOk() } }.andReturn()
+
+        val response = objectMapper.readValue<List<GeoLocationResponse>>(result.response.contentAsString)
+        assertEquals(1, response.size)
+        assertEquals("PropContinent", response[0].name)
+    }
+
 }

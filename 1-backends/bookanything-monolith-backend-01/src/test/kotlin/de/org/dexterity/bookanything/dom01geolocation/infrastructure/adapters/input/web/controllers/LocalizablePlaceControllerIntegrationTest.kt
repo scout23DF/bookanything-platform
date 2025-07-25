@@ -23,7 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
-import org.springframework.data.elasticsearch.core.query.DeleteQuery
 import org.springframework.http.MediaType
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
@@ -33,16 +32,12 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MvcResult
-import org.springframework.test.web.servlet.delete
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.*
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.io.File
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -423,6 +418,62 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
         kafkaTemplate.flush()
 
         return mockMvcResult
+
+    }
+
+    @Test
+    fun shouldSearchByFriendlyId() {
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(friendlyId = "search-place", name = "Searchable Place", latitude = 1.0, longitude = 1.0))
+
+        // Wait for Kafka and Elasticsearch to process the events
+        await().atMost(Duration.ofSeconds(30)).untilAsserted {
+
+            elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
+
+            val result = mockMvc.get("/api/v1/localizable-places/search-by-friendlyid?friendlyId=search") {
+                            with(jwt())
+                        }.andExpect { status { isOk() } }.andReturn()
+
+            val response = objectMapper.readValue<List<LocalizablePlaceRestResponse>>(result.response.contentAsString)
+
+            val count = response.size
+            if (count > 0) {
+                assertEquals(1, count)
+                assertEquals("Searchable Place", response[0].name)
+            }
+
+        }
+
+    }
+
+    @Test
+    fun shouldSearchByAdditionalDetail() {
+        createDistributionCenter(CreateLocalizablePlaceRestRequest(
+            friendlyId = "prop-place",
+            name = "Property Place",
+            latitude = 2.0,
+            longitude = 2.0,
+            additionalDetailsMap = mapOf("testKey" to "testValue")
+        ))
+
+        // Wait for Kafka and Elasticsearch to process the events
+        await().atMost(Duration.ofSeconds(30)).untilAsserted {
+
+            elasticsearchOperations.indexOps(LocalizablePlaceElasticEntity::class.java).refresh()
+
+            val result = mockMvc.get("/api/v1/localizable-places/search-by-additional-detail?key=testKey&value=testValue") {
+                with(jwt())
+            }.andExpect { status { isOk() } }.andReturn()
+
+            val response = objectMapper.readValue<List<LocalizablePlaceRestResponse>>(result.response.contentAsString)
+
+            val count = response.size
+            if (count > 0) {
+                assertEquals(1, count)
+                assertEquals("Property Place", response[0].name)
+            }
+
+        }
 
     }
 
