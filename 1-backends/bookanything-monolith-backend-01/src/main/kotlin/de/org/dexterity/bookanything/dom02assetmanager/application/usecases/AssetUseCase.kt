@@ -19,9 +19,20 @@ class AssetUseCase(
         file: MultipartFile,
         bucketName: String?,
         category: AssetCategory,
+        parentAliasToAttach: String?,
+        forceReimportIfExists: Boolean?,
         metadata: Map<String, Any>
     ): UploadAssetResponseDto {
-        val asset = assetCRUDService.uploadAssetFromMultipartFile(file, bucketName, category, metadata)
+
+        val asset = assetCRUDService.uploadAssetFromMultipartFile(
+            file,
+            bucketName,
+            category,
+            metadata,
+            parentAliasToAttach ?: "",
+            forceReimportIfExists ?: false
+        )
+
         return UploadAssetResponseDto(
             assetId = asset.id!!,
             status = asset.status,
@@ -65,8 +76,18 @@ class AssetUseCase(
         return assetCRUDService.findByMetadataContains(key, value, pageable).map { assetMapper.toDto(it) }
     }
 
-    suspend fun uploadGenericAsset(assetUploadRequestDto: GenericAssetUploadRequestDto): GenericUploadedAssetResponseDto {
-        return assetCRUDService.uploadGenericAsset(assetUploadRequestDto)
+    suspend fun uploadGenericAsset(
+        assetUploadRequestDto: GenericAssetUploadRequestDto,
+        parentAliasToAttach: String,
+        forceReimportIfExists: Boolean
+    ): GenericUploadedAssetResponseDto {
+
+        return assetCRUDService.uploadGenericAsset(
+            assetUploadRequestDto,
+            parentAliasToAttach,
+            forceReimportIfExists
+        )
+
     }
 
 

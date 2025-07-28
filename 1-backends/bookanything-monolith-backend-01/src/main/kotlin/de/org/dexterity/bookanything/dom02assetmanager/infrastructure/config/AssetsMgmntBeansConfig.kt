@@ -1,7 +1,7 @@
 package de.org.dexterity.bookanything.dom02assetmanager.infrastructure.config
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.AssetCRUDService
-import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetEventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
@@ -18,14 +18,14 @@ class AssetsMgmntBeansConfig {
         assetPersistRepositoryPort: AssetPersistRepositoryPort,
         bucketPersistRepositoryPort: BucketPersistRepositoryPort,
         storageProviderPort: StorageProviderPort,
-        assetEventPublisherPort: AssetEventPublisherPort
+        eventPublisherPort: EventPublisherPort
     ): AssetCRUDService {
 
         return AssetCRUDService(
             assetPersistRepositoryPort,
             bucketPersistRepositoryPort,
             storageProviderPort,
-            assetEventPublisherPort
+            eventPublisherPort
         )
     }
 }

@@ -1,26 +1,27 @@
 package de.org.dexterity.bookanything.dom01geolocation.domain.models
 
-import org.locationtech.jts.geom.Geometry
+import org.geolatte.geom.Geometry
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 enum class GeoJsonImportStatus {
     PENDING, PROCESSING, COMPLETED, FAILED
 }
 
-data class GeoJsonImported(
+data class GeoJsonImportedFileModel(
     val id: UUID = UUID.randomUUID(),
     val fileName: String,
     val originalContentType: String,
     val importTimestamp: Instant = Instant.now(),
     var status: GeoJsonImportStatus = GeoJsonImportStatus.PENDING,
     var statusDetails: String? = null,
-    var featuresList: List<GeoJsonFeature> = emptyList()
+    var featuresList: List<GeoJsonFeatureModel> = emptyList()
 )
 
-data class GeoJsonFeature(
+data class GeoJsonFeatureModel(
     val id: UUID = UUID.randomUUID(),
-    val geoJsonImportedFileId: UUID,
-    val featureGeometry: Geometry,
-    val featurePropertiesMap: Map<String, Any?>
+    val geoJsonImportedFile: GeoJsonImportedFileModel,
+    val featureGeometry: Geometry<*>? = null,
+    val featurePropertiesMap: Map<String, Any?>,
+    val featureGeometryContentAsJson: String? = null
 )

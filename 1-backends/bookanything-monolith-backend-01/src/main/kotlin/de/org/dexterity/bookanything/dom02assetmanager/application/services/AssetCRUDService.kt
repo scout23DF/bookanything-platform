@@ -1,11 +1,11 @@
 package de.org.dexterity.bookanything.dom02assetmanager.application.services
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericAssetUploadRequestDto
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericUploadedAssetResponseDto
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.UpdateAssetDto
-import de.org.dexterity.bookanything.dom02assetmanager.domain.events.AssetUploadedEvent
+import de.org.dexterity.bookanything.dom02assetmanager.domain.events.AssetRegisteredEvent
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.*
-import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetEventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
@@ -22,7 +22,7 @@ class AssetCRUDService(
     private val assetRepository: AssetPersistRepositoryPort,
     private val bucketRepository: BucketPersistRepositoryPort,
     private val storageProvider: StorageProviderPort,
-    private val eventPublisher: AssetEventPublisherPort
+    private val eventPublisher: EventPublisherPort
 ) {
 
     @Transactional
@@ -30,7 +30,9 @@ class AssetCRUDService(
         uploadedMultipartFile: MultipartFile,
         bucketName: String?,
         category: AssetCategory,
-        metadata: Map<String, Any>
+        metadata: Map<String, Any>,
+        parentAliasToAttach: String,
+        forceReimportIfExists: Boolean
     ): AssetModel {
 
         val genericAssetUploadRequestDto = GenericAssetUploadRequestDto(
@@ -43,7 +45,7 @@ class AssetCRUDService(
             metadataMap = metadata
         )
 
-        return uploadGenericAsset(genericAssetUploadRequestDto).createdAsset
+        return uploadGenericAsset(genericAssetUploadRequestDto, parentAliasToAttach, forceReimportIfExists).createdAsset
 
     }
 
@@ -102,7 +104,11 @@ class AssetCRUDService(
         return assetRepository.findByMetadataContains(key, value, pageable)
     }
 
-    suspend fun uploadGenericAsset(assetUploadRequestDto: GenericAssetUploadRequestDto): GenericUploadedAssetResponseDto {
+    suspend fun uploadGenericAsset(
+        assetUploadRequestDto: GenericAssetUploadRequestDto,
+        parentAliasToAttach: String,
+        forceReimportIfExists: Boolean
+    ): GenericUploadedAssetResponseDto {
 
         val targetBucketName = assetUploadRequestDto.bucketName ?: inferBucketName(assetUploadRequestDto.category)
 
@@ -134,11 +140,18 @@ class AssetCRUDService(
         val tempFile = File(tempDir, "${asset.id}-${originalFileName}")
         tempFile.writeBytes(assetUploadRequestDto.fileContentAsBytes)
 
-        eventPublisher.publishAssetUploadedEvent(AssetUploadedEvent(asset.id!!, tempFile.absolutePath))
+        eventPublisher.publish(
+            AssetRegisteredEvent(
+                assetId = asset.id!!,
+                tempFile.absolutePath,
+                parentAliasToAttach = parentAliasToAttach,
+                forceReimportIfExists = forceReimportIfExists
+            )
+        )
 
         return GenericUploadedAssetResponseDto(
             createdAsset = asset,
-            status = AssetStatus.PENDING,
+            status = AssetStatus.PROCESSING,
             message = "Asset upload processed. Final status: ${asset.status}",
             absolutePathTempFile = tempFile.absolutePath
         )

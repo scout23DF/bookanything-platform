@@ -1,6 +1,7 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.controllers
 
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.GeoJsonDownloaderUseCase
+import de.org.dexterity.bookanything.dom01geolocation.application.usecases.GeoJsonImporterUseCase
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoJsonDownloadRequest
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoJsonDownloadResponse
 import org.springframework.http.ResponseEntity
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/geolocation/geojson/downloads")
 class GeoJsonDownloaderController(
-    private val geoJsonDownloaderUseCase: GeoJsonDownloaderUseCase
+    private val geoJsonDownloaderUseCase: GeoJsonDownloaderUseCase,
+    private val geoJsonImporterUseCase: GeoJsonImporterUseCase
 ) {
 
     @PostMapping
@@ -25,4 +27,5 @@ class GeoJsonDownloaderController(
             )
         )
     }
+
 }

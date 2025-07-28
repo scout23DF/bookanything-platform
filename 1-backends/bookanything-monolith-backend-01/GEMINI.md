@@ -1,39 +1,60 @@
-# Project Context: BookAnything-Platform
+# Project Context: `bookanything-monolith-backend-01`
 
-This document provides a comprehensive overview of the `BookAnything-Platform` monorepo.
+This document provides a comprehensive overview of the `bookanything-monolith-backend-01` service, part of the larger `BookAnything-Platform`.
 
-## Overview
+## 1. Overview
 
-The `BookAnything-Platform` is a monorepo that aggregates projects and assets for a complete solution. The platform's goal is to manage any product or service that can be scheduled/booked and subsequently acquired, following specific acquisition/hiring flows according to the product/service category.
+`bookanything-monolith-backend-01` is a Spring Boot application written in Kotlin that serves as the foundational backend for the BookAnything platform. It is designed as a modular monolith, with clear separation between different business domains. The service manages entities that have a geographical component ("localizable places") and assets related to them.
 
-The monorepo is structured as follows:
-- `1-backends`: Contains backend services.
-- `2-bff`: Contains Backend-for-Frontend services.
-- `3-frontends`: Contains frontend applications.
-- `4-clients-and-utilities`: Contains client libraries and various utilities.
+The project is structured as a Maven project and is the primary component currently under development within the `1-backends` module of the monorepo.
 
-## Current State: `bookanything-monolith-backend-01`
+## 2. Architecture and Key Features
 
-The main component currently under development is `bookanything-monolith-backend-01`, located in the `1-backends` directory. This is a Kotlin Spring Boot service that serves as the foundation for the platform.
+The service leverages a modern, event-driven architecture and incorporates several key patterns and technologies:
 
-### Key Features and Functionality of `bookanything-monolith-backend-01`
+*   **Modular Monolith:** The code is organized into distinct domain packages (`dom01geolocation`, `dom02assetmanager`) to promote separation of concerns and facilitate a potential future migration to microservices.
+*   **CQRS (Command Query Responsibility Segregation):**
+    *   **Write Operations:** Handled via standard JPA repositories, with PostgreSQL (and PostGIS for spatial data) serving as the source of truth.
+    *   **Read Operations:** Complex queries, especially geo-spatial searches, are offloaded to Elasticsearch for high performance.
+*   **Event-Driven Architecture:** Apache Kafka is used for asynchronous communication and to ensure data consistency between the PostgreSQL and Elasticsearch data stores. Events are published for significant state changes (e.g., `LocalizablePlaceCreatedEvent`).
+*   **REST API:** A comprehensive RESTful API is exposed for managing all application entities. API documentation is generated and available via SpringDoc (Swagger UI).
+*   **AI Integration:** The application is integrated with Google's Vertex AI (Gemini Pro) for advanced functionalities, as seen in the `GetGeoLocationBoundaryViaAIService`.
+*   **File/Object Storage:** Minio is used for S3-compatible object storage, for instance, to manage GeoJSON file uploads and downloads.
+*   **Security:** The application is secured using Spring Security with OAuth2/JWT, delegating authentication and authorization to Keycloak.
 
-*   **Core Service:** Initially conceived as a `distribution-center-locator`, this service is being refactored to become the core backend for the BookAnything platform. It manages entities that are "localizable" or have a geographical component.
-*   **REST API:** Provides a comprehensive set of RESTful endpoints for managing these localizable entities. This includes CRUD operations, geo-spatial queries (finding entities within a radius), and data synchronization.
-*   **Asynchronous Processing with Kafka:** Uses Kafka for asynchronous tasks, such as processing uploaded GeoJSON files containing entity data. This ensures the platform is scalable and resilient.
-*   **CQRS (Command Query Responsibility Segregation) Pattern:**
-    *   **Write Repository (PostgreSQL/JPA):** The primary data store (source of truth).
-    *   **Query Repository (Elasticsearch):** Optimized for complex read operations, especially geo-spatial queries.
-*   **Event-Driven Architecture:** Kafka is used to maintain data consistency between the write (PostgreSQL) and read (Elasticsearch) repositories.
-*   **Technology Stack:**
-    *   **Language:** Kotlin
-    *   **Framework:** Spring Boot
-    *   **Build Tool:** Maven
-    *   **Database:** PostgreSQL with PostGIS
-    *   **Search Engine:** Elasticsearch
-    *   **Messaging:** Apache Kafka
-    *   **Authentication/Authorization:** Spring Security with OAuth2 (Keycloak)
+## 3. Technology Stack
 
-## Future Vision
+*   **Language:** Kotlin
+*   **Framework:** Spring Boot 3
+*   **Build Tool:** Maven
+*   **Primary Database:** PostgreSQL with PostGIS extension for geo-spatial data.
+*   **Database Migrations:** Liquibase
+*   **Read/Search Database:** Elasticsearch
+*   **Messaging Broker:** Apache Kafka
+*   **Identity and Access Management (IAM):** Keycloak
+*   **AI Provider:** Google Vertex AI (Gemini)
+*   **Object Storage:** Minio
+*   **API Documentation:** SpringDoc (OpenAPI 3)
+*   **Testing:** JUnit 5, MockK, Testcontainers (for integration tests with Kafka, PostgreSQL, etc.)
 
-The platform will evolve by adding more specialized backend services, BFFs for different client experiences (e.g., web, mobile), and the corresponding frontend applications. The initial backend service provides the core location-based service capabilities that will be fundamental for many of the bookable items on the platform.
+## 4. Development Environment
+
+The local development environment is fully containerized using **Docker Compose**. The `docker-compose.yml` file orchestrates all necessary backing services, including:
+*   Portainer (Container Management)
+*   Minio (Object Storage)
+*   PostgreSQL & PgAdmin
+*   Kafka & Zookeeper
+*   RabbitMQ
+*   Keycloak (IAM)
+*   Consul (Service Discovery/Configuration)
+*   Elasticsearch & Kibana
+
+This setup ensures a consistent and reproducible development environment for all team members.
+
+## 5. Core Business Domains
+
+*   **`dom01geolocation`:** Manages all aspects of localizable places.
+    *   CRUD operations for `LocalizablePlace` and `Address` entities.
+    *   Geo-spatial queries (e.g., find places within a radius).
+    *   Asynchronous processing of GeoJSON file uploads via Kafka for data import.
+*   **`dom02assetmanager`:** Manages assets that can be associated with localizable places. (Details to be expanded).

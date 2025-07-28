@@ -29,21 +29,21 @@
 		<spring-boot.version>3.5.3</spring-boot.version>
 		<liquibase.version>4.32.0</liquibase.version>
 		<jackson.version>2.18.2</jackson.version>
-		<jackson-datatype-jts.version>2.2</jackson-datatype-jts.version>
-		<mockk.version>1.13.16</mockk.version>
+		<jackson-datatype-jts.version>2.17.2</jackson-datatype-jts.version>
+		<jts-core.version>1.20.0</jts-core.version>
+		<geojson-jackson.version>1.14</geojson-jackson.version>
 
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 		<compiler-plugin.version>3.14.0</compiler-plugin.version>
 		<surefire-plugin.version>3.5.3</surefire-plugin.version>
 		<failsafe-plugin.version>3.5.3</failsafe-plugin.version>
+		<mockk.version>1.13.16</mockk.version>
 
 		<springdoc-openapi.version>2.8.8</springdoc-openapi.version>
 		<openapi-maven-plugin.version>0.0.23</openapi-maven-plugin.version>
 		<testcontainers.version>1.21.0</testcontainers.version>
 		<reflections.version>0.10.2</reflections.version>
 		<json-web-token.version>0.12.6</json-web-token.version>
-		<jts-core.version>1.19.0</jts-core.version>
-		<geojson-jackson.version>1.14</geojson-jackson.version>
 		<spring-ai.version>1.0.0-M6</spring-ai.version>
 
 		<!--
@@ -59,6 +59,20 @@
         -->
 
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>desespero-repo</id>
+			<url>https://nexus.terrestris.de/repository/public/</url>
+			<snapshots>
+					<enabled>true</enabled>
+			</snapshots>
+			<releases>
+					<enabled>true</enabled>
+			</releases>
+		</repository>
+
+	</repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -76,15 +90,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!--
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            -->
 		</dependencies>
 	</dependencyManagement>
 
@@ -190,10 +195,6 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.hibernate.orm</groupId>
-			<artifactId>hibernate-spatial</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -217,14 +218,33 @@
 			<version>${jts-core.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.locationtech.jts.io</groupId>
+			<artifactId>jts-io-common</artifactId>
+			<version>${jts-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.terrestris.jackson</groupId>
+			<artifactId>jackson-datatype-jts</artifactId>
+			<version>${jackson-datatype-jts.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>de.grundid.opendatalab</groupId>
 			<artifactId>geojson-jackson</artifactId>
 			<version>${geojson-jackson.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bedatadriven</groupId>
-			<artifactId>jackson-datatype-jts</artifactId>
-			<version>${jackson-datatype-jts.version}</version>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.postgis</groupId>
+			<artifactId>postgis-jdbc</artifactId>
+			<version>2025.1.1</version>
 		</dependency>
 
 		<dependency>

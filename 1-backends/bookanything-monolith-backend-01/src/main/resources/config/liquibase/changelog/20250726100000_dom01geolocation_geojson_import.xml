@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6,40 +6,57 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <!--
-    <changeSet id="20250726100000-1" author="gemini">
-        <createTable tableName="tb_geojson_import">
-            <column name="id" type="UUID">
+    <changeSet id="20250726100000-1" author="andre.nascimento">
+        <createTable tableName="tb_geojson_imported_file">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_asset" type="BIGINT">
+                <constraints nullable="false" unique="true" foreignKeyName="fk_imported_file_asset" references="tb_asset(id)"/>
             </column>
             <column name="ds_file_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="ds_original_content_type" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+            <column name="ds_storage_key" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
             </column>
-            <column name="ts_import" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="en_status" type="VARCHAR(255)">
+            <column name="en_status" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="ds_status_details" type="TEXT"/>
+            <column name="ts_created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ts_updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
+
+        <createIndex indexName="idx_imported_file_asset_id" tableName="tb_geojson_imported_file">
+            <column name="id_asset"/>
+        </createIndex>
     </changeSet>
 
-    <changeSet id="20250726100000-2" author="gemini">
+    <changeSet id="20250726100000-2" author="andre.nascimento">
         <createTable tableName="tb_geojson_feature">
-            <column name="id" type="UUID">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="import_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_feature_import" references="tb_geojson_import(id)"/>
+            <column name="id_imported_file" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_feature_imported_file" references="tb_geojson_imported_file(id)"/>
             </column>
-            <column name="ge_geometry" type="GEOMETRY">
+            <column name="ge_geometry" type="GEOMETRY(Geometry, 4326)">
                 <constraints nullable="false"/>
             </column>
             <column name="js_properties" type="JSONB"/>
+            <column name="ts_created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
+
+        <createIndex indexName="idx_feature_imported_file_id" tableName="tb_geojson_feature">
+            <column name="id_imported_file"/>
+        </createIndex>
     </changeSet>
     -->
 

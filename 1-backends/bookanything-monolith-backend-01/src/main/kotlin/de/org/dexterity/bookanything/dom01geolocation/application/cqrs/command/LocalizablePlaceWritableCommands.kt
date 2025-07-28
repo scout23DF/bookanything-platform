@@ -1,11 +1,11 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.cqrs.command
 
+import org.locationtech.jts.geom.Point
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.LocalizablePlaceCRUDUseCase
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.GeoJsonFileManagerUseCase
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.LocalizablePlaceModel
 import de.org.dexterity.bookanything.shared.mediators.IGenericDataRequest
 import de.org.dexterity.bookanything.shared.mediators.IGenericRequestHandler
-import org.locationtech.jts.geom.Point
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.util.*

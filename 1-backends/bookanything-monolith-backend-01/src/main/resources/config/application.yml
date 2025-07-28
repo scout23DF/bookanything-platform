@@ -56,8 +56,9 @@ spring:
                     in_clause_parameter_padding: true
                 show_sql: true
                 format_sql: true
-                # dialect: org.hibernate.dialect.PostgreSQLDialect
-    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+                # dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+                # org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+    # database-platform: org.hibernate.spatial.dialect.postgis.PostgisDialect
     liquibase:
         change-log: classpath:config/liquibase/master.xml
     jackson:
@@ -201,4 +202,9 @@ topics:
             failed: "geolocation.geojson-download.failed"
         geojson-file:
             downloaded: "geolocation.geojson-file.downloaded"
-
+        geojson-imported-file:
+            ready-to-make-geo-locations: "geolocation.geojson-imported-file.ready-to-make-geo-locations"
+    asset-manager:
+        asset-creation:
+            registered: "asset-manager.asset-creation.registered.topic"
+            uploaded-to-storage: "asset-manager.asset-creation.uploaded-to-storage.topic"

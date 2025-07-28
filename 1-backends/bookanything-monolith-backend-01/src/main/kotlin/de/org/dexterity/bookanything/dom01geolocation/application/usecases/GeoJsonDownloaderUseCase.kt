@@ -13,11 +13,13 @@ class GeoJsonDownloaderUseCase(
 
     fun initiateDownload(request: GeoJsonDownloadRequest): GeoJsonDownloadRequestedEvent {
         // Basic validation
-        require(request.countryIso3Codes.isNotEmpty()) { "Country list cannot be empty." }
-        require(request.countryIso3Codes.all { it.length == 3 && it.all(Char::isUpperCase) }) {
+        require(request.countryDataToImportRequestList.isNotEmpty()) { "Country list cannot be empty." }
+        require(request.countryDataToImportRequestList.all { it.countryIso3Code.length == 3 && it.countryIso3Code.all(Char::isUpperCase) }) {
             "All country codes must be 3-letter uppercase ISO codes."
         }
-        require(request.levels.all { it in 0..4 }) { "Levels must be between 0 and 4." }
+        require(request.countryDataToImportRequestList.all { it.levels.all { it in 0..4 } }) {
+            "Levels must be between 0 and 4."
+        }
 
         val jobId = UUID.randomUUID()
         val event = GeoJsonDownloadRequestedEvent(

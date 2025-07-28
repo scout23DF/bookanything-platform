@@ -6,14 +6,15 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoJsonUploadedFileDTO
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.GeoJsonFilePublisherPort
-import org.geojson.FeatureCollection
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.PrecisionModel
+import org.geojson.FeatureCollection
 import org.slf4j.LoggerFactory
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
 
 // Using RuntimeException is common in Spring for exceptions that should result in a client error.
@@ -36,7 +37,7 @@ class GeoJsonFileManagerUseCase(
 
         try {
 
-            mountGeoJSONObjectFromUploadedFile(contentDataType, uploadedGeoJSONFile)?.let {
+            mountGeoJSONObjectFromUploadedFile(contentDataType, uploadedGeoJSONFile.inputStream)?.let {
                 this.geoJsonFilePublisherPort.publish(it)
                 logger.info(messageResult)
             }
@@ -52,11 +53,11 @@ class GeoJsonFileManagerUseCase(
 
     }
 
-    private fun mountGeoJSONObjectFromUploadedFile(contentDataType: String, uploadedGeoJSONFile: MultipartFile) : GeoJsonUploadedFileDTO? {
+    private fun mountGeoJSONObjectFromUploadedFile(contentDataType: String, sourceInputStream: InputStream) : GeoJsonUploadedFileDTO? {
 
         try {
 
-            val geoJsonNode = objectMapper.readTree(uploadedGeoJSONFile.inputStream)
+            val geoJsonNode = objectMapper.readTree(sourceInputStream)
             val featureCollection = objectMapper.treeToValue(geoJsonNode, FeatureCollection::class.java)
 
             return GeoJsonUploadedFileDTO(

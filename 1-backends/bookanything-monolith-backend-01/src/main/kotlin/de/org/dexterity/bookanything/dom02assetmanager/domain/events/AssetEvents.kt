@@ -1,6 +1,8 @@
 package de.org.dexterity.bookanything.dom02assetmanager.domain.events
 
-data class AssetUploadedEvent(
+data class AssetRegisteredEvent(
     val assetId: Long,
-    val tempFilePath: String
+    val tempFilePath: String,
+    val parentAliasToAttach: String,
+    val forceReimportIfExists: Boolean
 )

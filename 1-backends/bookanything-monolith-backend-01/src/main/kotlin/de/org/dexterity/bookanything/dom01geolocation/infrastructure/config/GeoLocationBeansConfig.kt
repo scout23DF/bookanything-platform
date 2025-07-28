@@ -1,5 +1,9 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.config
 
+import com.bedatadriven.jackson.datatype.jts.JtsModule
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
@@ -8,10 +12,22 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.web.reactive.function.client.WebClient
+
 
 @Configuration
 class GeoLocationBeansConfig {
+
+    @Bean
+    @Primary
+    fun objectMapper(): ObjectMapper {
+        val mapper = ObjectMapper()
+        mapper.registerModule(JavaTimeModule())
+        mapper.registerModule(JtsModule())
+        mapper.registerModule(KotlinModule.Builder().build())
+        return mapper
+    }
 
     @Bean
     fun webClient(): WebClient {

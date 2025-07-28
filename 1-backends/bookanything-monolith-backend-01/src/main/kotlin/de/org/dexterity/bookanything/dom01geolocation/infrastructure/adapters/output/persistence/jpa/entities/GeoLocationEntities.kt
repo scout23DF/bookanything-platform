@@ -12,7 +12,7 @@ import java.util.*
 @DiscriminatorColumn(name = "tp_geo_location", discriminatorType = DiscriminatorType.STRING)
 @Table(
     name = "tb_geo_location",
-    indexes = [Index(name = "idx_friendly_id", columnList = "friendly_id")]
+    indexes = [Index(name = "idx_friendly_id", columnList = "ds_friendly_id")]
 )
 abstract class AbstractBaseGeoLocationEntity(
     @Id

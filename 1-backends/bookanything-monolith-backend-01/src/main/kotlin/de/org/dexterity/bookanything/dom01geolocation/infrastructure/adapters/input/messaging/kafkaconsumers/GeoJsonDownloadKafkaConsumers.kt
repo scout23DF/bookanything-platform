@@ -33,14 +33,16 @@ class GeoJsonDownloadKafkaConsumers(
     fun handleDownloadRequest(event: GeoJsonDownloadRequestedEvent) {
         logger.info("Received GeoJSON download request for job ${event.jobId}. Dispatching individual country download tasks...")
 
-        event.request.countryIso3Codes.forEach { countryCode ->
-            event.request.levels.forEach { level ->
+        event.request.countryDataToImportRequestList.forEach { oneCountryToImportRequest ->
+            oneCountryToImportRequest.levels.forEach { oneLevel ->
                 val countryEvent = CountryGeoJsonDataRequiredEvent(
                     jobId = event.jobId,
-                    countryIso3Code = countryCode,
-                    level = level
+                    countryIso3Code = oneCountryToImportRequest.countryIso3Code,
+                    level = oneLevel,
+                    parentAliasToAttach = oneCountryToImportRequest.parentAliasToAttach,
+                    forceReimportIfExists = oneCountryToImportRequest.forceReimportIfExists
                 )
-                logger.debug("Publishing event to download data for $countryCode, level $level.")
+                logger.debug("Publishing event to download data for $oneCountryToImportRequest.countryIso3Code, level $oneLevel.")
                 eventPublisher.publish(countryEvent)
             }
         }
@@ -69,7 +71,9 @@ class GeoJsonDownloadKafkaConsumers(
                 countryIso3Code = countryCode,
                 level = level,
                 tempFilePath = tempPath.toString(),
-                fileName = fileName
+                fileName = fileName,
+                parentAliasToAttach = event.parentAliasToAttach,
+                forceReimportIfExists = event.forceReimportIfExists
             )
             eventPublisher.publish(successEvent)
             logger.info("Successfully downloaded and published success event for $countryCode, level $level.")
@@ -80,7 +84,9 @@ class GeoJsonDownloadKafkaConsumers(
                 jobId = jobId,
                 countryIso3Code = countryCode,
                 level = level,
-                reason = e.message ?: "Unknown error"
+                reason = e.message ?: "Unknown error",
+                parentAliasToAttach = event.parentAliasToAttach,
+                forceReimportIfExists = event.forceReimportIfExists
             )
             eventPublisher.publish(failureEvent)
         }
@@ -112,7 +118,11 @@ class GeoJsonDownloadKafkaConsumers(
                 )
             )
 
-            val uploadAssetResponseDto = assetUseCase.uploadGenericAsset(assetUploadRequestDto)
+            val uploadAssetResponseDto = assetUseCase.uploadGenericAsset(
+                assetUploadRequestDto,
+                event.parentAliasToAttach,
+                event.forceReimportIfExists
+            )
 
             logger.info("Successfully uploaded $fileName to the StorageProvider via AssetManager :: Response: $uploadAssetResponseDto ")
 
@@ -122,7 +132,9 @@ class GeoJsonDownloadKafkaConsumers(
                 jobId = jobId,
                 countryIso3Code = countryCode,
                 level = level,
-                reason = "Failed to upload to asset manager: ${e.message}"
+                reason = "Failed to upload to asset manager: ${e.message}",
+                parentAliasToAttach = event.parentAliasToAttach,
+                forceReimportIfExists = event.forceReimportIfExists
             )
             eventPublisher.publish(failureEvent)
         } finally {

@@ -19,7 +19,9 @@ data class GeoJsonDownloadRequestedEvent(
 data class CountryGeoJsonDataRequiredEvent(
     val jobId: UUID,
     val countryIso3Code: String,
-    val level: Int
+    val level: Int,
+    val parentAliasToAttach: String,
+    val forceReimportIfExists: Boolean = false
 )
 
 /**
@@ -34,7 +36,9 @@ data class GeoJsonFileDownloadedEvent(
     val countryIso3Code: String,
     val level: Int,
     val tempFilePath: String,
-    val fileName: String
+    val fileName: String,
+    val parentAliasToAttach: String,
+    val forceReimportIfExists: Boolean = false
 )
 
 /**
@@ -44,5 +48,16 @@ data class GeoJsonDownloadFailedEvent(
     val jobId: UUID,
     val countryIso3Code: String,
     val level: Int,
-    val reason: String
+    val reason: String,
+    val parentAliasToAttach: String,
+    val forceReimportIfExists: Boolean = false
+)
+
+/**
+ * Event published when a new GeoJSON file and its Features have been successfully imported into the database.
+ */
+data class CountryDataToMakeGeoLocationsEvent(
+    val geoJsonImportedFileId: UUID,
+    val parentAliasToAttach: String,
+    val forceReimportIfExists: Boolean = false
 )

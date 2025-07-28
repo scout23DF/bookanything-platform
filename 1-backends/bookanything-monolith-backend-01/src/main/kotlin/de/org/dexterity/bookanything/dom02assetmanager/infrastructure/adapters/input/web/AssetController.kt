@@ -22,12 +22,21 @@ class AssetController(private val assetUseCase: AssetUseCase) {
         @RequestPart("file") uploadedFile: MultipartFile,
         @RequestPart("category") category: String,
         @RequestPart("bucket", required = false) bucket: String?,
+        @RequestPart("parentAliasToAttach", required = false) parentAliasToAttach: String?,
+        @RequestPart("forceReimportIfExists", required = false) forceReimportIfExists: Boolean?,
         @RequestPart("metadata", required = false) metadataJson: String?
     ): ResponseEntity<UploadAssetResponseDto> {
         val assetCategory = AssetCategory.valueOf(category.uppercase())
         val metadata = metadataJson?.let { jacksonObjectMapper().readValue<Map<String, Any>>(it) } ?: emptyMap()
 
-        val response = assetUseCase.handleUpload(uploadedFile, bucket, assetCategory, metadata)
+        val response = assetUseCase.handleUpload(
+            uploadedFile,
+            bucket,
+            assetCategory,
+            parentAliasToAttach,
+            forceReimportIfExists,
+            metadata)
+
         return ResponseEntity.ok(response)
     }
 
