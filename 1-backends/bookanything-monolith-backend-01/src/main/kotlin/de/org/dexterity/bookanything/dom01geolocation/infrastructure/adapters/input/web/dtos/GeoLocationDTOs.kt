@@ -28,7 +28,7 @@ data class GeoLocationResponse(
     val friendlyId: String,
     val name: String,
     val alias: String? = null,
-    val additionalDetailsMap: Map<String, Any>? = null,
+    val additionalDetailsMap: Map<String, Any?>? = null,
     val boundaryRepresentation: String? = null,
     val parentId: Long? = null
 )

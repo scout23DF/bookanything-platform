@@ -1,10 +1,11 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities
 
-import org.geolatte.geom.Geometry
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonImportStatus
+import de.org.dexterity.bookanything.dom02assetmanager.infrastructure.adapters.output.persistence.jpa.entities.AssetEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import org.locationtech.jts.geom.Geometry
 import java.time.Instant
 import java.util.*
 
@@ -30,6 +31,10 @@ data class GeoJsonImportedFileEntity(
     @Column(name = "ds_status_details")
     var statusDetails: String? = null,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_stored_asset_id", nullable = true)
+    val sourceStoredAsset: AssetEntity? = null,
+
     @OneToMany(mappedBy = "geoJsonImportedFile", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var featuresList: MutableList<GeoJsonFeatureEntity> = mutableListOf()
 )
@@ -45,15 +50,10 @@ data class GeoJsonFeatureEntity(
     val geoJsonImportedFile: GeoJsonImportedFileEntity,
 
     @Column(name = "ge_feature_geometry", columnDefinition = "geometry(MultiPolygon,4326)", nullable = true)
-    @JdbcTypeCode(SqlTypes.GEOMETRY)
-    val featureGeometry: Geometry<*>? = null,
+    val featureGeometry: Geometry? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "json_feature_properties", columnDefinition = "jsonb")
     val featurePropertiesMap: Map<String, Any?>,
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "json_geometry_content", columnDefinition = "jsonb")
-    val featureGeometryContentAsJson: String? = null
 
 )

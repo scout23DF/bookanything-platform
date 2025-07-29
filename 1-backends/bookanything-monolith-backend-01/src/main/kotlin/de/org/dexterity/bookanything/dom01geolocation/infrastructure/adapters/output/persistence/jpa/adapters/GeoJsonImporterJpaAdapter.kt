@@ -23,25 +23,7 @@ class GeoJsonImporterJpaAdapter(
     }
 
     override fun findById(id: UUID): GeoJsonImportedFileModel? {
-
-        val foundEntity = geoJsonImportedFileJpaRepository.findById(id)
-
-        //.map(geoJsonImportingJpaMappers::toGeoJsonImportedFileModel)
-        // .orElse(null)
-
-        return foundEntity.map {
-
-            GeoJsonImportedFileModel(
-                id = it.id,
-                fileName = it.fileName,
-                originalContentType = it.originalContentType,
-                importTimestamp = it.importTimestamp,
-                status = it.status,
-                statusDetails = it.statusDetails
-            )
-
-        }.orElse(null)
-
+        return geoJsonImportedFileJpaRepository.findById(id).map(geoJsonImportingJpaMappers::toGeoJsonImportedFileModel).orElse(null)
     }
 
 }

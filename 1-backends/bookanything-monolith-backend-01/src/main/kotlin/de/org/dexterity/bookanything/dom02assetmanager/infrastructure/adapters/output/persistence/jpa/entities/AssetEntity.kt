@@ -45,7 +45,7 @@ class AssetEntity(
     @Column(name="ts_updated_at", nullable = false)
     var updatedAt: Instant = Instant.now(),
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bucket_id", nullable = false)
     val bucket: BucketEntity
 

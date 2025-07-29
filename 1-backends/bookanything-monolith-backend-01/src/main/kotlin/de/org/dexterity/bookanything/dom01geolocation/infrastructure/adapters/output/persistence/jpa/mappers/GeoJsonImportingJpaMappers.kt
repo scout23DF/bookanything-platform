@@ -4,11 +4,18 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonFeatu
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonImportedFileModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.GeoJsonFeatureEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.GeoJsonImportedFileEntity
+import de.org.dexterity.bookanything.dom02assetmanager.infrastructure.adapters.output.persistence.jpa.mappers.AssetJpaMapper
+import de.org.dexterity.bookanything.dom02assetmanager.infrastructure.adapters.output.persistence.jpa.repositories.AssetJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Mapper
+import org.springframework.transaction.annotation.Transactional
 
 @Mapper
-class GeoJsonImportingJpaMappers() {
+class GeoJsonImportingJpaMappers(
+    private val assetJpaRepository: AssetJpaRepository,
+    private val assetJpaMapper: AssetJpaMapper
+) {
 
+    @Transactional(readOnly = true)
     fun toGeoJsonImportedFileJpaEntity(sourceDomainModel: GeoJsonImportedFileModel): GeoJsonImportedFileEntity {
         val geoJsonImportedFileEntity = GeoJsonImportedFileEntity(
             id = sourceDomainModel.id,
@@ -16,6 +23,7 @@ class GeoJsonImportingJpaMappers() {
             originalContentType = sourceDomainModel.originalContentType,
             importTimestamp = sourceDomainModel.importTimestamp,
             status = sourceDomainModel.status,
+            sourceStoredAsset = assetJpaRepository.findById(sourceDomainModel.sourceStoredAsset?.id!!).orElse(null),
             statusDetails = sourceDomainModel.statusDetails
         )
         val featureEntitiesList = sourceDomainModel.featuresList.map { feature ->
@@ -23,8 +31,7 @@ class GeoJsonImportingJpaMappers() {
                 id = feature.id,
                 geoJsonImportedFile = geoJsonImportedFileEntity,
                 featureGeometry = feature.featureGeometry,
-                featurePropertiesMap = feature.featurePropertiesMap,
-                featureGeometryContentAsJson = feature.featureGeometryContentAsJson
+                featurePropertiesMap = feature.featurePropertiesMap
             )
         }.toMutableList()
         geoJsonImportedFileEntity.featuresList = featureEntitiesList
@@ -32,7 +39,10 @@ class GeoJsonImportingJpaMappers() {
         return geoJsonImportedFileEntity
     }
 
+    @Transactional(readOnly = true)
     fun toGeoJsonImportedFileModel(sourceJpaEntity: GeoJsonImportedFileEntity): GeoJsonImportedFileModel {
+
+        val tmpAssetEntity = assetJpaRepository.findById(sourceJpaEntity.sourceStoredAsset?.id!!).orElse(null)
 
         val geoJsonImportedFileModel = GeoJsonImportedFileModel(
             id = sourceJpaEntity.id,
@@ -40,6 +50,7 @@ class GeoJsonImportingJpaMappers() {
             originalContentType = sourceJpaEntity.originalContentType,
             importTimestamp = sourceJpaEntity.importTimestamp,
             status = sourceJpaEntity.status,
+            sourceStoredAsset = assetJpaMapper.toDomain(tmpAssetEntity),
             statusDetails = sourceJpaEntity.statusDetails
         )
 
@@ -55,8 +66,7 @@ class GeoJsonImportingJpaMappers() {
                     statusDetails = geoJsonImportedFileModel.statusDetails
                 ),
                 featureGeometry = feature.featureGeometry,
-                featurePropertiesMap = feature.featurePropertiesMap,
-                featureGeometryContentAsJson = feature.featureGeometryContentAsJson
+                featurePropertiesMap = feature.featurePropertiesMap
             )
         }.toMutableList()
         geoJsonImportedFileModel.featuresList = featureModelsList
@@ -70,8 +80,7 @@ class GeoJsonImportingJpaMappers() {
             id = sourceDomainModel.id,
             geoJsonImportedFile = toGeoJsonImportedFileJpaEntity(sourceDomainModel.geoJsonImportedFile),
             featureGeometry = sourceDomainModel.featureGeometry,
-            featurePropertiesMap = sourceDomainModel.featurePropertiesMap,
-            featureGeometryContentAsJson = sourceDomainModel.featureGeometryContentAsJson
+            featurePropertiesMap = sourceDomainModel.featurePropertiesMap
         )
         return geoJsonFeatureJpaEntity
 
@@ -83,8 +92,7 @@ class GeoJsonImportingJpaMappers() {
             id = sourceJpaEntity.id,
             geoJsonImportedFile = toGeoJsonImportedFileModel(sourceJpaEntity.geoJsonImportedFile),
             featureGeometry = sourceJpaEntity.featureGeometry,
-            featurePropertiesMap = sourceJpaEntity.featurePropertiesMap,
-            featureGeometryContentAsJson = sourceJpaEntity.featureGeometryContentAsJson
+            featurePropertiesMap = sourceJpaEntity.featurePropertiesMap
         )
         return geoJsonFeatureModel
 

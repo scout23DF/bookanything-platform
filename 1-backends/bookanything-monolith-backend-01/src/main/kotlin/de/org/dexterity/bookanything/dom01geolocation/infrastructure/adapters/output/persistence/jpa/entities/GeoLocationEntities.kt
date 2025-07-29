@@ -30,7 +30,7 @@ abstract class AbstractBaseGeoLocationEntity(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "json_additional_details", columnDefinition = "jsonb")
-    open var additionalDetailsMap: Map<String, Any>? = null,
+    open var additionalDetailsMap: Map<String, Any?>? = null,
 
     @Column("tp_geo_location", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -62,7 +62,7 @@ open class ContinentEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @OneToMany(mappedBy = "continent", cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY, targetEntity = RegionEntity::class)
@@ -82,7 +82,7 @@ open class RegionEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -106,7 +106,7 @@ open class CountryEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -130,7 +130,7 @@ open class ProvinceEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -154,7 +154,7 @@ open class CityEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -178,7 +178,7 @@ open class DistrictEntity(
     friendlyId: String,
     name: String,
     alias: String? = null,
-    additionalDetailsMap: Map<String, Any>? = null,
+    additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
     @ManyToOne(fetch = FetchType.LAZY)

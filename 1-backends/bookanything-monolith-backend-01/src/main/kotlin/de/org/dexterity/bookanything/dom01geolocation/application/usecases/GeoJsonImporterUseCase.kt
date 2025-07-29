@@ -7,12 +7,10 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonFeatu
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonImportStatus
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoJsonImportedFileModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
-import de.org.dexterity.bookanything.dom01geolocation.domain.ports.GeoJsonFeatureRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.GeoJsonImportedFileRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
 import org.geojson.FeatureCollection
-import org.geolatte.geom.jts.JTS
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,7 +24,6 @@ import java.util.*
 @Service
 class GeoJsonImporterUseCase(
     private val geoJsonImportedFileRepositoryPort: GeoJsonImportedFileRepositoryPort,
-    private val geoJsonFeatureRepositoryPort: GeoJsonFeatureRepositoryPort,
     private val storageProvider: StorageProviderPort,
     private val objectMapper: ObjectMapper,
     private val eventPublisher: EventPublisherPort
@@ -36,6 +33,7 @@ class GeoJsonImporterUseCase(
 
     @Transactional
     suspend fun execute(assetFromEvent: AssetModel, parentAliasToAttach: String, forceReimportIfExists: Boolean) {
+
         logger.info("Executing GeoJSON import for asset: {}", assetFromEvent.id)
 
         val geoJsonImportedFileModel = GeoJsonImportedFileModel(
@@ -43,7 +41,8 @@ class GeoJsonImporterUseCase(
             fileName = assetFromEvent.fileName,
             originalContentType = assetFromEvent.mimeType,
             importTimestamp = Instant.now(),
-            status = GeoJsonImportStatus.PROCESSING
+            status = GeoJsonImportStatus.PROCESSING,
+            sourceStoredAsset = assetFromEvent
         )
         geoJsonImportedFileRepositoryPort.save(geoJsonImportedFileModel)
 
@@ -58,17 +57,16 @@ class GeoJsonImporterUseCase(
 
             val featureCollection = objectMapper.readValue(fileContentInputStream, FeatureCollection::class.java)
 
-            geoJsonImportedFileModel.featuresList = featureCollection.map { oneFeature ->
+            geoJsonImportedFileModel.featuresList = featureCollection.map { oneGeoJsonFeature ->
 
-                val featureJson = objectMapper.writeValueAsString(oneFeature)
+                val featureJson = objectMapper.writeValueAsString(oneGeoJsonFeature)
                 val featureDto = objectMapper.readValue(featureJson, GeoJsonFeatureDto::class.java)
 
                 val newGeoJsonFeatureModel = GeoJsonFeatureModel(
                     id = UUID.randomUUID(),
                     geoJsonImportedFile = geoJsonImportedFileModel,
-                    featureGeometry = JTS.from(featureDto.geometry),
-                    featurePropertiesMap = featureDto.properties,
-                    featureGeometryContentAsJson = objectMapper.writeValueAsString(featureDto.geometry)
+                    featureGeometry = featureDto.geometry,
+                    featurePropertiesMap = featureDto.properties
                 )
 
                 newGeoJsonFeatureModel
