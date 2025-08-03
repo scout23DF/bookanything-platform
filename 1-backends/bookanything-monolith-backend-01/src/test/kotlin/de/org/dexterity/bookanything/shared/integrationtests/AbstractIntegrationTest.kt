@@ -34,7 +34,7 @@ abstract class AbstractIntegrationTest {
             .withEnv("KAFKA_REPLICA_FETCH_MAX_BYTES", "52428800")
 
         @Container
-        val keycloak: KeycloakContainer = KeycloakContainer("keycloak/keycloak:26.3.1")
+        val keycloak: KeycloakContainer = KeycloakContainer("keycloak/keycloak:26.3.2")
             .withRealmImportFile("keycloak/dexterity-apps-01-realm.json")
 
 

@@ -55,7 +55,7 @@ spring:
                     fail_on_pagination_over_collection_fetch: true
                     in_clause_parameter_padding: true
                 show_sql: true
-                format_sql: true
+                format_sql: false
                 # dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
                 # org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
     # database-platform: org.hibernate.spatial.dialect.postgis.PostgisDialect
@@ -102,6 +102,11 @@ spring:
                         trusted:
                             packages: de.grundid.opendatalab.geojson,de.org.dexterity.bookanything.*
                 max.partition.fetch.bytes: 52428800
+                request.timeout.ms: 300000
+                heartbeat.interval.ms: 1000
+                max.poll.interval.ms: 900000
+                max.poll.records: 100
+                session.timeout.ms: 600000
 
     elasticsearch:
         uris: http://localhost:9200
@@ -198,12 +203,14 @@ topics:
     geolocation:
         geojson-download:
             requested: "geolocation.geojson-download.requested"
-            country-data-required: "geolocation.geojson-download.country-data-required"
+            hierarchical-geo-json-data-required: "geolocation.geojson-download.hierarchical-geo-json-data-required"
             failed: "geolocation.geojson-download.failed"
         geojson-file:
             downloaded: "geolocation.geojson-file.downloaded"
         geojson-imported-file:
             ready-to-make-geo-locations: "geolocation.geojson-imported-file.ready-to-make-geo-locations"
+        geojson-feature:
+            city-importing-processed: "geolocation.geojson-feature.city-importing-processed"
     asset-manager:
         asset-creation:
             registered: "asset-manager.asset-creation.registered.topic"

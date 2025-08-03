@@ -3,6 +3,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
@@ -10,7 +11,10 @@ import org.locationtech.jts.geom.Point
 import java.util.UUID
 
 @Entity
-@Table(name = "tb_localizable_place")
+@Table(
+    name = "tb_localizable_place",
+    indexes = [Index(name = "idx_location_geohash", columnList = "ds_location_as_geohash")]
+)
 data class LocalizablePlaceJpaEntity(
     @Id
     var id: UUID? = null,
@@ -29,7 +33,11 @@ data class LocalizablePlaceJpaEntity(
     var additionalDetailsMap: Map<String, Any>? = null,
 
     @Column(name="ge_location", columnDefinition="geometry(Point,4326)", nullable = false)
-    var locationPoint: Point? = null
+    var locationPoint: Point? = null,
+
+    @Column(name="ds_location_as_geohash", length = 12, nullable = true)
+    var locationAsGeoHash: String? = null
+
 ) {
     // Construtor sem argumentos para o Hibernate
     constructor() : this(null, "", null, null, null, null)

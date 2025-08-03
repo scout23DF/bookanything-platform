@@ -39,8 +39,9 @@ class LocalizablePlaceRestMapper {
             name = sourceDomainModel.name,
             alias = sourceDomainModel.alias,
             additionalDetailsMap = sourceDomainModel.additionalDetailsMap,
-            latitude = sourceDomainModel.locationPoint.y,
-            longitude = sourceDomainModel.locationPoint.x
+            latitude = sourceDomainModel.locationPoint?.y ?: 0.0,
+            longitude = sourceDomainModel.locationPoint?.x ?: 0.0,
+            locationAsGeoHash = sourceDomainModel.locationAsGeoHash
         )
 
     }

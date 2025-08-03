@@ -1,6 +1,7 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.messaging.kafkaconsumers
 
-import de.org.dexterity.bookanything.dom01geolocation.domain.events.CountryGeoJsonDataRequiredEvent
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
+import de.org.dexterity.bookanything.dom01geolocation.domain.events.HierarchicalGeoJsonDataRequiredEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.GeoJsonDownloadFailedEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.GeoJsonDownloadRequestedEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.GeoJsonFileDownloadedEvent
@@ -33,60 +34,99 @@ class GeoJsonDownloadKafkaConsumers(
     fun handleDownloadRequest(event: GeoJsonDownloadRequestedEvent) {
         logger.info("Received GeoJSON download request for job ${event.jobId}. Dispatching individual country download tasks...")
 
-        event.request.countryDataToImportRequestList.forEach { oneCountryToImportRequest ->
-            oneCountryToImportRequest.levels.forEach { oneLevel ->
-                val countryEvent = CountryGeoJsonDataRequiredEvent(
+        event.geoJsonDownloadRequest.countryDataToImportRequestList.forEach { oneCountryToImportRequest ->
+
+            if (oneCountryToImportRequest.importingDetailsForCountry != null) {
+
+                val importRequestForCountryLevelEvent = HierarchicalGeoJsonDataRequiredEvent(
                     jobId = event.jobId,
                     countryIso3Code = oneCountryToImportRequest.countryIso3Code,
-                    level = oneLevel,
-                    parentAliasToAttach = oneCountryToImportRequest.parentAliasToAttach,
-                    forceReimportIfExists = oneCountryToImportRequest.forceReimportIfExists
+                    hierarchyDetailsRequest = oneCountryToImportRequest.importingDetailsForCountry
                 )
-                logger.debug("Publishing event to download data for $oneCountryToImportRequest.countryIso3Code, level $oneLevel.")
-                eventPublisher.publish(countryEvent)
+                logger.debug("Publishing Event to download data for $oneCountryToImportRequest.countryIso3Code, Country Level, File Level No.: ${oneCountryToImportRequest.importingDetailsForCountry.hierarchyLevelOfFileToImport}.")
+                eventPublisher.publish(importRequestForCountryLevelEvent)
+
             }
+
+            if (oneCountryToImportRequest.importingDetailsForProvince != null) {
+
+                val importRequestForProvinceLevelEvent = HierarchicalGeoJsonDataRequiredEvent(
+                    jobId = event.jobId,
+                    countryIso3Code = oneCountryToImportRequest.countryIso3Code,
+                    hierarchyDetailsRequest = oneCountryToImportRequest.importingDetailsForProvince
+                )
+                logger.debug("Publishing Event to download data for $oneCountryToImportRequest.countryIso3Code, Province Level, File Level No.: ${oneCountryToImportRequest.importingDetailsForProvince.hierarchyLevelOfFileToImport}.")
+                eventPublisher.publish(importRequestForProvinceLevelEvent)
+
+            }
+
+            if (oneCountryToImportRequest.importingDetailsForCity != null) {
+
+                val importRequestForCityLevelEvent = HierarchicalGeoJsonDataRequiredEvent(
+                    jobId = event.jobId,
+                    countryIso3Code = oneCountryToImportRequest.countryIso3Code,
+                    hierarchyDetailsRequest = oneCountryToImportRequest.importingDetailsForCity
+                )
+                logger.debug("Publishing Event to download data for $oneCountryToImportRequest.countryIso3Code, City Level, File Level No.: ${oneCountryToImportRequest.importingDetailsForCity.hierarchyLevelOfFileToImport}.")
+                eventPublisher.publish(importRequestForCityLevelEvent)
+
+            }
+
+            if (oneCountryToImportRequest.importingDetailsForDistrict != null) {
+
+                val importRequestForDistrictLevelEvent = HierarchicalGeoJsonDataRequiredEvent(
+                    jobId = event.jobId,
+                    countryIso3Code = oneCountryToImportRequest.countryIso3Code,
+                    hierarchyDetailsRequest = oneCountryToImportRequest.importingDetailsForDistrict
+                )
+                logger.debug("Publishing Event to download data for $oneCountryToImportRequest.countryIso3Code, District Level, File Level No.: ${oneCountryToImportRequest.importingDetailsForDistrict.hierarchyLevelOfFileToImport}.")
+                eventPublisher.publish(importRequestForDistrictLevelEvent)
+
+            }
+
         }
 
         logger.info("All download tasks for job ${event.jobId} have been dispatched.")
     }
 
     @KafkaListener(
-        topics = ["\${topics.geolocation.geojson-download.country-data-required}"],
+        topics = ["\${topics.geolocation.geojson-download.hierarchical-geo-json-data-required}"],
         groupId = "geolocation-downloader-worker"
     )
-    fun handleCountryDataRequired(event: CountryGeoJsonDataRequiredEvent) = runBlocking {
-        val (jobId, countryCode, level) = event
-        logger.info("Received request to download GeoJSON for $countryCode, level $level (Job ID: $jobId)")
+    fun handleCountryDataRequired(hierarchicalGeoJsonDataRequiredEvent: HierarchicalGeoJsonDataRequiredEvent) = runBlocking {
+
+        val jobId = hierarchicalGeoJsonDataRequiredEvent.jobId
+        val targetCountryCode = hierarchicalGeoJsonDataRequiredEvent.countryIso3Code
+        val hierarchyDetailsRequest: HierarchyDetailsRequest = hierarchicalGeoJsonDataRequiredEvent.hierarchyDetailsRequest
+        val targetLevel = hierarchicalGeoJsonDataRequiredEvent.hierarchyDetailsRequest.hierarchyLevelOfFileToImport
+
+        logger.info("Received request to download GeoJSON for $targetCountryCode, level $targetLevel (Job ID: $jobId)")
 
         try {
-            if (!geoJsonProvider.fileExists(countryCode, level)) {
-                throw FileNotFoundException("File not found for $countryCode at level $level.")
+            if (!geoJsonProvider.fileExists(targetCountryCode, targetLevel)) {
+                throw FileNotFoundException("File not found for $targetCountryCode at level $targetLevel.")
             }
 
-            val tempPath = geoJsonProvider.downloadFile(countryCode, level)
-            val fileName = geoJsonProvider.getFileName(countryCode, level)
+            val tempPath = geoJsonProvider.downloadFile(targetCountryCode, targetLevel)
+            val fileName = geoJsonProvider.getFileName(targetCountryCode, targetLevel)
 
             val successEvent = GeoJsonFileDownloadedEvent(
                 jobId = jobId,
-                countryIso3Code = countryCode,
-                level = level,
+                countryIso3Code = targetCountryCode,
+                hierarchyDetailsRequest = hierarchyDetailsRequest,
                 tempFilePath = tempPath.toString(),
-                fileName = fileName,
-                parentAliasToAttach = event.parentAliasToAttach,
-                forceReimportIfExists = event.forceReimportIfExists
+                fileName = fileName
             )
             eventPublisher.publish(successEvent)
-            logger.info("Successfully downloaded and published success event for $countryCode, level $level.")
+            logger.info("Successfully downloaded and published success event for $targetCountryCode, level $targetLevel.")
 
         } catch (e: Exception) {
-            logger.error("Failed to download GeoJSON for $countryCode, level $level (Job ID: $jobId). Reason: ${e.message}")
+            logger.error("Failed to download GeoJSON for $targetCountryCode, level $targetLevel (Job ID: $jobId). Reason: ${e.message}")
             val failureEvent = GeoJsonDownloadFailedEvent(
                 jobId = jobId,
-                countryIso3Code = countryCode,
-                level = level,
-                reason = e.message ?: "Unknown error",
-                parentAliasToAttach = event.parentAliasToAttach,
-                forceReimportIfExists = event.forceReimportIfExists
+                countryIso3Code = targetCountryCode,
+                hierarchyDetailsRequest = hierarchyDetailsRequest,
+                reason = e.message ?: "Unknown error"
             )
             eventPublisher.publish(failureEvent)
         }
@@ -96,9 +136,15 @@ class GeoJsonDownloadKafkaConsumers(
         topics = ["\${topics.geolocation.geojson-file.downloaded}"],
         groupId = "geolocation-uploader-worker"
     )
-    suspend fun handleFileDownloaded(event: GeoJsonFileDownloadedEvent) {
-        val (jobId, countryCode, level, tempFilePathStr, fileName) = event
-        logger.info("Received downloaded file event for $countryCode, level $level. Uploading to asset manager... (Job ID: $jobId)")
+    suspend fun handleFileDownloaded(geoJsonFileDownloadedEvent: GeoJsonFileDownloadedEvent) {
+        val jobId = geoJsonFileDownloadedEvent.jobId
+        val targetCountryCode = geoJsonFileDownloadedEvent.countryIso3Code
+        val hierarchyDetailsRequest: HierarchyDetailsRequest = geoJsonFileDownloadedEvent.hierarchyDetailsRequest
+        val targetLevel = geoJsonFileDownloadedEvent.hierarchyDetailsRequest.hierarchyLevelOfFileToImport
+        val tempFilePathStr = geoJsonFileDownloadedEvent.tempFilePath
+        val fileName = geoJsonFileDownloadedEvent.fileName
+
+        logger.info("Received downloaded file event for $targetCountryCode, level $targetLevel. Uploading to asset manager... (Job ID: $jobId)")
         val tempPath = Paths.get(tempFilePathStr)
 
         try {
@@ -112,16 +158,16 @@ class GeoJsonDownloadKafkaConsumers(
                 fileContentAsBytes = fileBytes,
                 metadataMap = mapOf(
                     "jobId" to jobId.toString(),
-                    "country" to countryCode,
-                    "level" to level.toString(),
+                    "country" to targetCountryCode,
+                    "level" to targetLevel.toString(),
                     "source" to "GADMv4.1"
                 )
             )
 
             val uploadAssetResponseDto = assetUseCase.uploadGenericAsset(
                 assetUploadRequestDto,
-                event.parentAliasToAttach,
-                event.forceReimportIfExists
+                targetCountryCode,
+                hierarchyDetailsRequest
             )
 
             logger.info("Successfully uploaded $fileName to the StorageProvider via AssetManager :: Response: $uploadAssetResponseDto ")
@@ -130,11 +176,9 @@ class GeoJsonDownloadKafkaConsumers(
             logger.error("Failed to upload $fileName for job $jobId. Reason: ${e.message}")
             val failureEvent = GeoJsonDownloadFailedEvent(
                 jobId = jobId,
-                countryIso3Code = countryCode,
-                level = level,
-                reason = "Failed to upload to asset manager: ${e.message}",
-                parentAliasToAttach = event.parentAliasToAttach,
-                forceReimportIfExists = event.forceReimportIfExists
+                countryIso3Code = targetCountryCode,
+                hierarchyDetailsRequest = hierarchyDetailsRequest,
+                reason = "Failed to upload to asset manager: ${e.message}"
             )
             eventPublisher.publish(failureEvent)
         } finally {

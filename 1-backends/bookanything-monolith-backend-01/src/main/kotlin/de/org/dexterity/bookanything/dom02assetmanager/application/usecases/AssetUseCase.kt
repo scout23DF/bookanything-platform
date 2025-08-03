@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom02assetmanager.application.usecases
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
 import de.org.dexterity.bookanything.dom02assetmanager.application.mappers.AssetMapper
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.AssetCRUDService
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.*
@@ -78,14 +79,14 @@ class AssetUseCase(
 
     suspend fun uploadGenericAsset(
         assetUploadRequestDto: GenericAssetUploadRequestDto,
-        parentAliasToAttach: String,
-        forceReimportIfExists: Boolean
+        targetCountryCode: String,
+        hierarchyDetailsRequest: HierarchyDetailsRequest
     ): GenericUploadedAssetResponseDto {
 
         return assetCRUDService.uploadGenericAsset(
             assetUploadRequestDto,
-            parentAliasToAttach,
-            forceReimportIfExists
+            targetCountryCode,
+            hierarchyDetailsRequest
         )
 
     }

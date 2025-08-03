@@ -11,5 +11,6 @@ data class LocalizablePlaceCreatedEvent(
     val propertiesDetailsMap: Map<String, Any>?,
     val latitude: Double,
     val longitude: Double,
+    val locationAsGeoHash: String?,
     val timestamp: LocalDateTime = LocalDateTime.now()
 )

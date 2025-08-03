@@ -12,7 +12,7 @@ class LocalizablePlacesAllDeletedKafkaConsumer(
 
     @KafkaListener(topics = ["localizable-places-all-deleted-topic"], groupId = "elasticsearch-deleter-all")
     fun listen(event: LocalizablePlacesAllDeletedEvent) {
-        localizablePlaceQueryRepositoryPort.deletarTodos()
+        localizablePlaceQueryRepositoryPort.removeAll()
         println("All the Localizable Places were removed successfully from ElasticSearch.")
     }
 }

@@ -17,14 +17,44 @@ class GeoJsonDownloaderUseCase(
         require(request.countryDataToImportRequestList.all { it.countryIso3Code.length == 3 && it.countryIso3Code.all(Char::isUpperCase) }) {
             "All country codes must be 3-letter uppercase ISO codes."
         }
-        require(request.countryDataToImportRequestList.all { it.levels.all { it in 0..4 } }) {
-            "Levels must be between 0 and 4."
+
+        require(request.countryDataToImportRequestList.all {
+            it.importingDetailsForCountry != null || it.importingDetailsForProvince != null || it.importingDetailsForCity != null || it.importingDetailsForDistrict != null
+        }) {
+            "At least, one ImportingDetailsRequest must be provided. Choose the GeoLocation Hieraychy Type you want to import: Country | Province | City | District."
+        }
+
+        request.countryDataToImportRequestList.forEach { oneCountryRequest ->
+            if (oneCountryRequest.importingDetailsForCountry != null) {
+                require(oneCountryRequest.importingDetailsForCountry.hierarchyLevelOfFileToImport in 0..4) {
+                    "For the Country [${oneCountryRequest.countryIso3Code}], in the 'ImportingDetailsForCountry', the hierarchyLevelOfFileToImport field must be between 0 and 4."
+                }
+            }
+
+            if (oneCountryRequest.importingDetailsForProvince != null) {
+                require(oneCountryRequest.importingDetailsForProvince.hierarchyLevelOfFileToImport in 0..4) {
+                    "For the Country [${oneCountryRequest.countryIso3Code}], in the 'ImportingDetailsForProvince', the hierarchyLevelOfFileToImport field must be between 0 and 4."
+                }
+            }
+
+            if (oneCountryRequest.importingDetailsForCity != null) {
+                require(oneCountryRequest.importingDetailsForCity.hierarchyLevelOfFileToImport in 0..4) {
+                    "For the Country [${oneCountryRequest.countryIso3Code}], in the 'ImportingDetailsForCity', the hierarchyLevelOfFileToImport field must be between 0 and 4."
+                }
+            }
+
+            if (oneCountryRequest.importingDetailsForDistrict != null) {
+                require(oneCountryRequest.importingDetailsForDistrict.hierarchyLevelOfFileToImport in 0..4) {
+                    "For the Country [${oneCountryRequest.countryIso3Code}], in the 'ImportingDetailsForDistrict', the hierarchyLevelOfFileToImport field must be between 0 and 4."
+                }
+            }
+
         }
 
         val jobId = UUID.randomUUID()
         val event = GeoJsonDownloadRequestedEvent(
             jobId = jobId,
-            request = request
+            geoJsonDownloadRequest = request
         )
 
         eventPublisher.publish(event)

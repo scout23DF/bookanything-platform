@@ -10,6 +10,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.features.Localizabl
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlacePersistRepositoryPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlaceQueryRepositoryPort
 import org.locationtech.jts.geom.Point
+import org.springframework.data.elasticsearch.utils.geohash.Geohash
 import java.util.*
 
 class LocalizablePlaceCRUDUseCase(
@@ -18,50 +19,65 @@ class LocalizablePlaceCRUDUseCase(
     private val eventPublisherPort: EventPublisherPort
 ) : LocalizablePlaceWriteFeaturePort, LocalizablePlaceReadFeaturePort {
 
-    override fun cadastrar(nome: String, alias: String?, friendlyId: String, propertiesDetailsMap: Map<String, Any>?, localizacao: Point): LocalizablePlaceModel {
-        if (localizablePlacePersistRepositoryPort.existsByName(nome)) {
-            throw IllegalArgumentException("Centro de Distribuição com o nome '$nome' já existe.")
+    override fun create(
+        locationName: String,
+        locationAlias: String?,
+        friendlyId: String,
+        propertiesDetailsMap: Map<String, Any>?,
+        locationPoint: Point
+    ): LocalizablePlaceModel {
+
+        if (localizablePlacePersistRepositoryPort.existsByName(locationName)) {
+            throw IllegalArgumentException("Localizable Please named as: '$locationName' already exists.")
         }
+
+        val calculatedLocationGeohashed = Geohash.stringEncode(locationPoint.x, locationPoint.y, 9)
+
         val localizablePlaceModel = LocalizablePlaceModel(
             id = UUID.randomUUID(),
             friendlyId = friendlyId,
-            name = nome,
-            alias = alias,
+            name = locationName,
+            alias = locationAlias,
             additionalDetailsMap = propertiesDetailsMap,
-            locationPoint = localizacao
+            locationPoint = locationPoint,
+            locationAsGeoHash = calculatedLocationGeohashed
         )
-        val savedCentroDistribuicao = localizablePlacePersistRepositoryPort.salvar(localizablePlaceModel)
+
+
+
+        val savedLocalizablePlace = localizablePlacePersistRepositoryPort.salvar(localizablePlaceModel)
         eventPublisherPort.publish(
             LocalizablePlaceCreatedEvent(
-                id = savedCentroDistribuicao.id,
-                friendlyId = savedCentroDistribuicao.friendlyId,
-                name = savedCentroDistribuicao.name,
-                alias = savedCentroDistribuicao.alias,
-                propertiesDetailsMap = savedCentroDistribuicao.additionalDetailsMap,
-                latitude = savedCentroDistribuicao.locationPoint.y,
-                longitude = savedCentroDistribuicao.locationPoint.x
+                id = savedLocalizablePlace.id,
+                friendlyId = savedLocalizablePlace.friendlyId,
+                name = savedLocalizablePlace.name,
+                alias = savedLocalizablePlace.alias,
+                propertiesDetailsMap = savedLocalizablePlace.additionalDetailsMap,
+                latitude = savedLocalizablePlace.locationPoint?.y ?: 0.0,
+                longitude = savedLocalizablePlace.locationPoint?.x ?: 0.0,
+                locationAsGeoHash = savedLocalizablePlace.locationAsGeoHash
             )
         )
-        return savedCentroDistribuicao
+        return savedLocalizablePlace
     }
 
-    override fun buscarPorId(id: UUID): LocalizablePlaceModel? {
-        return localizablePlaceQueryRepositoryPort.buscarPorId(id)
+    override fun searchById(id: UUID): LocalizablePlaceModel? {
+        return localizablePlaceQueryRepositoryPort.searchById(id)
     }
 
-    override fun buscarTodos(): List<LocalizablePlaceModel> {
-        return localizablePlaceQueryRepositoryPort.buscarTodos()
+    override fun searchAll(): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.searchAll()
     }
 
-    override fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel> {
-        return localizablePlaceQueryRepositoryPort.buscarCentrosProximos(localizacao, raioEmKm)
+    override fun searchNearestLocalizablePlaces(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.searchByNearest(localizacao, raioEmKm)
     }
 
-    override fun buscarPorAliasIniciandoPor(searchedAlias: String): List<LocalizablePlaceModel> {
-        return localizablePlaceQueryRepositoryPort.buscarPorAliasIniciandoPor(searchedAlias)
+    override fun searchByAliasStartingWith(searchedAlias: String): List<LocalizablePlaceModel> {
+        return localizablePlaceQueryRepositoryPort.searchByAliasStartingWith(searchedAlias)
     }
 
-    override fun deletarPorId(id: UUID) {
+    override fun removeById(id: UUID) {
         localizablePlacePersistRepositoryPort.deletarPorId(id)
         eventPublisherPort.publish(LocalizablePlaceDeletedEvent(id))
     }
@@ -72,17 +88,17 @@ class LocalizablePlaceCRUDUseCase(
         )
     }
 
-    override fun deletarTodos() {
+    override fun removeAll() {
         localizablePlacePersistRepositoryPort.deletarTodos()
         eventPublisherPort.publish(LocalizablePlacesAllDeletedEvent())
     }
 
     fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
-        return localizablePlaceQueryRepositoryPort.findByFriendlyIdContaining(friendlyId)
+        return localizablePlaceQueryRepositoryPort.searchByFriendlyIdContaining(friendlyId)
     }
 
     fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
-        return localizablePlaceQueryRepositoryPort.findByPropertiesDetailsMapContains(key, value)
+        return localizablePlaceQueryRepositoryPort.searchByPropertiesDetailsMapContains(key, value)
     }
 
 }

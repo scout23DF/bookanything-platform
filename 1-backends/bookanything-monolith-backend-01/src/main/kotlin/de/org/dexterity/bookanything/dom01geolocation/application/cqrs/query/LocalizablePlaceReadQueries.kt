@@ -26,7 +26,7 @@ class GetAllLocalizablePlacesHandler(
 
     override fun handleRequest(requestHolder: GetAllLocalizablePlacesCQRSRequest): GetAllLocalizablePlacesCQRSResponse? {
 
-        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarTodos()
+        val allFoundModelsList = localizablePlaceCRUDUseCase.searchAll()
 
         return GetAllLocalizablePlacesCQRSResponse(allFoundModelsList)
     }
@@ -52,7 +52,7 @@ class GetByIdLocalizablePlaceHandler(
 
     override fun handleRequest(requestHolder: GetByIdLocalizablePlaceCQRSRequest): GetByIdLocalizablePlaceCQRSResponse? {
 
-        val foundModel = localizablePlaceCRUDUseCase.buscarPorId(requestHolder.id)
+        val foundModel = localizablePlaceCRUDUseCase.searchById(requestHolder.id)
 
         return GetByIdLocalizablePlaceCQRSResponse(foundModel)
     }
@@ -79,7 +79,7 @@ class GetByNearestLocalizablePlacesHandler(
 
     override fun handleRequest(requestHolder: GetByNearestLocalizablePlacesCQRSRequest): GetByNearestLocalizablePlacesCQRSResponse? {
 
-        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarCentrosProximos(
+        val allFoundModelsList = localizablePlaceCRUDUseCase.searchNearestLocalizablePlaces(
             requestHolder.locationPointRef,
             requestHolder.raioEmKm
         )
@@ -108,7 +108,7 @@ class GetByAliasCentroDistribuicaoHandler(
 
     override fun handleRequest(requestHolder: GetByAliasLocalizablePlacesCQRSRequest): GetByAliasLocalizablePlacesCQRSResponse? {
 
-        val allFoundModelsList = localizablePlaceCRUDUseCase.buscarPorAliasIniciandoPor(requestHolder.searchedAliasPrefix)
+        val allFoundModelsList = localizablePlaceCRUDUseCase.searchByAliasStartingWith(requestHolder.searchedAliasPrefix)
 
         return GetByAliasLocalizablePlacesCQRSResponse(allFoundModelsList)
     }

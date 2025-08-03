@@ -15,5 +15,6 @@ data class LocalizablePlaceElasticEntity(
     val alias: String?,
     val additionalDetailsMap: Map<String, Any>?,
     @GeoPointField
-    val locationPoint: GeoPoint
+    val locationPoint: GeoPoint,
+    val locationAsGeoHash: String? = null
 )

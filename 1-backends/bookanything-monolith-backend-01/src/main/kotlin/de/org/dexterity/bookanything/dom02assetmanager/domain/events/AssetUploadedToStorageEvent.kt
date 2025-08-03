@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom02assetmanager.domain.events
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
 
 /**
@@ -8,6 +9,6 @@ import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
  */
 data class AssetUploadedToStorageEvent(
     val asset: AssetModel,
-    val parentAliasToAttach: String,
-    val forceReimportIfExists: Boolean
+    val targetCountryCode: String,
+    val hierarchyDetailsRequest: HierarchyDetailsRequest
 )

@@ -5,8 +5,16 @@ import org.locationtech.jts.geom.Point
 import java.util.*
 
 interface LocalizablePlaceWriteFeaturePort {
-    fun cadastrar(nome: String, alias: String?, friendlyId: String, propertiesDetailsMap: Map<String, Any>?, localizacao: Point): LocalizablePlaceModel
-    fun deletarPorId(id: UUID)
+
+    fun create(
+        locationName: String,
+        locationAlias: String?,
+        friendlyId: String,
+        propertiesDetailsMap: Map<String, Any>?,
+        locationPoint: Point
+    ): LocalizablePlaceModel
+
+    fun removeById(id: UUID)
     fun synchronizeAll(): Map<String, Int>
-    fun deletarTodos()
+    fun removeAll()
 }

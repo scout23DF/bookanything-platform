@@ -9,5 +9,6 @@ data class LocalizablePlaceModel(
     val name: String,
     val alias: String?,
     val additionalDetailsMap: Map<String, Any>?,
-    val locationPoint: Point
+    val locationPoint: Point? = null,
+    val locationAsGeoHash: String? = null
 )

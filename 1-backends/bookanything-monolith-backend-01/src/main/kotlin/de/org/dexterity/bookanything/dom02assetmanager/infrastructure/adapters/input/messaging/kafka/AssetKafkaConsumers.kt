@@ -34,14 +34,14 @@ class AssetKafkaConsumers(
         topics = ["\${topics.asset-manager.asset-creation.registered}"],
         groupId = "assetmanager-pos-registered-asset-processor"
     )
-    suspend fun consumeAssetRegisteredEvent(event: AssetRegisteredEvent) {
-        val asset = assetRepository.findById(event.assetId).orElse(null)
+    suspend fun consumeAssetRegisteredEvent(assetRegisteredEvent: AssetRegisteredEvent) {
+        val asset = assetRepository.findById(assetRegisteredEvent.assetId).orElse(null)
         if (asset == null) {
             // Asset not found, maybe it was deleted
             return
         }
 
-        val tempFile = File(event.tempFilePath)
+        val tempFile = File(assetRegisteredEvent.tempFilePath)
         if (!tempFile.exists()) {
             asset.status = AssetStatus.ERROR
             assetRepository.save(asset)
@@ -63,8 +63,8 @@ class AssetKafkaConsumers(
             eventPublisher.publish(
                 AssetUploadedToStorageEvent(
                     savedAsset,
-                    event.parentAliasToAttach,
-                    event.forceReimportIfExists
+                    assetRegisteredEvent.targetCountryCode,
+                    assetRegisteredEvent.hierarchyDetailsRequest
                 )
             )
 
@@ -80,10 +80,11 @@ class AssetKafkaConsumers(
         topics = ["\${topics.asset-manager.asset-creation.uploaded-to-storage}"],
         groupId = "assetmanager-pos-uploaded-asset-processor"
     )
-    fun consumeAssetCreatedEvent(event: AssetUploadedToStorageEvent) {
-        log.info("Received asset created event for asset ID: {}", event.asset.id)
+    fun consumeAssetCreatedEvent(assetUploadedToStorageEvent: AssetUploadedToStorageEvent) {
 
-        val registeredAsset = event.asset
+        log.info("Received asset created event for asset ID: {}", assetUploadedToStorageEvent.asset.id)
+
+        val registeredAsset = assetUploadedToStorageEvent.asset
         if (registeredAsset.mimeType != GEOJSON_MIME_TYPE) {
             log.debug("Asset ID {} is not a GeoJSON file (mimeType: {}). Skipping.", registeredAsset.id, registeredAsset.mimeType)
             return
@@ -99,8 +100,8 @@ class AssetKafkaConsumers(
         runBlocking {
             geoJsonImporterUseCase.execute(
                 registeredAsset,
-                event.parentAliasToAttach,
-                event.forceReimportIfExists
+                assetUploadedToStorageEvent.targetCountryCode,
+                assetUploadedToStorageEvent.hierarchyDetailsRequest
             )
         }
     }

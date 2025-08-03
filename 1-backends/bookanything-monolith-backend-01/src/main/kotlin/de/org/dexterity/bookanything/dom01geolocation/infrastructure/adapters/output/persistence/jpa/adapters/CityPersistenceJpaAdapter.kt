@@ -30,7 +30,7 @@ class CityPersistenceJpaAdapter(
             boundaryRepresentation = targetModel.boundaryRepresentation,
             province = provinceEntity
         )
-        val entitySaved = cityJpaRepository.save(cityEntity)
+        val entitySaved = cityJpaRepository.saveAndFlush<CityEntity>(cityEntity)
         val savedModel = geoLocationJpaMappers.cityToDomainModel(entitySaved, true)
         return savedModel
     }

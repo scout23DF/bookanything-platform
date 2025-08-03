@@ -11,11 +11,12 @@ import org.springframework.stereotype.Component
 @Component
 class KafkaEventPublisherAdapter(
     private val kafkaTemplate: KafkaTemplate<String, Any>,
-    @Value("\${topics.geolocation.geojson-download.country-data-required}") private val countryDataRequiredTopic: String,
+    @Value("\${topics.geolocation.geojson-download.hierarchical-geo-json-data-required}") private val hierarchicalGeoJsonDataRequiredTopic: String,
     @Value("\${topics.geolocation.geojson-file.downloaded}") private val fileDownloadedTopic: String,
     @Value("\${topics.geolocation.geojson-download.failed}") private val downloadFailedTopic: String,
     @Value("\${topics.geolocation.geojson-download.requested}") private val downloadRequestedTopic: String,
     @Value("\${topics.geolocation.geojson-imported-file.ready-to-make-geo-locations}") private val geoJsonImportedFileReadyToMakeGeoLocationsTopic: String,
+    @Value("\${topics.geolocation.geojson-feature.city-importing-processed}") private val geoJsonFeatureForCityImportingTopic: String,
     @Value("\${topics.asset-manager.asset-creation.registered}") private val assetRegisteredTopic: String,
     @Value("\${topics.asset-manager.asset-creation.uploaded-to-storage}") private val assetUploadedToStorageTopic: String
 ) : EventPublisherPort {
@@ -26,13 +27,14 @@ class KafkaEventPublisherAdapter(
             is LocalizablePlaceDeletedEvent -> "localizable-place-deleted-topic"
             is LocalizablePlacesAllDeletedEvent -> "localizable-places-all-deleted-topic"
             is GeoLocationEnrichmentEvent -> "geolocation-enrichment-request-topic"
-            is CountryGeoJsonDataRequiredEvent -> countryDataRequiredTopic
+            is HierarchicalGeoJsonDataRequiredEvent -> hierarchicalGeoJsonDataRequiredTopic
             is GeoJsonFileDownloadedEvent -> fileDownloadedTopic
             is GeoJsonDownloadFailedEvent -> downloadFailedTopic
             is GeoJsonDownloadRequestedEvent -> downloadRequestedTopic
             is AssetRegisteredEvent -> assetRegisteredTopic
             is AssetUploadedToStorageEvent -> assetUploadedToStorageTopic
             is CountryDataToMakeGeoLocationsEvent -> geoJsonImportedFileReadyToMakeGeoLocationsTopic
+            is CreateCityFromGeoJsonFeatureEvent -> geoJsonFeatureForCityImportingTopic
             else -> throw IllegalArgumentException("Unknown event type: ${event.javaClass.name}")
         }
         kafkaTemplate.send(topic, event)

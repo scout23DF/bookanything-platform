@@ -2,99 +2,49 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.LocalizablePlaceModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlaceQueryRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.elasticsearch.entities.LocalizablePlaceElasticEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.elasticsearch.mappers.LocalizablePlaceElasticMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.elasticsearch.repositories.LocalizablePlaceElasticRepository
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.Point
-import org.springframework.data.elasticsearch.core.geo.GeoPoint
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component("centroDistribuicaoElasticSearchAdapter")
 class LocalizablePlaceElasticSearchAdapter(
-    private val localizablePlaceElasticRepository: LocalizablePlaceElasticRepository
+    private val localizablePlaceElasticRepository: LocalizablePlaceElasticRepository,
+    private val localizablePlaceElasticMapper: LocalizablePlaceElasticMapper
 ) : LocalizablePlaceQueryRepositoryPort {
 
-    override fun buscarPorId(id: UUID): LocalizablePlaceModel? {
+    override fun searchById(id: UUID): LocalizablePlaceModel? {
 
         return localizablePlaceElasticRepository.findById(id)
             .map { elasticEntity ->
-                LocalizablePlaceModel(
-                    id = elasticEntity.id,
-                    friendlyId = elasticEntity.friendlyId,
-                    name = elasticEntity.name,
-                    alias = elasticEntity.alias,
-                    additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                    locationPoint = GeometryFactory().createPoint(
-                        Coordinate(
-                            elasticEntity.locationPoint.lon,
-                            elasticEntity.locationPoint.lat
-                        )
-                    )
-                )
+                localizablePlaceElasticMapper.toDomainModel(elasticEntity)
             }
             .orElse(null)
 
     }
 
-    override fun buscarTodos(): List<LocalizablePlaceModel> {
+    override fun searchAll(): List<LocalizablePlaceModel> {
 
         return localizablePlaceElasticRepository.findAll().map { elasticEntity ->
-            LocalizablePlaceModel(
-                id = elasticEntity.id,
-                friendlyId = elasticEntity.friendlyId,
-                name = elasticEntity.name,
-                alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                locationPoint = GeometryFactory().createPoint(
-                    Coordinate(
-                        elasticEntity.locationPoint.lon,
-                        elasticEntity.locationPoint.lat
-                    )
-                )
-            )
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
         }.toList()
 
     }
 
-    override fun buscarPorAliasIniciandoPor(alias: String): List<LocalizablePlaceModel> {
+    override fun searchByAliasStartingWith(alias: String): List<LocalizablePlaceModel> {
         return localizablePlaceElasticRepository.findByAliasStartingWith(alias).map { elasticEntity ->
-            LocalizablePlaceModel(
-                id = elasticEntity.id,
-                friendlyId = elasticEntity.friendlyId,
-                name = elasticEntity.name,
-                alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                locationPoint = GeometryFactory().createPoint(
-                    Coordinate(
-                        elasticEntity.locationPoint.lon,
-                        elasticEntity.locationPoint.lat
-                    )
-                )
-            )
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
         }.toList()
     }
 
-    override fun buscarCentrosProximos(
-        locationPoint: Point,
-        raioEmKm: Double
+    override fun searchByNearest(
+        locationPointToSearch: Point,
+        radiusInKm: Double
     ): List<LocalizablePlaceModel> {
 
-        return localizablePlaceElasticRepository.findByLocationPointWithin(locationPoint, raioEmKm).map { elasticEntity ->
-            LocalizablePlaceModel(
-                id = elasticEntity.id,
-                friendlyId = elasticEntity.friendlyId,
-                name = elasticEntity.name,
-                alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                locationPoint = GeometryFactory().createPoint(
-                    Coordinate(
-                        elasticEntity.locationPoint.lon,
-                        elasticEntity.locationPoint.lat
-                    )
-                )
-            )
+        return localizablePlaceElasticRepository.findByLocationPointWithin(locationPointToSearch, radiusInKm).map { elasticEntity ->
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
         }.toList()
 
     }
@@ -109,70 +59,44 @@ class LocalizablePlaceElasticSearchAdapter(
         localizablePlaceElasticRepository.deleteAll()
 
         // 3. Indexar os dados do PostgreSQL no Elasticsearch
-        sourceLocalizablePlacesList?.let { localizablePlaceFromDBList ->
-            val elasticEntitiesList = localizablePlaceFromDBList.map { oneLocalizablePlaceFromDB ->
-                LocalizablePlaceElasticEntity(
-                    id = oneLocalizablePlaceFromDB.id,
-                    friendlyId = oneLocalizablePlaceFromDB.friendlyId,
-                    name = oneLocalizablePlaceFromDB.name,
-                    alias = oneLocalizablePlaceFromDB.alias,
-                    additionalDetailsMap = oneLocalizablePlaceFromDB.additionalDetailsMap,
-                    locationPoint = GeoPoint(
-                        oneLocalizablePlaceFromDB.locationPoint.y,
-                        oneLocalizablePlaceFromDB.locationPoint.x
-                    )
-                )
+        sourceLocalizablePlacesList?.let { localizablePlacesModelList ->
+            val elasticEntitiesList = localizablePlacesModelList.map { oneLocalizablePlaceModel ->
+                localizablePlaceElasticMapper.toElasticEntity(oneLocalizablePlaceModel)
             }
             val savedEntriesInReadRepository = this.localizablePlaceElasticRepository.saveAll(elasticEntitiesList)
             resultMap["after.entries-in-queryable-repository.count"] = savedEntriesInReadRepository.count().toInt()
 
         }
 
-        println("Synchronization done: ${resultMap}")
+        println("Synchronization done: $resultMap")
 
         return resultMap
     }
 
-    override fun deletarTodos() {
+    override fun removeAll() {
         localizablePlaceElasticRepository.deleteAll()
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
+    override fun searchByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel> {
 
         return localizablePlaceElasticRepository.findByFriendlyIdContaining(friendlyId).map { elasticEntity ->
-            LocalizablePlaceModel(
-                id = elasticEntity.id,
-                friendlyId = elasticEntity.friendlyId,
-                name = elasticEntity.name,
-                alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                locationPoint = GeometryFactory().createPoint(
-                    Coordinate(
-                        elasticEntity.locationPoint.lon,
-                        elasticEntity.locationPoint.lat
-                    )
-                )
-            )
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
         }.toList()
 
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
+    override fun searchByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel> {
 
         return localizablePlaceElasticRepository.findByAdditionalDetailsMapContains(key, value).map { elasticEntity ->
-            LocalizablePlaceModel(
-                id = elasticEntity.id,
-                friendlyId = elasticEntity.friendlyId,
-                name = elasticEntity.name,
-                alias = elasticEntity.alias,
-                additionalDetailsMap = elasticEntity.additionalDetailsMap,
-                locationPoint = GeometryFactory().createPoint(
-                    Coordinate(
-                        elasticEntity.locationPoint.lon,
-                        elasticEntity.locationPoint.lat
-                    )
-                )
-            )
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
+        }.toList()
+
+    }
+
+    override fun searchByLocationAsGeoHash(geoHashToSearch: String): List<LocalizablePlaceModel> {
+
+        return localizablePlaceElasticRepository.findByLocationAsGeoHashEndingWith(geoHashToSearch).map { elasticEntity ->
+            localizablePlaceElasticMapper.toDomainModel(elasticEntity)
         }.toList()
 
     }

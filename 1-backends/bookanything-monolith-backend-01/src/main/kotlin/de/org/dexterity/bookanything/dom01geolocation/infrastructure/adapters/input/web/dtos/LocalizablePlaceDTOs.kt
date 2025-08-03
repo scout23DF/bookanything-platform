@@ -24,5 +24,6 @@ data class LocalizablePlaceRestResponse(
     val alias: String?,
     val additionalDetailsMap: Map<String, Any>? = null,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val locationAsGeoHash: String? = null
 )

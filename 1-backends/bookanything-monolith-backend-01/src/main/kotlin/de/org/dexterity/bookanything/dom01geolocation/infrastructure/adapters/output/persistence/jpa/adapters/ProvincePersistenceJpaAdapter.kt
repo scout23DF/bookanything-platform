@@ -10,6 +10,7 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
+import org.springframework.cache.annotation.Cacheable
 import java.util.*
 
 @Adapter
@@ -107,11 +108,13 @@ class ProvincePersistenceJpaAdapter(
             .map { deepGeoLocationJpaMappers.deepProvinceToDomainModel(it, true) }
     }
 
+    @Cacheable("provincesByFriendlyId")
     override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel> {
         return provinceJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
+    @Cacheable("provincesByPropertiesMap")
     override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
         return provinceJpaRepository.findByPropertiesDetailsMapContains(key, value)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }

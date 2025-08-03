@@ -2,60 +2,40 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.o
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.LocalizablePlaceModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.LocalizablePlacePersistRepositoryPort
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.LocalizablePlaceJpaEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.LocalizablePlaceJpaMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.LocalizablePlaceJpaRepository
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class LocalizablePlaceJpaAdapter(
-    private val repository: LocalizablePlaceJpaRepository
+    private val jpaRepository: LocalizablePlaceJpaRepository,
+    private val jpaMapper: LocalizablePlaceJpaMapper
 ) : LocalizablePlacePersistRepositoryPort {
 
     override fun salvar(localizablePlaceModel: LocalizablePlaceModel): LocalizablePlaceModel {
-        val entity = LocalizablePlaceJpaEntity(
-            id = localizablePlaceModel.id,
-            friendlyId = localizablePlaceModel.friendlyId,
-            name = localizablePlaceModel.name,
-            alias = localizablePlaceModel.alias,
-            additionalDetailsMap = localizablePlaceModel.additionalDetailsMap,
-            locationPoint = localizablePlaceModel.locationPoint
-        )
-        val savedEntity = repository.save(entity)
-        return LocalizablePlaceModel(
-            id = savedEntity.id!!,
-            friendlyId = savedEntity.friendlyId,
-            name = savedEntity.name!!,
-            alias = savedEntity.alias,
-            additionalDetailsMap = savedEntity.additionalDetailsMap,
-            locationPoint = savedEntity.locationPoint!!
-        )
+        val entity = jpaMapper.toJpaEntity(localizablePlaceModel)
+        val savedEntity = jpaRepository.save(entity)
+        return jpaMapper.toDomainModel(savedEntity)
     }
 
     override fun deletarPorId(id: UUID) {
-        repository.deleteById(id)
+        jpaRepository.deleteById(id)
     }
 
     override fun findAllForSync(): List<LocalizablePlaceModel> {
-        return repository.findAll().map { entity ->
-            LocalizablePlaceModel(
-                id = entity.id!!,
-                friendlyId = entity.friendlyId,
-                name = entity.name!!,
-                alias = entity.alias,
-                additionalDetailsMap = entity.additionalDetailsMap,
-                locationPoint = entity.locationPoint!!
-            )
+        return jpaRepository.findAll().map { entity ->
+            jpaMapper.toDomainModel(entity)
         }
     }
 
     override fun deletarTodos(): List<UUID> {
-        val allIds = repository.findAll().map { it.id!! }
-        repository.deleteAll()
+        val allIds = jpaRepository.findAll().map { it.id!! }
+        jpaRepository.deleteAll()
         return allIds
     }
 
     override fun existsByName(name: String): Boolean {
-        return repository.existsByName(name)
+        return jpaRepository.existsByName(name)
     }
 }

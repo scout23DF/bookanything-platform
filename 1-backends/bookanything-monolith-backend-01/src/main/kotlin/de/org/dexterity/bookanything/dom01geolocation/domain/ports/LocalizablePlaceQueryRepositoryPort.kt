@@ -6,14 +6,15 @@ import java.util.UUID
 
 interface LocalizablePlaceQueryRepositoryPort {
 
-    fun buscarPorId(id: UUID): LocalizablePlaceModel?
-    fun buscarTodos(): List<LocalizablePlaceModel>
-    fun buscarPorAliasIniciandoPor(alias: String): List<LocalizablePlaceModel>
-    fun buscarCentrosProximos(localizacao: Point, raioEmKm: Double): List<LocalizablePlaceModel>
-    fun synchronizeFromWriteRepository(sourceCentroDistribuicaoList: List<LocalizablePlaceModel>?): Map<String, Int>
-    fun deletarTodos()
+    fun searchById(id: UUID): LocalizablePlaceModel?
+    fun searchAll(): List<LocalizablePlaceModel>
+    fun searchByAliasStartingWith(alias: String): List<LocalizablePlaceModel>
+    fun searchByNearest(locationPointToSearch: Point, radiusInKm: Double): List<LocalizablePlaceModel>
+    fun synchronizeFromWriteRepository(sourceLocalizablePlacesList: List<LocalizablePlaceModel>?): Map<String, Int>
+    fun removeAll()
 
-    fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel>
+    fun searchByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceModel>
+    fun searchByPropertiesDetailsMapContains(key: String, value: String): List<LocalizablePlaceModel>
+    fun searchByLocationAsGeoHash(geoHashToSearch: String): List<LocalizablePlaceModel>
 
 }

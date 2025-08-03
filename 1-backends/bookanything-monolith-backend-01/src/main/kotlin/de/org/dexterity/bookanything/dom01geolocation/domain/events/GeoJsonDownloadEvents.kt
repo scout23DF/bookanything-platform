@@ -1,7 +1,8 @@
 package de.org.dexterity.bookanything.dom01geolocation.domain.events
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoJsonDownloadRequest
-import java.util.UUID
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
+import java.util.*
 
 /**
  * Event published when a user requests to download a batch of GeoJSON files.
@@ -9,19 +10,17 @@ import java.util.UUID
  */
 data class GeoJsonDownloadRequestedEvent(
     val jobId: UUID,
-    val request: GeoJsonDownloadRequest
+    val geoJsonDownloadRequest: GeoJsonDownloadRequest
 )
 
 /**
  * Event published by the dispatcher for each individual country and level to be downloaded.
  * This event triggers a download worker.
  */
-data class CountryGeoJsonDataRequiredEvent(
+data class HierarchicalGeoJsonDataRequiredEvent(
     val jobId: UUID,
     val countryIso3Code: String,
-    val level: Int,
-    val parentAliasToAttach: String,
-    val forceReimportIfExists: Boolean = false
+    val hierarchyDetailsRequest: HierarchyDetailsRequest
 )
 
 /**
@@ -34,11 +33,9 @@ data class CountryGeoJsonDataRequiredEvent(
 data class GeoJsonFileDownloadedEvent(
     val jobId: UUID,
     val countryIso3Code: String,
-    val level: Int,
+    val hierarchyDetailsRequest: HierarchyDetailsRequest,
     val tempFilePath: String,
-    val fileName: String,
-    val parentAliasToAttach: String,
-    val forceReimportIfExists: Boolean = false
+    val fileName: String
 )
 
 /**
@@ -47,10 +44,8 @@ data class GeoJsonFileDownloadedEvent(
 data class GeoJsonDownloadFailedEvent(
     val jobId: UUID,
     val countryIso3Code: String,
-    val level: Int,
-    val reason: String,
-    val parentAliasToAttach: String,
-    val forceReimportIfExists: Boolean = false
+    val hierarchyDetailsRequest: HierarchyDetailsRequest,
+    val reason: String
 )
 
 /**
@@ -58,6 +53,11 @@ data class GeoJsonDownloadFailedEvent(
  */
 data class CountryDataToMakeGeoLocationsEvent(
     val geoJsonImportedFileId: UUID,
-    val parentAliasToAttach: String,
-    val forceReimportIfExists: Boolean = false
+    val countryIso3Code: String,
+    val hierarchyDetailsRequest: HierarchyDetailsRequest
+)
+
+data class CreateCityFromGeoJsonFeatureEvent(
+    val geoJsonFeatureId: UUID,
+    val hierarchyDetailsRequest: HierarchyDetailsRequest
 )

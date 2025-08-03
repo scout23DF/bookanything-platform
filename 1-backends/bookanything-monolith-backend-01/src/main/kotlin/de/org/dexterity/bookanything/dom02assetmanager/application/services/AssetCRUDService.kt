@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom02assetmanager.application.services
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericAssetUploadRequestDto
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.dtos.GenericUploadedAssetResponseDto
@@ -45,7 +46,21 @@ class AssetCRUDService(
             metadataMap = metadata
         )
 
-        return uploadGenericAsset(genericAssetUploadRequestDto, parentAliasToAttach, forceReimportIfExists).createdAsset
+        val hierarchyDetailsRequest = HierarchyDetailsRequest(
+            hierarchyType = "IGNORE",
+            hierarchyLevelOfFileToImport = 0,
+            propertyForFieldFriendlyIdData = "IGNORE",
+            propertyForFieldNameData = "IGNORE",
+            propertyForFieldAliasData = "IGNORE",
+            propertyForSearchIfExists = "IGNORE",
+            forceReimportIfExists = forceReimportIfExists,
+            parentAliasToAttach = parentAliasToAttach,
+        )
+
+        return uploadGenericAsset(
+            genericAssetUploadRequestDto,
+            "IGNORE",
+            hierarchyDetailsRequest).createdAsset
 
     }
 
@@ -106,8 +121,8 @@ class AssetCRUDService(
 
     suspend fun uploadGenericAsset(
         assetUploadRequestDto: GenericAssetUploadRequestDto,
-        parentAliasToAttach: String,
-        forceReimportIfExists: Boolean
+        targetCountryCode: String,
+        hierarchyDetailsRequest: HierarchyDetailsRequest
     ): GenericUploadedAssetResponseDto {
 
         val targetBucketName = assetUploadRequestDto.bucketName ?: inferBucketName(assetUploadRequestDto.category)
@@ -144,8 +159,8 @@ class AssetCRUDService(
             AssetRegisteredEvent(
                 assetId = asset.id!!,
                 tempFile.absolutePath,
-                parentAliasToAttach = parentAliasToAttach,
-                forceReimportIfExists = forceReimportIfExists
+                targetCountryCode,
+                hierarchyDetailsRequest
             )
         )
 

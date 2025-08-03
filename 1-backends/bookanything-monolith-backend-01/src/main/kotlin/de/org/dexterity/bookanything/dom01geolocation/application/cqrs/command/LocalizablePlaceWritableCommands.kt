@@ -31,7 +31,7 @@ class CreateCentroDistribuicaoHandler(
     }
 
     override fun handleRequest(requestHolder: CreateLocalizablePlaceCQRSRequest): CreateLocalizablePlaceCQRSResponse? {
-        val centroDistribuicaoModelResult = centroDistribuicaoCRUDUseCase.cadastrar(
+        val centroDistribuicaoModelResult = centroDistribuicaoCRUDUseCase.create(
             requestHolder.locationName,
             requestHolder.alias,
             requestHolder.friendlyId,
@@ -61,7 +61,7 @@ class RemoveByIdCentroDistribuicaoHandler(
 
     override fun handleRequest(requestHolder: RemoveByIdCentroDistribuicaoCQRSRequest): Void? {
 
-        centroDistribuicaoCRUDUseCase.deletarPorId(requestHolder.id)
+        centroDistribuicaoCRUDUseCase.removeById(requestHolder.id)
 
         return null
     }
@@ -84,7 +84,7 @@ class RemoveAllCentroDistribuicaoHandler(
 
     override fun handleRequest(requestHolder: RemoveAllCentroDistribuicaoCQRSRequest): Void? {
 
-        centroDistribuicaoCRUDUseCase.deletarTodos()
+        centroDistribuicaoCRUDUseCase.removeAll()
 
         return null
     }

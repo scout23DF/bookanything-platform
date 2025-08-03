@@ -10,4 +10,5 @@ interface LocalizablePlaceElasticRepository : ElasticsearchRepository<Localizabl
     fun findByAliasStartingWith(searchedAlias: String): List<LocalizablePlaceElasticEntity>
     fun findByFriendlyIdContaining(friendlyId: String): List<LocalizablePlaceElasticEntity>
     fun findByAdditionalDetailsMapContains(key: String, value: String): List<LocalizablePlaceElasticEntity>
+    fun findByLocationAsGeoHashEndingWith(geoHashToSearch: String): List<LocalizablePlaceElasticEntity>
 }
