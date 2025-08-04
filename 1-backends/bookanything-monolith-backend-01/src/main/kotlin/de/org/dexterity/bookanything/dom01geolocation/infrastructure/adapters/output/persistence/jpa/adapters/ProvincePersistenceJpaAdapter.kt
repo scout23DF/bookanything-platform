@@ -10,7 +10,6 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
-import org.springframework.cache.annotation.Cacheable
 import java.util.*
 
 @Adapter
@@ -88,6 +87,11 @@ class ProvincePersistenceJpaAdapter(
         provinceJpaRepository.deleteAll()
     }
 
+    override fun findAllByCountryId(countryId: GeoLocationId): List<ProvinceModel> {
+        return provinceJpaRepository.findAllByCountryId(countryId.id)
+            .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
+    }
+
     override fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel> {
         return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
@@ -108,13 +112,13 @@ class ProvincePersistenceJpaAdapter(
             .map { deepGeoLocationJpaMappers.deepProvinceToDomainModel(it, true) }
     }
 
-    @Cacheable("provincesByFriendlyId")
+    // @Cacheable("provincesByFriendlyId")
     override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel> {
         return provinceJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
-    @Cacheable("provincesByPropertiesMap")
+    // @Cacheable("provincesByPropertiesMap")
     override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
         return provinceJpaRepository.findByPropertiesDetailsMapContains(key, value)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }

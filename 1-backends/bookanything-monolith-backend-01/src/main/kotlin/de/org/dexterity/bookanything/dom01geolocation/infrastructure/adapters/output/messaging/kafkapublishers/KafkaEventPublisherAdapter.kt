@@ -16,7 +16,6 @@ class KafkaEventPublisherAdapter(
     @Value("\${topics.geolocation.geojson-download.failed}") private val downloadFailedTopic: String,
     @Value("\${topics.geolocation.geojson-download.requested}") private val downloadRequestedTopic: String,
     @Value("\${topics.geolocation.geojson-imported-file.ready-to-make-geo-locations}") private val geoJsonImportedFileReadyToMakeGeoLocationsTopic: String,
-    @Value("\${topics.geolocation.geojson-feature.city-importing-processed}") private val geoJsonFeatureForCityImportingTopic: String,
     @Value("\${topics.asset-manager.asset-creation.registered}") private val assetRegisteredTopic: String,
     @Value("\${topics.asset-manager.asset-creation.uploaded-to-storage}") private val assetUploadedToStorageTopic: String
 ) : EventPublisherPort {
@@ -34,7 +33,6 @@ class KafkaEventPublisherAdapter(
             is AssetRegisteredEvent -> assetRegisteredTopic
             is AssetUploadedToStorageEvent -> assetUploadedToStorageTopic
             is CountryDataToMakeGeoLocationsEvent -> geoJsonImportedFileReadyToMakeGeoLocationsTopic
-            is CreateCityFromGeoJsonFeatureEvent -> geoJsonFeatureForCityImportingTopic
             else -> throw IllegalArgumentException("Unknown event type: ${event.javaClass.name}")
         }
         kafkaTemplate.send(topic, event)

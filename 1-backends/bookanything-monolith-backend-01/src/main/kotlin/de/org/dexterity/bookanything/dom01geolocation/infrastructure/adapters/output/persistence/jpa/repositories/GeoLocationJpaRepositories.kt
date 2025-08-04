@@ -26,6 +26,7 @@ interface ContinentJpaRepository : JpaRepository<ContinentEntity, Long> {
 
 @Repository
 interface RegionJpaRepository : JpaRepository<RegionEntity, Long> {
+    fun findAllByContinentId(continentId: Long): List<RegionEntity>
     fun findByContinentIdAndNameStartingWithIgnoreCase(continentId: Long, name: String): List<RegionEntity>
     fun findByContinentIdAndAliasStartingWithIgnoreCase(continentId: Long, searchedAlias: String): List<RegionEntity>
 
@@ -43,6 +44,7 @@ interface RegionJpaRepository : JpaRepository<RegionEntity, Long> {
 
 @Repository
 interface CountryJpaRepository : JpaRepository<CountryEntity, Long> {
+    fun findAllByRegionId(regionId: Long): List<CountryEntity>
     fun findByRegionIdAndNameStartingWithIgnoreCase(regionId: Long, name: String): List<CountryEntity>
     fun findByRegionIdAndAliasStartingWithIgnoreCase(regionId: Long, searchedAlias: String): List<CountryEntity>
 
@@ -60,6 +62,7 @@ interface CountryJpaRepository : JpaRepository<CountryEntity, Long> {
 
 @Repository
 interface ProvinceJpaRepository : JpaRepository<ProvinceEntity, Long> {
+    fun findAllByCountryId(countryId: Long): List<ProvinceEntity>
     fun findByCountryIdAndNameStartingWithIgnoreCase(countryId: Long, name: String): List<ProvinceEntity>
     fun findByCountryIdAndAliasStartingWithIgnoreCase(countryId: Long, searchedAlias: String): List<ProvinceEntity>
 
@@ -77,6 +80,7 @@ interface ProvinceJpaRepository : JpaRepository<ProvinceEntity, Long> {
 
 @Repository
 interface CityJpaRepository : JpaRepository<CityEntity, Long> {
+    fun findAllByProvinceId(provinceId: Long): List<CityEntity>
     fun findByProvinceIdAndNameStartingWithIgnoreCase(provinceId: Long, name: String): List<CityEntity>
     fun findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId: Long, searchedAlias: String): List<CityEntity>
 
@@ -94,6 +98,7 @@ interface CityJpaRepository : JpaRepository<CityEntity, Long> {
 
 @Repository
 interface DistrictJpaRepository : JpaRepository<DistrictEntity, Long> {
+    fun findAllByCityId(cityId: Long): List<DistrictEntity>
     fun findByCityIdAndNameStartingWithIgnoreCase(cityId: Long, name: String): List<DistrictEntity>
     fun findByCityIdAndAliasStartingWithIgnoreCase(cityId: Long, searchedAlias: String): List<DistrictEntity>
 

@@ -54,7 +54,7 @@ spring:
                 query:
                     fail_on_pagination_over_collection_fetch: true
                     in_clause_parameter_padding: true
-                show_sql: true
+                show_sql: false
                 format_sql: false
                 # dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
                 # org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
@@ -104,7 +104,7 @@ spring:
                 max.partition.fetch.bytes: 52428800
                 request.timeout.ms: 300000
                 heartbeat.interval.ms: 1000
-                max.poll.interval.ms: 900000
+                max.poll.interval.ms: 9000000
                 max.poll.records: 100
                 session.timeout.ms: 600000
 
@@ -209,8 +209,6 @@ topics:
             downloaded: "geolocation.geojson-file.downloaded"
         geojson-imported-file:
             ready-to-make-geo-locations: "geolocation.geojson-imported-file.ready-to-make-geo-locations"
-        geojson-feature:
-            city-importing-processed: "geolocation.geojson-feature.city-importing-processed"
     asset-manager:
         asset-creation:
             registered: "asset-manager.asset-creation.registered.topic"

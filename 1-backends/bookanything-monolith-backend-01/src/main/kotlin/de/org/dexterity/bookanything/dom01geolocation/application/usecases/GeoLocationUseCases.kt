@@ -2,6 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.application.usecases
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -12,6 +13,7 @@ interface IGeoLocationUseCase<T : IGeoLocationModel> {
     fun update(model: T): T?
     fun deleteById(id: GeoLocationId)
     fun deleteAll()
+    fun deleteByParentId(parentId: GeoLocationId)
     fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<T>
     fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<T>
     fun findDeepById(id: GeoLocationId): Optional<T>
@@ -45,6 +47,10 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoL
 
     override fun deleteAll() {
         return repository.deleteAll()
+    }
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        // Continents do not have a parent, so this method is not applicable
     }
 
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<ContinentModel> {
@@ -82,13 +88,25 @@ class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoL
 }
 
 @Service
-class RegionUseCase(private val repository: IRegionRepositoryPort) : IGeoLocationUseCase<RegionModel> {
+class RegionUseCase(
+    private val repository: IRegionRepositoryPort,
+    @Lazy private val countryUseCase: CountryUseCase
+) : IGeoLocationUseCase<RegionModel> {
     override fun create(model: RegionModel): RegionModel = repository.saveNew(model)
     override fun findById(id: GeoLocationId): Optional<RegionModel> = repository.findById(id)
     override fun findAll(): List<RegionModel> = repository.findAll()
     override fun update(model: RegionModel): RegionModel? = repository.update(model)
     override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        val children = repository.findAllByContinentId(parentId)
+        children.forEach { child ->
+            countryUseCase.deleteByParentId(child.id)
+            deleteById(child.id)
+        }
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<RegionModel> {
         if (parentId == null) {
             return emptyList() // Regions must have a parent
@@ -122,13 +140,25 @@ class RegionUseCase(private val repository: IRegionRepositoryPort) : IGeoLocatio
 }
 
 @Service
-class CountryUseCase(private val repository: ICountryRepositoryPort) : IGeoLocationUseCase<CountryModel> {
+class CountryUseCase(
+    private val repository: ICountryRepositoryPort,
+    @Lazy private val provinceUseCase: ProvinceUseCase
+) : IGeoLocationUseCase<CountryModel> {
     override fun create(model: CountryModel): CountryModel = repository.saveNew(model)
     override fun findById(id: GeoLocationId): Optional<CountryModel> = repository.findById(id)
     override fun findAll(): List<CountryModel> = repository.findAll()
     override fun update(model: CountryModel): CountryModel? = repository.update(model)
     override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        val children = repository.findAllByRegionId(parentId)
+        children.forEach { child ->
+            provinceUseCase.deleteByParentId(child.id)
+            deleteById(child.id)
+        }
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<CountryModel> {
         if (parentId == null) {
             return emptyList() // Countries must have a parent
@@ -162,13 +192,25 @@ class CountryUseCase(private val repository: ICountryRepositoryPort) : IGeoLocat
 }
 
 @Service
-class ProvinceUseCase(private val repository: IProvinceRepositoryPort) : IGeoLocationUseCase<ProvinceModel> {
+class ProvinceUseCase(
+    private val repository: IProvinceRepositoryPort,
+    @Lazy private val cityUseCase: CityUseCase
+) : IGeoLocationUseCase<ProvinceModel> {
     override fun create(model: ProvinceModel): ProvinceModel = repository.saveNew(model)
     override fun findById(id: GeoLocationId): Optional<ProvinceModel> = repository.findById(id)
     override fun findAll(): List<ProvinceModel> = repository.findAll()
     override fun update(model: ProvinceModel): ProvinceModel? = repository.update(model)
     override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        val children = repository.findAllByCountryId(parentId)
+        children.forEach { child ->
+            cityUseCase.deleteByParentId(child.id)
+            deleteById(child.id)
+        }
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<ProvinceModel> {
         if (parentId == null) {
             return emptyList() // Provinces must have a parent
@@ -202,13 +244,25 @@ class ProvinceUseCase(private val repository: IProvinceRepositoryPort) : IGeoLoc
 }
 
 @Service
-class CityUseCase(private val repository: ICityRepositoryPort) : IGeoLocationUseCase<CityModel> {
+class CityUseCase(
+    private val repository: ICityRepositoryPort,
+    @Lazy private val districtUseCase: DistrictUseCase
+) : IGeoLocationUseCase<CityModel> {
     override fun create(model: CityModel): CityModel = repository.saveNew(model)
     override fun findById(id: GeoLocationId): Optional<CityModel> = repository.findById(id)
     override fun findAll(): List<CityModel> = repository.findAll()
     override fun update(model: CityModel): CityModel? = repository.update(model)
     override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        val children = repository.findAllByProvinceId(parentId)
+        children.forEach { child ->
+            districtUseCase.deleteByParentId(child.id)
+            deleteById(child.id)
+        }
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<CityModel> {
         if (parentId == null) {
             return emptyList() // Cities must have a parent
@@ -249,6 +303,14 @@ class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLoc
     override fun update(model: DistrictModel): DistrictModel? = repository.update(model)
     override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteByParentId(parentId: GeoLocationId) {
+        val children = repository.findAllByCityId(parentId)
+        children.forEach { child ->
+            deleteById(child.id)
+        }
+    }
+
     override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<DistrictModel> {
         if (parentId == null) {
             return emptyList() // Districts must have a parent

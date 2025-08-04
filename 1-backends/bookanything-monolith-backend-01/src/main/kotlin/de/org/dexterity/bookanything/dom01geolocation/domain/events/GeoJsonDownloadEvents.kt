@@ -56,8 +56,3 @@ data class CountryDataToMakeGeoLocationsEvent(
     val countryIso3Code: String,
     val hierarchyDetailsRequest: HierarchyDetailsRequest
 )
-
-data class CreateCityFromGeoJsonFeatureEvent(
-    val geoJsonFeatureId: UUID,
-    val hierarchyDetailsRequest: HierarchyDetailsRequest
-)

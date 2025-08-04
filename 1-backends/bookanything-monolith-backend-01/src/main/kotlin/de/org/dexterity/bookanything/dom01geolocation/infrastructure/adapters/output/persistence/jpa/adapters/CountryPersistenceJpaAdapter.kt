@@ -87,6 +87,11 @@ class CountryPersistenceJpaAdapter(
         countryJpaRepository.deleteAll()
     }
 
+    override fun findAllByRegionId(regionId: GeoLocationId): List<CountryModel> {
+        return countryJpaRepository.findAllByRegionId(regionId.id)
+            .map { geoLocationJpaMappers.countryToDomainModel(it, true) }
+    }
+
     override fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel> {
         return countryJpaRepository.findByRegionIdAndNameStartingWithIgnoreCase(regionId.id, namePrefix)
             .map { geoLocationJpaMappers.countryToDomainModel(it, true) }

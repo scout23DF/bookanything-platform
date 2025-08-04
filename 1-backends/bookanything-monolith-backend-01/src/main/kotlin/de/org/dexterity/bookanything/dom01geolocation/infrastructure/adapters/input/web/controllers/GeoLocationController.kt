@@ -120,6 +120,16 @@ class GeoLocationController(
         return ResponseEntity.noContent().build()
     }
 
+    @DeleteMapping("/{type}/by-parent/{parentId}")
+    fun deleteByParentId(
+        @PathVariable type: String,
+        @PathVariable parentId: Long
+    ): ResponseEntity<Void> {
+        val geoLocationType = parseGeoLocationType(type)
+        geoLocationCRUDService.deleteByParentId(geoLocationType, parentId)
+        return ResponseEntity.noContent().build()
+    }
+
     private fun parseGeoLocationType(type: String): GeoLocationType {
         return GeoLocationType.valueOf(type.uppercase())
     }

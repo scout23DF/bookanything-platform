@@ -27,6 +27,7 @@ interface IContinentRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<Continent
 }
 
 interface IRegionRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<RegionModel> {
+    fun findAllByContinentId(continentId: GeoLocationId): List<RegionModel>
     fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String): List<RegionModel>
     fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String): List<RegionModel>
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<RegionModel>
@@ -34,6 +35,7 @@ interface IRegionRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<RegionModel>
 }
 
 interface ICountryRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CountryModel> {
+    fun findAllByRegionId(regionId: GeoLocationId): List<CountryModel>
     fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel>
     fun findByRegionIdAndAliasStartingWith(regionId: GeoLocationId, searchedAlias: String): List<CountryModel>
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CountryModel>
@@ -41,6 +43,7 @@ interface ICountryRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CountryMode
 }
 
 interface IProvinceRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ProvinceModel> {
+    fun findAllByCountryId(countryId: GeoLocationId): List<ProvinceModel>
     fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel>
     fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String): List<ProvinceModel>
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel>
@@ -48,6 +51,7 @@ interface IProvinceRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ProvinceMo
 }
 
 interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel> {
+    fun findAllByProvinceId(provinceId: GeoLocationId): List<CityModel>
     fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel>
     fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String): List<CityModel>
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CityModel>
@@ -55,6 +59,7 @@ interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel> {
 }
 
 interface IDistrictRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<DistrictModel> {
+    fun findAllByCityId(cityId: GeoLocationId): List<DistrictModel>
     fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel>
     fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel>
     fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictModel>

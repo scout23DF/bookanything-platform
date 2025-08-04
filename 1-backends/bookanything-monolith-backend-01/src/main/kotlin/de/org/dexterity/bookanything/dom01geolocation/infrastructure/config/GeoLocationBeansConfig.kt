@@ -63,16 +63,16 @@ class GeoLocationBeansConfig {
     fun continentUseCase(repository: IContinentRepositoryPort): ContinentUseCase = ContinentUseCase(repository)
 
     @Bean
-    fun regionUseCase(repository: IRegionRepositoryPort): RegionUseCase = RegionUseCase(repository)
+    fun regionUseCase(repository: IRegionRepositoryPort, countryUseCase: CountryUseCase): RegionUseCase = RegionUseCase(repository, countryUseCase)
 
     @Bean
-    fun countryUseCase(repository: ICountryRepositoryPort): CountryUseCase = CountryUseCase(repository)
+    fun countryUseCase(repository: ICountryRepositoryPort, provinceUseCase: ProvinceUseCase): CountryUseCase = CountryUseCase(repository, provinceUseCase)
 
     @Bean
-    fun provinceUseCase(repository: IProvinceRepositoryPort): ProvinceUseCase = ProvinceUseCase(repository)
+    fun provinceUseCase(repository: IProvinceRepositoryPort, cityUseCase: CityUseCase): ProvinceUseCase = ProvinceUseCase(repository, cityUseCase)
 
     @Bean
-    fun cityUseCase(repository: ICityRepositoryPort): CityUseCase = CityUseCase(repository)
+    fun cityUseCase(repository: ICityRepositoryPort, districtUseCase: DistrictUseCase): CityUseCase = CityUseCase(repository, districtUseCase)
 
     @Bean
     fun districtUseCase(repository: IDistrictRepositoryPort): DistrictUseCase = DistrictUseCase(repository)

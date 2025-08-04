@@ -107,6 +107,11 @@ class GeoLocationCRUDService(
         useCase.deleteAll()
     }
 
+    fun deleteByParentId(type: GeoLocationType, parentId: Long) {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        useCase.deleteByParentId(GeoLocationId(parentId))
+    }
+
     fun searchByParentIdAndNameStartingWith(type: GeoLocationType, parentId: Long?, namePrefix: String): List<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
         val parentGeoLocationId = parentId?.let { GeoLocationId(it) }

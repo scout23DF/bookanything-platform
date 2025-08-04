@@ -3,7 +3,6 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.i
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.GeoJsonImporterUseCase
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.CountryDataToMakeGeoLocationsEvent
-import de.org.dexterity.bookanything.dom01geolocation.domain.events.CreateCityFromGeoJsonFeatureEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
@@ -84,29 +83,6 @@ class GeoLocationsMakerFromGeoJsonImportedFileKafkaConsumer(
         }
 
         return resultGeoLocationType
-
-    }
-
-    @KafkaListener(
-        topics = ["geolocation.geojson-feature.city-importing-processed"],
-        groupId = "geolocation-geojson-feature-city-importing-processor"
-    )
-    fun listen(cityFromGeoJsonFeatureEvent: CreateCityFromGeoJsonFeatureEvent) {
-        logger.info("===> Event consumed: $cityFromGeoJsonFeatureEvent")
-
-        try {
-            val geoJsonFeatureModel =
-                geoJsonFeatureRepositoryPort.findById(cityFromGeoJsonFeatureEvent.geoJsonFeatureId)
-
-            geoJsonImporterUseCase.createCityFromGeoJsonFeature(
-                geoJsonFeatureModel!!,
-                cityFromGeoJsonFeatureEvent.hierarchyDetailsRequest
-            )
-
-        } catch (ex: Exception) {
-            logger.error("===> Error while creating City from GeoJsonFeature: ${ex.message} :: Event consumed: $cityFromGeoJsonFeatureEvent")
-            return
-        }
 
     }
 

@@ -87,6 +87,11 @@ class CityPersistenceJpaAdapter(
         cityJpaRepository.deleteAll()
     }
 
+    override fun findAllByProvinceId(provinceId: GeoLocationId): List<CityModel> {
+        return cityJpaRepository.findAllByProvinceId(provinceId.id)
+            .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
+    }
+
     override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel> {
         return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoJsonFeatureDto
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.HierarchyDetailsRequest
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.CountryDataToMakeGeoLocationsEvent
-import de.org.dexterity.bookanything.dom01geolocation.domain.events.CreateCityFromGeoJsonFeatureEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
@@ -12,7 +11,6 @@ import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProvi
 import org.geojson.FeatureCollection
 import org.locationtech.jts.io.WKTReader
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -29,14 +27,10 @@ class GeoJsonImporterUseCase(
     private val storageProvider: StorageProviderPort,
     private val objectMapper: ObjectMapper,
     private val eventPublisher: EventPublisherPort,
-    private val continentRepository: IContinentRepositoryPort,
     private val countryRepository: ICountryRepositoryPort,
     private val regionRepository: IRegionRepositoryPort,
     private val provinceRepository: IProvinceRepositoryPort,
-    private val cityRepository: ICityRepositoryPort,
-    private val districtRepository: IDistrictRepositoryPort,
-    @Value("\${topics.geolocation.geojson-feature.city-importing-processed}")
-    private val geoJsonFeatureForCityImportingTopic: String
+    private val cityRepository: ICityRepositoryPort
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -244,60 +238,57 @@ class GeoJsonImporterUseCase(
         hierarchyDetailsRequest: HierarchyDetailsRequest
     ): CityModel? {
 
-        /*
-        val cityFromGeoJsonFeatureEvent : CreateCityFromGeoJsonFeatureEvent = CreateCityFromGeoJsonFeatureEvent(
-            geoJsonFeatureId = geoJsonFeatureModel.id,
-            hierarchyDetailsRequest = hierarchyDetailsRequest
-        )
-        eventPublisher.publish(cityFromGeoJsonFeatureEvent)
-
-        return CityModel(
-            id = GeoLocationId(-1),
-            name = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldNameData] as String,
-            friendlyId = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldFriendlyIdData] as String,
-            alias = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldAliasData] as String?,
-            additionalDetailsMap = geoJsonFeatureModel.featurePropertiesMap,
-            boundaryRepresentation = geoJsonFeatureModel.featureGeometry?.let { wktReader.read(it.toText()) },
-            parentId = -1,
-            province = ProvinceModel(
-                id = GeoLocationId(-1),
-                name = "",
-                friendlyId = "",
-                alias = "",
-                additionalDetailsMap = null,
-                boundaryRepresentation = null,
-                parentId = -1,
-                country = CountryModel(
-                    id = GeoLocationId(-1),
-                    name = "",
-                    friendlyId = "",
-                    alias = "",
-                    additionalDetailsMap = null,
-                    boundaryRepresentation = null,
-                    parentId = -1,
-                    region = RegionModel(
-                        id = GeoLocationId(-1),
-                        name = "",
-                        friendlyId = "",
-                        alias = "",
-                        additionalDetailsMap = null,
-                        boundaryRepresentation = null,
-                        parentId = -1,
-                        continent = ContinentModel(
-                            id = GeoLocationId(-1),
-                            name = "",
-                            friendlyId = ""
-                        )
-                    )
-                )
-            ),
-            districtsList = null
-        )
-        */
-
         try {
 
-            return createCityFromGeoJsonFeature(geoJsonFeatureModel, hierarchyDetailsRequest)
+            val foundCityModel = cityRepository.findByPropertiesDetailsMapContains(
+                hierarchyDetailsRequest.propertyForSearchIfExists as String,
+                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String
+            ).firstOrNull()
+
+            val parentProvinceModel = provinceRepository.findByFriendlyIdContainingIgnoreCase(
+                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String
+            ).firstOrNull()
+
+            if (foundCityModel == null) {
+
+                parentProvinceModel?.let { it ->
+
+                    val newCityModel = CityModel(
+                        id = GeoLocationId(-1),
+                        name = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldNameData] as String,
+                        friendlyId = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldFriendlyIdData] as String,
+                        alias = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldAliasData] as String?,
+                        additionalDetailsMap = geoJsonFeatureModel.featurePropertiesMap,
+                        boundaryRepresentation = geoJsonFeatureModel.featureGeometry?.let { wktReader.read(it.toText()) },
+                        parentId = it.id.id,
+                        province = it,
+                        districtsList = null
+                    )
+
+                    return cityRepository.saveNew(newCityModel)
+
+                }
+
+            } else if (hierarchyDetailsRequest.forceReimportIfExists) {
+
+                parentProvinceModel?.let {
+
+                    val updateCityModel = foundCityModel.copy(
+                        name = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldNameData] as String,
+                        friendlyId = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldFriendlyIdData] as String,
+                        alias = geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForFieldAliasData] as String?,
+                        additionalDetailsMap = geoJsonFeatureModel.featurePropertiesMap,
+                        boundaryRepresentation = geoJsonFeatureModel.featureGeometry?.let { wktReader.read(it.toText()) },
+                        parentId = it.id.id,
+                        province = it
+                    )
+
+                    return cityRepository.update(updateCityModel)
+                }
+
+            }
+
+            return foundCityModel
 
         } catch (ex: Exception) {
             logger.error("===> Error while creating City from GeoJsonFeature: [${geoJsonFeatureModel.id} | ${geoJsonFeatureModel.geoJsonImportedFile.id} | ${geoJsonFeatureModel.featurePropertiesMap}] - \n - Exception: ${ex.message}")
@@ -329,7 +320,7 @@ class GeoJsonImporterUseCase(
 
         if (foundCityModel == null) {
 
-            parentProvinceModel?.let {
+            parentProvinceModel?.let { it ->
 
                 val newCityModel = CityModel(
                     id = GeoLocationId(-1),
