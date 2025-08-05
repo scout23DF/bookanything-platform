@@ -8,6 +8,8 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.DeepGeoLocationRestMapper
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -44,10 +46,11 @@ class GeoLocationController(
     @GetMapping("/{type}")
     fun findAll(
         @PathVariable type: String,
-        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
-    ): ResponseEntity<List<GeoLocationResponse>> {
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
+        pageable: Pageable
+    ): ResponseEntity<Page<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
-        val results = geoLocationCRUDService.findAll(geoLocationType)
+        val results = geoLocationCRUDService.findAll(geoLocationType, pageable)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
@@ -57,10 +60,11 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestParam(required = false) parentId: Long?,
         @RequestParam namePrefix: String,
-        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
-    ): ResponseEntity<List<GeoLocationResponse>> {
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
+        pageable: Pageable
+    ): ResponseEntity<Page<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
-        val results = geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix)
+        val results = geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix, pageable)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
@@ -70,10 +74,11 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestParam(required = true) parentId: Long,
         @RequestParam aliasPrefix: String,
-        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
-    ): ResponseEntity<List<GeoLocationResponse>> {
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
+        pageable: Pageable
+    ): ResponseEntity<Page<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
-        val results = geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
+        val results = geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix, pageable)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
@@ -144,10 +149,11 @@ class GeoLocationController(
     fun searchByFriendlyId(
         @PathVariable type: String,
         @RequestParam friendlyId: String,
-        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
-    ): ResponseEntity<List<GeoLocationResponse>> {
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
+        pageable: Pageable
+    ): ResponseEntity<Page<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
-        val results = geoLocationCRUDService.findByFriendlyId(geoLocationType, friendlyId)
+        val results = geoLocationCRUDService.findByFriendlyId(geoLocationType, friendlyId, pageable)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
@@ -157,10 +163,11 @@ class GeoLocationController(
         @PathVariable type: String,
         @RequestParam key: String,
         @RequestParam value: String,
-        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
-    ): ResponseEntity<List<GeoLocationResponse>> {
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
+        pageable: Pageable
+    ): ResponseEntity<Page<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
-        val results = geoLocationCRUDService.findByPropertiesDetailsMap(geoLocationType, key, value)
+        val results = geoLocationCRUDService.findByPropertiesDetailsMap(geoLocationType, key, value, pageable)
             .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }

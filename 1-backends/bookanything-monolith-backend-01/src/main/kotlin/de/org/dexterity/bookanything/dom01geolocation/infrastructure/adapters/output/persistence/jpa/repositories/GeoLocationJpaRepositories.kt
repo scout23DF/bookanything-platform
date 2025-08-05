@@ -1,21 +1,23 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories
 
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import java.util.Optional
+import java.util.*
 
 @Repository
 interface ContinentJpaRepository : JpaRepository<ContinentEntity, Long> {
-    fun findByNameStartingWithIgnoreCase(name: String): List<ContinentEntity>
-    fun findByAliasStartingWithIgnoreCase(searchedAlias: String): List<ContinentEntity>
+    fun findByNameStartingWithIgnoreCase(name: String, pageable: Pageable): Page<ContinentEntity>
+    fun findByAliasStartingWithIgnoreCase(searchedAlias: String, pageable: Pageable): Page<ContinentEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ContinentEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<ContinentEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'CONTINENT'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ContinentEntity>
 
     @Query("SELECT c FROM ContinentEntity c LEFT JOIN FETCH c.regionsList WHERE c.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<ContinentEntity>
@@ -26,14 +28,14 @@ interface ContinentJpaRepository : JpaRepository<ContinentEntity, Long> {
 
 @Repository
 interface RegionJpaRepository : JpaRepository<RegionEntity, Long> {
-    fun findAllByContinentId(continentId: Long): List<RegionEntity>
-    fun findByContinentIdAndNameStartingWithIgnoreCase(continentId: Long, name: String): List<RegionEntity>
-    fun findByContinentIdAndAliasStartingWithIgnoreCase(continentId: Long, searchedAlias: String): List<RegionEntity>
+    fun findAllByContinentId(continentId: Long, pageable: Pageable): Page<RegionEntity>
+    fun findByContinentIdAndNameStartingWithIgnoreCase(continentId: Long, name: String, pageable: Pageable): Page<RegionEntity>
+    fun findByContinentIdAndAliasStartingWithIgnoreCase(continentId: Long, searchedAlias: String, pageable: Pageable): Page<RegionEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<RegionEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<RegionEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'REGION'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<RegionEntity>
 
     @Query("SELECT r FROM RegionEntity r LEFT JOIN FETCH r.countriesList WHERE r.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<RegionEntity>
@@ -44,14 +46,14 @@ interface RegionJpaRepository : JpaRepository<RegionEntity, Long> {
 
 @Repository
 interface CountryJpaRepository : JpaRepository<CountryEntity, Long> {
-    fun findAllByRegionId(regionId: Long): List<CountryEntity>
-    fun findByRegionIdAndNameStartingWithIgnoreCase(regionId: Long, name: String): List<CountryEntity>
-    fun findByRegionIdAndAliasStartingWithIgnoreCase(regionId: Long, searchedAlias: String): List<CountryEntity>
+    fun findAllByRegionId(regionId: Long, pageable: Pageable): Page<CountryEntity>
+    fun findByRegionIdAndNameStartingWithIgnoreCase(regionId: Long, name: String, pageable: Pageable): Page<CountryEntity>
+    fun findByRegionIdAndAliasStartingWithIgnoreCase(regionId: Long, searchedAlias: String, pageable: Pageable): Page<CountryEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CountryEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<CountryEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'COUNTRY'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<CountryEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CountryEntity>
 
     @Query("SELECT c FROM CountryEntity c LEFT JOIN FETCH c.provincesList WHERE c.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<CountryEntity>
@@ -62,14 +64,14 @@ interface CountryJpaRepository : JpaRepository<CountryEntity, Long> {
 
 @Repository
 interface ProvinceJpaRepository : JpaRepository<ProvinceEntity, Long> {
-    fun findAllByCountryId(countryId: Long): List<ProvinceEntity>
-    fun findByCountryIdAndNameStartingWithIgnoreCase(countryId: Long, name: String): List<ProvinceEntity>
-    fun findByCountryIdAndAliasStartingWithIgnoreCase(countryId: Long, searchedAlias: String): List<ProvinceEntity>
+    fun findAllByCountryId(countryId: Long, pageable: Pageable): Page<ProvinceEntity>
+    fun findByCountryIdAndNameStartingWithIgnoreCase(countryId: Long, name: String, pageable: Pageable): Page<ProvinceEntity>
+    fun findByCountryIdAndAliasStartingWithIgnoreCase(countryId: Long, searchedAlias: String, pageable: Pageable): Page<ProvinceEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<ProvinceEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'PROVINCE'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ProvinceEntity>
 
     @Query("SELECT p FROM ProvinceEntity p LEFT JOIN FETCH p.citiesList WHERE p.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<ProvinceEntity>
@@ -80,14 +82,14 @@ interface ProvinceJpaRepository : JpaRepository<ProvinceEntity, Long> {
 
 @Repository
 interface CityJpaRepository : JpaRepository<CityEntity, Long> {
-    fun findAllByProvinceId(provinceId: Long): List<CityEntity>
-    fun findByProvinceIdAndNameStartingWithIgnoreCase(provinceId: Long, name: String): List<CityEntity>
-    fun findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId: Long, searchedAlias: String): List<CityEntity>
+    fun findAllByProvinceId(provinceId: Long, pageable: Pageable): Page<CityEntity>
+    fun findByProvinceIdAndNameStartingWithIgnoreCase(provinceId: Long, name: String, pageable: Pageable): Page<CityEntity>
+    fun findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId: Long, searchedAlias: String, pageable: Pageable): Page<CityEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CityEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<CityEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'CITY'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CityEntity>
 
     @Query("SELECT c FROM CityEntity c LEFT JOIN FETCH c.districtsList WHERE c.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<CityEntity>
@@ -98,14 +100,14 @@ interface CityJpaRepository : JpaRepository<CityEntity, Long> {
 
 @Repository
 interface DistrictJpaRepository : JpaRepository<DistrictEntity, Long> {
-    fun findAllByCityId(cityId: Long): List<DistrictEntity>
-    fun findByCityIdAndNameStartingWithIgnoreCase(cityId: Long, name: String): List<DistrictEntity>
-    fun findByCityIdAndAliasStartingWithIgnoreCase(cityId: Long, searchedAlias: String): List<DistrictEntity>
+    fun findAllByCityId(cityId: Long, pageable: Pageable): Page<DistrictEntity>
+    fun findByCityIdAndNameStartingWithIgnoreCase(cityId: Long, name: String, pageable: Pageable): Page<DistrictEntity>
+    fun findByCityIdAndAliasStartingWithIgnoreCase(cityId: Long, searchedAlias: String, pageable: Pageable): Page<DistrictEntity>
 
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictEntity>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<DistrictEntity>
 
     @Query(value= "SELECT g.* FROM tb_geo_location g WHERE g.json_additional_details ->> ?1 = ?2 AND g.tp_geo_location = 'DISTRICT'", nativeQuery = true)
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictEntity>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<DistrictEntity>
 
     @Query("SELECT d FROM DistrictEntity d LEFT JOIN FETCH d.addressesList WHERE d.id = :id")
     fun findDeepById(@Param("id") id: Long): Optional<DistrictEntity>

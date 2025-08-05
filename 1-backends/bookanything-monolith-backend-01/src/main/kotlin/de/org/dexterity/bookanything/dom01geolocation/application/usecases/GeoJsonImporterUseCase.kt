@@ -11,6 +11,7 @@ import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProvi
 import org.geojson.FeatureCollection
 import org.locationtech.jts.io.WKTReader
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -126,11 +127,13 @@ class GeoJsonImporterUseCase(
     ): CountryModel? {
 
         val foundCountryModel = countryRepository.findByFriendlyIdContainingIgnoreCase(
-            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String
+            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         val parentRegionModel = regionRepository.findByFriendlyIdContainingIgnoreCase(
-            hierarchyDetailsRequest.parentAliasToAttach
+            hierarchyDetailsRequest.parentAliasToAttach,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         if (foundCountryModel == null) {
@@ -183,11 +186,13 @@ class GeoJsonImporterUseCase(
 
         val foundProvinceModel = provinceRepository.findByPropertiesDetailsMapContains(
             hierarchyDetailsRequest.propertyForSearchIfExists as String,
-            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String
+            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         val parentCountryModel = countryRepository.findByFriendlyIdContainingIgnoreCase(
-            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String
+            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         if (foundProvinceModel == null) {
@@ -242,11 +247,13 @@ class GeoJsonImporterUseCase(
 
             val foundCityModel = cityRepository.findByPropertiesDetailsMapContains(
                 hierarchyDetailsRequest.propertyForSearchIfExists as String,
-                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String
+                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String,
+                Pageable.ofSize(1)
             ).firstOrNull()
 
             val parentProvinceModel = provinceRepository.findByFriendlyIdContainingIgnoreCase(
-                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String
+                geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String,
+                Pageable.ofSize(1)
             ).firstOrNull()
 
             if (foundCityModel == null) {
@@ -311,11 +318,13 @@ class GeoJsonImporterUseCase(
 
         val foundCityModel = cityRepository.findByPropertiesDetailsMapContains(
             hierarchyDetailsRequest.propertyForSearchIfExists as String,
-            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String
+            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForSearchIfExists] as String,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         val parentProvinceModel = provinceRepository.findByFriendlyIdContainingIgnoreCase(
-            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String
+            geoJsonFeatureModel.featurePropertiesMap[hierarchyDetailsRequest.propertyForParentSearch] as String,
+            Pageable.ofSize(1)
         ).firstOrNull()
 
         if (foundCityModel == null) {

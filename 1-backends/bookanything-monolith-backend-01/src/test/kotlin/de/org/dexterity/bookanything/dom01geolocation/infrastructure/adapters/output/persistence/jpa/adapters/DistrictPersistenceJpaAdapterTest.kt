@@ -1,10 +1,10 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.adapters
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.DistrictModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.CityModel
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.CityEntity
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.entities.DistrictEntity
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.DeepGeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.mappers.GeoLocationJpaMappers
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.CityJpaRepository
@@ -12,10 +12,13 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 class DistrictPersistenceJpaAdapterTest {
@@ -102,14 +105,16 @@ class DistrictPersistenceJpaAdapterTest {
         val cityModel = CityModel(id = GeoLocationId(cityId), friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, parentId = 1L, province = mockk(), boundaryRepresentation = null, districtsList = emptyList())
         val cityEntity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, province = mockk(), boundaryRepresentation = null, districtsList = emptyList())
         val entities = listOf(DistrictEntity(friendlyId = "sukhumvit", name = "Sukhumvit", additionalDetailsMap = null, city = cityEntity, boundaryRepresentation = null, addressesList = emptyList()))
+        val pageOfResults = PageImpl(entities)
+
         val models = listOf(DistrictModel(id = GeoLocationId(2), friendlyId = "sukhumvit", name = "Sukhumvit", additionalDetailsMap = null, parentId = cityModel.id.id, city = cityModel, boundaryRepresentation = null, addressesList = emptyList()))
 
-        every { districtJpaRepository.findAll() } returns entities
+        every { districtJpaRepository.findAll(Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.districtToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findAll()
+        val result = adapter.findAll(Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 
     @Test
@@ -130,14 +135,16 @@ class DistrictPersistenceJpaAdapterTest {
         val cityModel = CityModel(id = GeoLocationId(cityId), friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, parentId = 1L, province = mockk(), boundaryRepresentation = null, districtsList = emptyList())
         val cityEntity = CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, province = mockk(), boundaryRepresentation = null, districtsList = emptyList())
         val entities = listOf(DistrictEntity(friendlyId = "sukhumvit", name = "Sukhumvit", additionalDetailsMap = null, city = cityEntity, boundaryRepresentation = null, addressesList = emptyList()))
+        val pageOfResults = PageImpl(entities)
+
         val models = listOf(DistrictModel(id = GeoLocationId(2), friendlyId = "sukhumvit", name = "Sukhumvit", additionalDetailsMap = null, parentId = cityModel.id.id, city = cityModel, boundaryRepresentation = null, addressesList = emptyList()))
 
         every { cityJpaRepository.findById(cityId) } returns Optional.of(cityEntity)
-        every { districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId, namePrefix) } returns entities
+        every { districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId, namePrefix, Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.districtToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findByCityIdAndNameStartingWith(GeoLocationId(cityId), namePrefix)
+        val result = adapter.findByCityIdAndNameStartingWith(GeoLocationId(cityId), namePrefix, Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 }

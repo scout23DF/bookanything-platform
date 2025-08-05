@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.DistrictJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 @Adapter
@@ -74,8 +76,8 @@ class DistrictPersistenceJpaAdapter(
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
-    override fun findAll(): List<DistrictModel> {
-        return districtJpaRepository.findAll()
+    override fun findAll(pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findAll(pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
@@ -87,18 +89,18 @@ class DistrictPersistenceJpaAdapter(
         districtJpaRepository.deleteAll()
     }
 
-    override fun findAllByCityId(cityId: GeoLocationId): List<DistrictModel> {
-        return districtJpaRepository.findAllByCityId(cityId.id)
+    override fun findAllByCityId(cityId: GeoLocationId, pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findAllByCityId(cityId.id, pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
-    override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel> {
-        return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix)
+    override fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findByCityIdAndNameStartingWithIgnoreCase(cityId.id, namePrefix, pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
-    override fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel> {
-        return districtJpaRepository.findByCityIdAndAliasStartingWithIgnoreCase(cityId.id, searchedAlias)
+    override fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findByCityIdAndAliasStartingWithIgnoreCase(cityId.id, searchedAlias, pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
@@ -112,13 +114,13 @@ class DistrictPersistenceJpaAdapter(
             .map { deepGeoLocationJpaMappers.deepDistrictToDomainModel(it, true) }
     }
 
-    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictModel> {
-        return districtJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictModel> {
-        return districtJpaRepository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<DistrictModel> {
+        return districtJpaRepository.findByPropertiesDetailsMapContains(key, value, pageable)
             .map { geoLocationJpaMappers.districtToDomainModel(it, true) }
     }
 }

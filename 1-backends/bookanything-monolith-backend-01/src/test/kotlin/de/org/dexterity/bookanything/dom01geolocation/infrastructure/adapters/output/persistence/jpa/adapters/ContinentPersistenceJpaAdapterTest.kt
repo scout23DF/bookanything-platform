@@ -9,10 +9,13 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 class ContinentPersistenceJpaAdapterTest {
@@ -83,14 +86,16 @@ class ContinentPersistenceJpaAdapterTest {
     @Test
     fun `findAll should return list of ContinentModels`() {
         val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val pageOfResults = PageImpl(entities)
+
         val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
-        every { continentJpaRepository.findAll() } returns entities
+        every { continentJpaRepository.findAll(Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findAll()
+        val result = adapter.findAll(Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 
     @Test
@@ -105,13 +110,15 @@ class ContinentPersistenceJpaAdapterTest {
     @Test
     fun `findByNameStartingWith should return filtered list`() {
         val entities = listOf(ContinentEntity(friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val pageOfResults = PageImpl(entities)
+
         val models = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
-        every { continentJpaRepository.findByNameStartingWithIgnoreCase("A") } returns entities
+        every { continentJpaRepository.findByNameStartingWithIgnoreCase("A", Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.continentToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findByNameStartingWith("A")
+        val result = adapter.findByNameStartingWith("A", Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 }

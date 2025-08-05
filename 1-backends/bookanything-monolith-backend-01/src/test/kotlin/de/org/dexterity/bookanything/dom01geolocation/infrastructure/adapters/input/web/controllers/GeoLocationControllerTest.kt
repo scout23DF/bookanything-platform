@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLo
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.GeoLocationResponse
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
@@ -16,6 +17,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import java.util.*
 
@@ -75,25 +79,28 @@ class GeoLocationControllerTest {
             ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()),
             ContinentModel(id = GeoLocationId(2), friendlyId = "europe", name = "Europe", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
         )
+        val pageOfResults: Page<IGeoLocationModel> = PageImpl(continents)
+
         val responseList = listOf(
             GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null),
             GeoLocationResponse(type = type, id = 2, friendlyId = "europe", name = "Europe", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null)
         )
 
-        every { geoLocationCRUDService.findAll(type) } returns continents
+        every { geoLocationCRUDService.findAll(type, Pageable.unpaged()) } returns pageOfResults
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any(), false) } answers { callOriginal() }
 
-        val result = controller.findAll(type.name, false)
+        val result = controller.findAll(type.name, false, Pageable.unpaged())
 
         assertEquals(2, result.body?.size)
         // Note: Direct comparison of lists of complex objects might fail if equals/hashCode are not properly implemented
         // For simplicity, we're assuming they are for this test.
         // A more robust test would compare properties individually or use a custom matcher.
-        assertEquals(responseList[0].id, result.body?.get(0)?.id)
-        assertEquals(responseList[0].name, result.body?.get(0)?.name)
-        assertEquals(responseList[1].id, result.body?.get(1)?.id)
-        assertEquals(responseList[1].name, result.body?.get(1)?.name)
-        verify(exactly = 1) { geoLocationCRUDService.findAll(type) }
+        assertEquals(responseList[0].id, result.body?.content?.get(0)?.id)
+        assertEquals(responseList[0].name, result.body?.content?.get(0)?.name)
+        assertEquals(responseList[1].id, result.body?.content?.get(1)?.id)
+        assertEquals(responseList[1].name, result.body?.content?.get(1)?.name)
+
+        verify(exactly = 1) { geoLocationCRUDService.findAll(type, Pageable.unpaged()) }
     }
 
     @Test
@@ -133,16 +140,18 @@ class GeoLocationControllerTest {
         val type = GeoLocationType.CONTINENT
         val namePrefix = "A"
         val continents = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
+        val pageOfResults: Page<IGeoLocationModel> = PageImpl(continents)
         val responseList = listOf(GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null))
 
-        every { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) } returns continents
+        every { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix, Pageable.unpaged()) } returns pageOfResults
         every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any(), false) } answers { callOriginal() }
 
-        val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix, false)
+        val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix, false, Pageable.unpaged())
 
         assertEquals(1, result.body?.size)
-        assertEquals(responseList[0].id, result.body?.get(0)?.id)
-        assertEquals(responseList[0].name, result.body?.get(0)?.name)
-        verify(exactly = 1) { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) }
+        assertEquals(responseList[0].id, result.body?.content?.get(0)?.id)
+        assertEquals(responseList[0].name, result.body?.content?.get(0)?.name)
+
+        verify(exactly = 1) { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix, Pageable.unpaged()) }
     }
 }

@@ -3,342 +3,344 @@ package de.org.dexterity.bookanything.dom01geolocation.application.usecases
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
 interface IGeoLocationUseCase<T : IGeoLocationModel> {
     fun create(model: T): T
     fun findById(id: GeoLocationId): Optional<T>
-    fun findAll(): List<T>
+    fun findAll(pageable: Pageable): Page<T>
     fun update(model: T): T?
     fun deleteById(id: GeoLocationId)
     fun deleteAll()
     fun deleteByParentId(parentId: GeoLocationId)
-    fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<T>
-    fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<T>
+    fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<T>
+    fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<T>
     fun findDeepById(id: GeoLocationId): Optional<T>
     fun findDeepByName(name: String): Optional<T>
-    fun findByFriendlyIdContaining(friendlyId: String): List<T>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<T>
+    fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<T>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<T>
 }
 
 @Service
-class ContinentUseCase(private val repository: IContinentRepositoryPort) : IGeoLocationUseCase<ContinentModel> {
+class ContinentUseCase(private val continentRepositoryPort: IContinentRepositoryPort) : IGeoLocationUseCase<ContinentModel> {
 
     override fun create(model: ContinentModel): ContinentModel {
-        return repository.saveNew(model)
+        return continentRepositoryPort.saveNew(model)
     }
 
     override fun findById(id: GeoLocationId): Optional<ContinentModel> {
-        return repository.findById(id)
+        return continentRepositoryPort.findById(id)
     }
 
-    override fun findAll(): List<ContinentModel> {
-        return repository.findAll()
+    override fun findAll(pageable: Pageable): Page<ContinentModel> {
+        return continentRepositoryPort.findAll(pageable)
     }
 
     override fun update(model: ContinentModel): ContinentModel? {
-        return repository.update(model)
+        return continentRepositoryPort.update(model)
     }
 
     override fun deleteById(id: GeoLocationId) {
-        return repository.deleteById(id)
+        return continentRepositoryPort.deleteById(id)
     }
 
     override fun deleteAll() {
-        return repository.deleteAll()
+        return continentRepositoryPort.deleteAll()
     }
 
     override fun deleteByParentId(parentId: GeoLocationId) {
         // Continents do not have a parent, so this method is not applicable
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<ContinentModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<ContinentModel> {
         // Continents do not have a parent, so parentId should be null
         if (parentId != null) {
-            return emptyList()
+            return Page.empty()
         }
-        return repository.findByNameStartingWith(namePrefix)
+        return continentRepositoryPort.findByNameStartingWith(namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<ContinentModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<ContinentModel> {
         // Continents do not have a parent, so parentId should be null
         if (parentId != null) {
-            return emptyList()
+            return Page.empty()
         }
-        return repository.findByAliasStartingWith(aliasPrefix)
+        return continentRepositoryPort.findByAliasStartingWith(aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<ContinentModel> {
-        return repository.findDeepById(id)
+        return continentRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<ContinentModel> {
-        return repository.findDeepByName(name)
+        return continentRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<ContinentModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<ContinentModel> {
+        return continentRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ContinentModel> {
+        return continentRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }
 
 @Service
 class RegionUseCase(
-    private val repository: IRegionRepositoryPort,
+    private val regionRepositoryPort: IRegionRepositoryPort,
     @Lazy private val countryUseCase: CountryUseCase
 ) : IGeoLocationUseCase<RegionModel> {
-    override fun create(model: RegionModel): RegionModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<RegionModel> = repository.findById(id)
-    override fun findAll(): List<RegionModel> = repository.findAll()
-    override fun update(model: RegionModel): RegionModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+    override fun create(model: RegionModel): RegionModel = regionRepositoryPort.saveNew(model)
+    override fun findById(id: GeoLocationId): Optional<RegionModel> = regionRepositoryPort.findById(id)
+    override fun findAll(pageable: Pageable): Page<RegionModel> = regionRepositoryPort.findAll(pageable)
+    override fun update(model: RegionModel): RegionModel? = regionRepositoryPort.update(model)
+    override fun deleteById(id: GeoLocationId) = regionRepositoryPort.deleteById(id)
+    override fun deleteAll() = regionRepositoryPort.deleteAll()
 
     override fun deleteByParentId(parentId: GeoLocationId) {
-        val children = repository.findAllByContinentId(parentId)
+        val children = regionRepositoryPort.findAllByContinentId(parentId, Pageable.ofSize(10000))
         children.forEach { child ->
             countryUseCase.deleteByParentId(child.id)
             deleteById(child.id)
         }
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<RegionModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<RegionModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByContinentIdAndNameStartingWith(parentId, namePrefix)
+        return regionRepositoryPort.findByContinentIdAndNameStartingWith(parentId, namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<RegionModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<RegionModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByContinentIdAndAliasStartingWith(parentId, aliasPrefix)
+        return regionRepositoryPort.findByContinentIdAndAliasStartingWith(parentId, aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<RegionModel> {
-        return repository.findDeepById(id)
+        return regionRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<RegionModel> {
-        return repository.findDeepByName(name)
+        return regionRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<RegionModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<RegionModel> {
+        return regionRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<RegionModel> {
+        return regionRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }
 
 @Service
 class CountryUseCase(
-    private val repository: ICountryRepositoryPort,
+    private val countryRepositoryPort: ICountryRepositoryPort,
     @Lazy private val provinceUseCase: ProvinceUseCase
 ) : IGeoLocationUseCase<CountryModel> {
-    override fun create(model: CountryModel): CountryModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<CountryModel> = repository.findById(id)
-    override fun findAll(): List<CountryModel> = repository.findAll()
-    override fun update(model: CountryModel): CountryModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+    override fun create(model: CountryModel): CountryModel = countryRepositoryPort.saveNew(model)
+    override fun findById(id: GeoLocationId): Optional<CountryModel> = countryRepositoryPort.findById(id)
+    override fun findAll(pageable: Pageable): Page<CountryModel> = countryRepositoryPort.findAll(pageable)
+    override fun update(model: CountryModel): CountryModel? = countryRepositoryPort.update(model)
+    override fun deleteById(id: GeoLocationId) = countryRepositoryPort.deleteById(id)
+    override fun deleteAll() = countryRepositoryPort.deleteAll()
 
     override fun deleteByParentId(parentId: GeoLocationId) {
-        val children = repository.findAllByRegionId(parentId)
+        val children = countryRepositoryPort.findAllByRegionId(parentId, Pageable.ofSize(10000))
         children.forEach { child ->
             provinceUseCase.deleteByParentId(child.id)
             deleteById(child.id)
         }
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<CountryModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<CountryModel> {
         if (parentId == null) {
-            return emptyList() // Countries must have a parent
+            return Page.empty() // Countries must have a parent
         }
-        return repository.findByRegionIdAndNameStartingWith(parentId, namePrefix)
+        return countryRepositoryPort.findByRegionIdAndNameStartingWith(parentId, namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<CountryModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<CountryModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByRegionIdAndAliasStartingWith(parentId, aliasPrefix)
+        return countryRepositoryPort.findByRegionIdAndAliasStartingWith(parentId, aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<CountryModel> {
-        return repository.findDeepById(id)
+        return countryRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<CountryModel> {
-        return repository.findDeepByName(name)
+        return countryRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<CountryModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<CountryModel> {
+        return countryRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<CountryModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CountryModel> {
+        return countryRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }
 
 @Service
 class ProvinceUseCase(
-    private val repository: IProvinceRepositoryPort,
+    private val provinceRepositoryPort: IProvinceRepositoryPort,
     @Lazy private val cityUseCase: CityUseCase
 ) : IGeoLocationUseCase<ProvinceModel> {
-    override fun create(model: ProvinceModel): ProvinceModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<ProvinceModel> = repository.findById(id)
-    override fun findAll(): List<ProvinceModel> = repository.findAll()
-    override fun update(model: ProvinceModel): ProvinceModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+    override fun create(model: ProvinceModel): ProvinceModel = provinceRepositoryPort.saveNew(model)
+    override fun findById(id: GeoLocationId): Optional<ProvinceModel> = provinceRepositoryPort.findById(id)
+    override fun findAll(pageable: Pageable): Page<ProvinceModel> = provinceRepositoryPort.findAll(pageable)
+    override fun update(model: ProvinceModel): ProvinceModel? = provinceRepositoryPort.update(model)
+    override fun deleteById(id: GeoLocationId) = provinceRepositoryPort.deleteById(id)
+    override fun deleteAll() = provinceRepositoryPort.deleteAll()
 
     override fun deleteByParentId(parentId: GeoLocationId) {
-        val children = repository.findAllByCountryId(parentId)
+        val children = provinceRepositoryPort.findAllByCountryId(parentId, Pageable.ofSize(10000))
         children.forEach { child ->
             cityUseCase.deleteByParentId(child.id)
             deleteById(child.id)
         }
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<ProvinceModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<ProvinceModel> {
         if (parentId == null) {
-            return emptyList() // Provinces must have a parent
+            return Page.empty() // Provinces must have a parent
         }
-        return repository.findByCountryIdAndNameStartingWith(parentId, namePrefix)
+        return provinceRepositoryPort.findByCountryIdAndNameStartingWith(parentId, namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<ProvinceModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<ProvinceModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByCountryIdAndAliasStartingWith(parentId, aliasPrefix)
+        return provinceRepositoryPort.findByCountryIdAndAliasStartingWith(parentId, aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<ProvinceModel> {
-        return repository.findDeepById(id)
+        return provinceRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<ProvinceModel> {
-        return repository.findDeepByName(name)
+        return provinceRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<ProvinceModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }
 
 @Service
 class CityUseCase(
-    private val repository: ICityRepositoryPort,
+    private val cityRepositoryPort: ICityRepositoryPort,
     @Lazy private val districtUseCase: DistrictUseCase
 ) : IGeoLocationUseCase<CityModel> {
-    override fun create(model: CityModel): CityModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<CityModel> = repository.findById(id)
-    override fun findAll(): List<CityModel> = repository.findAll()
-    override fun update(model: CityModel): CityModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+    override fun create(model: CityModel): CityModel = cityRepositoryPort.saveNew(model)
+    override fun findById(id: GeoLocationId): Optional<CityModel> = cityRepositoryPort.findById(id)
+    override fun findAll(pageable: Pageable): Page<CityModel> = cityRepositoryPort.findAll(pageable)
+    override fun update(model: CityModel): CityModel? = cityRepositoryPort.update(model)
+    override fun deleteById(id: GeoLocationId) = cityRepositoryPort.deleteById(id)
+    override fun deleteAll() = cityRepositoryPort.deleteAll()
 
     override fun deleteByParentId(parentId: GeoLocationId) {
-        val children = repository.findAllByProvinceId(parentId)
+        val children = cityRepositoryPort.findAllByProvinceId(parentId, Pageable.ofSize(10000))
         children.forEach { child ->
             districtUseCase.deleteByParentId(child.id)
             deleteById(child.id)
         }
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<CityModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<CityModel> {
         if (parentId == null) {
-            return emptyList() // Cities must have a parent
+            return Page.empty() // Cities must have a parent
         }
-        return repository.findByProvinceIdAndNameStartingWith(parentId, namePrefix)
+        return cityRepositoryPort.findByProvinceIdAndNameStartingWith(parentId, namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<CityModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<CityModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByProvinceIdAndAliasStartingWith(parentId, aliasPrefix)
+        return cityRepositoryPort.findByProvinceIdAndAliasStartingWith(parentId, aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<CityModel> {
-        return repository.findDeepById(id)
+        return cityRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<CityModel> {
-        return repository.findDeepByName(name)
+        return cityRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<CityModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<CityModel> {
+        return cityRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CityModel> {
+        return cityRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }
 
 @Service
-class DistrictUseCase(private val repository: IDistrictRepositoryPort) : IGeoLocationUseCase<DistrictModel> {
-    override fun create(model: DistrictModel): DistrictModel = repository.saveNew(model)
-    override fun findById(id: GeoLocationId): Optional<DistrictModel> = repository.findById(id)
-    override fun findAll(): List<DistrictModel> = repository.findAll()
-    override fun update(model: DistrictModel): DistrictModel? = repository.update(model)
-    override fun deleteById(id: GeoLocationId) = repository.deleteById(id)
-    override fun deleteAll() = repository.deleteAll()
+class DistrictUseCase(private val districtRepositoryPort: IDistrictRepositoryPort) : IGeoLocationUseCase<DistrictModel> {
+    override fun create(model: DistrictModel): DistrictModel = districtRepositoryPort.saveNew(model)
+    override fun findById(id: GeoLocationId): Optional<DistrictModel> = districtRepositoryPort.findById(id)
+    override fun findAll(pageable: Pageable): Page<DistrictModel> = districtRepositoryPort.findAll(pageable)
+    override fun update(model: DistrictModel): DistrictModel? = districtRepositoryPort.update(model)
+    override fun deleteById(id: GeoLocationId) = districtRepositoryPort.deleteById(id)
+    override fun deleteAll() = districtRepositoryPort.deleteAll()
 
     override fun deleteByParentId(parentId: GeoLocationId) {
-        val children = repository.findAllByCityId(parentId)
+        val children = districtRepositoryPort.findAllByCityId(parentId, Pageable.ofSize(10000))
         children.forEach { child ->
             deleteById(child.id)
         }
     }
 
-    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String): List<DistrictModel> {
+    override fun findByParentIdAndNameStartingWith(parentId: GeoLocationId?, namePrefix: String, pageable: Pageable): Page<DistrictModel> {
         if (parentId == null) {
-            return emptyList() // Districts must have a parent
+            return Page.empty() // Districts must have a parent
         }
-        return repository.findByCityIdAndNameStartingWith(parentId, namePrefix)
+        return districtRepositoryPort.findByCityIdAndNameStartingWith(parentId, namePrefix, pageable)
     }
 
-    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String): List<DistrictModel> {
+    override fun findByParentIdAndAliasStartingWith(parentId: GeoLocationId?, aliasPrefix: String, pageable: Pageable): Page<DistrictModel> {
         if (parentId == null) {
-            return emptyList() // Regions must have a parent
+            return Page.empty() // Regions must have a parent
         }
-        return repository.findByCityIdAndAliasStartingWith(parentId, aliasPrefix)
+        return districtRepositoryPort.findByCityIdAndAliasStartingWith(parentId, aliasPrefix, pageable)
     }
 
     override fun findDeepById(id: GeoLocationId): Optional<DistrictModel> {
-        return repository.findDeepById(id)
+        return districtRepositoryPort.findDeepById(id)
     }
 
     override fun findDeepByName(name: String): Optional<DistrictModel> {
-        return repository.findDeepByName(name)
+        return districtRepositoryPort.findDeepByName(name)
     }
 
-    override fun findByFriendlyIdContaining(friendlyId: String): List<DistrictModel> {
-        return repository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContaining(friendlyId: String, pageable: Pageable): Page<DistrictModel> {
+        return districtRepositoryPort.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictModel> {
-        return repository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<DistrictModel> {
+        return districtRepositoryPort.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }

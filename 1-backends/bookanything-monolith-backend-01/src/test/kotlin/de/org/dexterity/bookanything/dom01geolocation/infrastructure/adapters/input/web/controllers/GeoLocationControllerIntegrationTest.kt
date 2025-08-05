@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
@@ -247,11 +248,11 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val foundAllResponse = objectMapper.readValue<List<GeoLocationResponse>>(findAllResult.response.contentAsString)
-        assertEquals(1, foundAllResponse.size)
-        assertEquals(updatedGeoLocationName, foundAllResponse[0].name)
-        assertEquals(updatedFriendlyId, foundAllResponse[0].friendlyId)
-        assertEquals(updatedPolygonAreaAsString, foundAllResponse[0].boundaryRepresentation)
+        val foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        assertEquals(1, foundAllResponse.content.size)
+        assertEquals(updatedGeoLocationName, foundAllResponse.content[0].name)
+        assertEquals(updatedFriendlyId, foundAllResponse.content[0].friendlyId)
+        assertEquals(updatedPolygonAreaAsString, foundAllResponse.content[0].boundaryRepresentation)
 
         return GeoLocationId(createdResponse.id)
     }
@@ -306,8 +307,8 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        var foundAllResponse = objectMapper.readValue<List<GeoLocationResponse>>(findAllResult.response.contentAsString)
-        assertEquals(existingRowsCount, foundAllResponse.size)
+        var foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        assertEquals(existingRowsCount, foundAllResponse.totalElements.toInt())
 
         // 1. Delete
         mockMvc.delete("/api/v1/geolocations/" + targetGeoLocationType.name.lowercase() + "/all") {
@@ -320,8 +321,8 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        foundAllResponse = objectMapper.readValue<List<GeoLocationResponse>>(findAllResult.response.contentAsString)
-        assertEquals(0, foundAllResponse.size)
+        foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        assertEquals(0, foundAllResponse.content.size)
 
     }
 
@@ -334,9 +335,9 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val response = objectMapper.readValue<List<GeoLocationResponse>>(result.response.contentAsString)
-        assertEquals(1, response.size)
-        assertEquals("SearchContinent", response[0].name)
+        val response = objectMapper.readValue<Page<GeoLocationResponse>>(result.response.contentAsString)
+        assertEquals(1, response.content.size)
+        assertEquals("SearchContinent", response.content[0].name)
     }
 
     @Test
@@ -359,9 +360,9 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val response = objectMapper.readValue<List<GeoLocationResponse>>(result.response.contentAsString)
-        assertEquals(1, response.size)
-        assertEquals("PropContinent", response[0].name)
+        val response = objectMapper.readValue<Page<GeoLocationResponse>>(result.response.contentAsString)
+        assertEquals(1, response.content.size)
+        assertEquals("PropContinent", response.content[0].name)
     }
 
 }

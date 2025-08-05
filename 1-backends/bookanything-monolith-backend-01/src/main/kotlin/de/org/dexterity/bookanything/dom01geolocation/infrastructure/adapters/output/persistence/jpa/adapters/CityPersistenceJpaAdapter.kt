@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 @Adapter
@@ -74,8 +76,8 @@ class CityPersistenceJpaAdapter(
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
-    override fun findAll(): List<CityModel> {
-        return cityJpaRepository.findAll()
+    override fun findAll(pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findAll(pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
@@ -87,18 +89,18 @@ class CityPersistenceJpaAdapter(
         cityJpaRepository.deleteAll()
     }
 
-    override fun findAllByProvinceId(provinceId: GeoLocationId): List<CityModel> {
-        return cityJpaRepository.findAllByProvinceId(provinceId.id)
+    override fun findAllByProvinceId(provinceId: GeoLocationId, pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findAllByProvinceId(provinceId.id, pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
-    override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel> {
-        return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix)
+    override fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId.id, namePrefix, pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
-    override fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String): List<CityModel> {
-        return cityJpaRepository.findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId.id, searchedAlias)
+    override fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findByProvinceIdAndAliasStartingWithIgnoreCase(provinceId.id, searchedAlias, pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
@@ -112,13 +114,13 @@ class CityPersistenceJpaAdapter(
             .map { deepGeoLocationJpaMappers.deepCityToDomainModel(it, true) }
     }
 
-    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CityModel> {
-        return cityJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityModel> {
-        return cityJpaRepository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CityModel> {
+        return cityJpaRepository.findByPropertiesDetailsMapContains(key, value, pageable)
             .map { geoLocationJpaMappers.cityToDomainModel(it, true) }
     }
 }

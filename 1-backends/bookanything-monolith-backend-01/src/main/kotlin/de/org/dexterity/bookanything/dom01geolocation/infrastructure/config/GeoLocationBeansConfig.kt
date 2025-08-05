@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.ia.gemini.VertexGeminiIAProxyAdapter
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.springframework.ai.chat.client.ChatClient
+import org.springframework.cloud.openfeign.support.PageJacksonModule
+import org.springframework.cloud.openfeign.support.SortJacksonModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -25,6 +27,8 @@ class GeoLocationBeansConfig {
         val mapper = ObjectMapper()
         mapper.registerModule(JavaTimeModule())
         mapper.registerModule(JtsModule())
+        mapper.registerModule(PageJacksonModule())
+        mapper.registerModule(SortJacksonModule())
         mapper.registerModule(KotlinModule.Builder().build())
         return mapper
     }

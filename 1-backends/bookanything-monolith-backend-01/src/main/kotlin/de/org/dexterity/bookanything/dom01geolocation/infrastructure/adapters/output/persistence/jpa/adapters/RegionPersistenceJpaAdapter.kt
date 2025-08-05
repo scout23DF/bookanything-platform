@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.RegionJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 @Adapter
@@ -74,8 +76,8 @@ class RegionPersistenceJpaAdapter(
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
-    override fun findAll(): List<RegionModel> {
-        return regionJpaRepository.findAll()
+    override fun findAll(pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findAll(pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
@@ -87,18 +89,18 @@ class RegionPersistenceJpaAdapter(
         regionJpaRepository.deleteAll()
     }
 
-    override fun findAllByContinentId(continentId: GeoLocationId): List<RegionModel> {
-        return regionJpaRepository.findAllByContinentId(continentId.id)
+    override fun findAllByContinentId(continentId: GeoLocationId, pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findAllByContinentId(continentId.id, pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
-    override fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String): List<RegionModel> {
-        return regionJpaRepository.findByContinentIdAndNameStartingWithIgnoreCase(continentId.id, namePrefix)
+    override fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findByContinentIdAndNameStartingWithIgnoreCase(continentId.id, namePrefix, pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
-    override fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String): List<RegionModel> {
-        return regionJpaRepository.findByContinentIdAndAliasStartingWithIgnoreCase(continentId.id, searchedAlias)
+    override fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findByContinentIdAndAliasStartingWithIgnoreCase(continentId.id, searchedAlias, pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
@@ -112,13 +114,13 @@ class RegionPersistenceJpaAdapter(
             .map { deepGeoLocationJpaMappers.deepRegionToDomainModel(it, true) }
     }
 
-    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<RegionModel> {
-        return regionJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionModel> {
-        return regionJpaRepository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<RegionModel> {
+        return regionJpaRepository.findByPropertiesDetailsMapContains(key, value, pageable)
             .map { geoLocationJpaMappers.regionToDomainModel(it, true) }
     }
 }

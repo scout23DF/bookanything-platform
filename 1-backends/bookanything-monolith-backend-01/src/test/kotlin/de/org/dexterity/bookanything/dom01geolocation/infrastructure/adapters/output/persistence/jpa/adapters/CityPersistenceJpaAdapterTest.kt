@@ -12,10 +12,13 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 class CityPersistenceJpaAdapterTest {
@@ -110,18 +113,19 @@ class CityPersistenceJpaAdapterTest {
         val provinceId = 1L
         val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         val entities = listOf(CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
+        val pageOfResults = PageImpl(entities)
 
         val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
         val models = listOf(CityModel(id = GeoLocationId(2), friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
 
-        every { cityJpaRepository.findAll() } returns entities
+        every { cityJpaRepository.findAll(Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.cityToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findAll()
+        val result = adapter.findAll(Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 
     @Test
@@ -141,17 +145,18 @@ class CityPersistenceJpaAdapterTest {
         val namePrefix = "B"
         val provinceEntity = ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         val entities = listOf(CityEntity(friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, province = provinceEntity, boundaryRepresentation = null, districtsList = emptyList()))
+        val pageOfResults = PageImpl(entities)
 
         val provinceModel = ProvinceModel(id = GeoLocationId(provinceId), friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, parentId = 1L, country = mockk(), boundaryRepresentation = null, citiesList = emptyList())
         every { geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true) } returns provinceModel
 
         val models = listOf(CityModel(id = GeoLocationId(2), friendlyId = "bangkok-city", name = "Bangkok City", additionalDetailsMap = null, parentId = provinceEntity.id, province = geoLocationJpaMappers.provinceToDomainModel(provinceEntity, true), boundaryRepresentation = null, districtsList = emptyList()))
 
-        every { cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId, namePrefix) } returns entities
+        every { cityJpaRepository.findByProvinceIdAndNameStartingWithIgnoreCase(provinceId, namePrefix, Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.cityToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findByProvinceIdAndNameStartingWith(GeoLocationId(provinceId), namePrefix)
+        val result = adapter.findByProvinceIdAndNameStartingWith(GeoLocationId(provinceId), namePrefix, Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 }

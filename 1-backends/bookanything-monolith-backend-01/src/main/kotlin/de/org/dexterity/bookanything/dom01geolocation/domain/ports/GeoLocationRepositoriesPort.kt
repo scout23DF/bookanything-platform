@@ -4,14 +4,17 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
 import org.locationtech.jts.geom.Geometry
 import java.util.*
 
-sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+
+sealed interface IGeoLocationBaseCRUDRepositoryPort<T : Any> {
 
     fun saveNew(targetModel: T): T
     fun update(targetModel: T): T?
     fun updateBoundary(id: GeoLocationId, boundary: Geometry): T?
     fun existsGeoLocationById(geoLocationId: GeoLocationId): Boolean
     fun findById(geoLocationId: GeoLocationId): Optional<T>
-    fun findAll(): List<T>
+    fun findAll(pageable: Pageable): Page<T>
     fun findDeepById(geoLocationId: GeoLocationId): Optional<T>
     fun findDeepByName(name: String): Optional<T>
     fun deleteById(geoLocationId: GeoLocationId)
@@ -20,48 +23,48 @@ sealed interface IGeoLocationBaseCRUDRepositoryPort<T> {
 }
 
 interface IContinentRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ContinentModel> {
-    fun findByNameStartingWith(namePrefix: String): List<ContinentModel>
-    fun findByAliasStartingWith(searchedAlias: String): List<ContinentModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ContinentModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<ContinentModel>
+    fun findByNameStartingWith(namePrefix: String, pageable: Pageable): Page<ContinentModel>
+    fun findByAliasStartingWith(searchedAlias: String, pageable: Pageable): Page<ContinentModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<ContinentModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ContinentModel>
 }
 
 interface IRegionRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<RegionModel> {
-    fun findAllByContinentId(continentId: GeoLocationId): List<RegionModel>
-    fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String): List<RegionModel>
-    fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String): List<RegionModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<RegionModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<RegionModel>
+    fun findAllByContinentId(continentId: GeoLocationId, pageable: Pageable): Page<RegionModel>
+    fun findByContinentIdAndNameStartingWith(continentId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<RegionModel>
+    fun findByContinentIdAndAliasStartingWith(continentId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<RegionModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<RegionModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<RegionModel>
 }
 
 interface ICountryRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CountryModel> {
-    fun findAllByRegionId(regionId: GeoLocationId): List<CountryModel>
-    fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String): List<CountryModel>
-    fun findByRegionIdAndAliasStartingWith(regionId: GeoLocationId, searchedAlias: String): List<CountryModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CountryModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<CountryModel>
+    fun findAllByRegionId(regionId: GeoLocationId, pageable: Pageable): Page<CountryModel>
+    fun findByRegionIdAndNameStartingWith(regionId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<CountryModel>
+    fun findByRegionIdAndAliasStartingWith(regionId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<CountryModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<CountryModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CountryModel>
 }
 
 interface IProvinceRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<ProvinceModel> {
-    fun findAllByCountryId(countryId: GeoLocationId): List<ProvinceModel>
-    fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel>
-    fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String): List<ProvinceModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel>
+    fun findAllByCountryId(countryId: GeoLocationId, pageable: Pageable): Page<ProvinceModel>
+    fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<ProvinceModel>
+    fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<ProvinceModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<ProvinceModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ProvinceModel>
 }
 
 interface ICityRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<CityModel> {
-    fun findAllByProvinceId(provinceId: GeoLocationId): List<CityModel>
-    fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String): List<CityModel>
-    fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String): List<CityModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<CityModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<CityModel>
+    fun findAllByProvinceId(provinceId: GeoLocationId, pageable: Pageable): Page<CityModel>
+    fun findByProvinceIdAndNameStartingWith(provinceId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<CityModel>
+    fun findByProvinceIdAndAliasStartingWith(provinceId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<CityModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<CityModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<CityModel>
 }
 
 interface IDistrictRepositoryPort: IGeoLocationBaseCRUDRepositoryPort<DistrictModel> {
-    fun findAllByCityId(cityId: GeoLocationId): List<DistrictModel>
-    fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String): List<DistrictModel>
-    fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String): List<DistrictModel>
-    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<DistrictModel>
-    fun findByPropertiesDetailsMapContains(key: String, value: String): List<DistrictModel>
+    fun findAllByCityId(cityId: GeoLocationId, pageable: Pageable): Page<DistrictModel>
+    fun findByCityIdAndNameStartingWith(cityId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<DistrictModel>
+    fun findByCityIdAndAliasStartingWith(cityId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<DistrictModel>
+    fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<DistrictModel>
+    fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<DistrictModel>
 }

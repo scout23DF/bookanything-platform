@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.persistence.jpa.repositories.ProvinceJpaRepository
 import de.org.dexterity.bookanything.shared.annotations.Adapter
 import org.locationtech.jts.geom.Geometry
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 @Adapter
@@ -74,8 +76,8 @@ class ProvincePersistenceJpaAdapter(
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
-    override fun findAll(): List<ProvinceModel> {
-        return provinceJpaRepository.findAll()
+    override fun findAll(pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findAll(pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
@@ -87,18 +89,18 @@ class ProvincePersistenceJpaAdapter(
         provinceJpaRepository.deleteAll()
     }
 
-    override fun findAllByCountryId(countryId: GeoLocationId): List<ProvinceModel> {
-        return provinceJpaRepository.findAllByCountryId(countryId.id)
+    override fun findAllByCountryId(countryId: GeoLocationId, pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findAllByCountryId(countryId.id, pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
-    override fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String): List<ProvinceModel> {
-        return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix)
+    override fun findByCountryIdAndNameStartingWith(countryId: GeoLocationId, namePrefix: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId.id, namePrefix, pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
-    override fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String): List<ProvinceModel> {
-        return provinceJpaRepository.findByCountryIdAndAliasStartingWithIgnoreCase(countryId.id, searchedAlias)
+    override fun findByCountryIdAndAliasStartingWith(countryId: GeoLocationId, searchedAlias: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findByCountryIdAndAliasStartingWithIgnoreCase(countryId.id, searchedAlias, pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
@@ -113,14 +115,14 @@ class ProvincePersistenceJpaAdapter(
     }
 
     // @Cacheable("provincesByFriendlyId")
-    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String): List<ProvinceModel> {
-        return provinceJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId)
+    override fun findByFriendlyIdContainingIgnoreCase(friendlyId: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findByFriendlyIdContainingIgnoreCase(friendlyId, pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 
     // @Cacheable("provincesByPropertiesMap")
-    override fun findByPropertiesDetailsMapContains(key: String, value: String): List<ProvinceModel> {
-        return provinceJpaRepository.findByPropertiesDetailsMapContains(key, value)
+    override fun findByPropertiesDetailsMapContains(key: String, value: String, pageable: Pageable): Page<ProvinceModel> {
+        return provinceJpaRepository.findByPropertiesDetailsMapContains(key, value, pageable)
             .map { geoLocationJpaMappers.provinceToDomainModel(it, true) }
     }
 }

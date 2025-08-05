@@ -1,7 +1,10 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.services
 
 import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
-import de.org.dexterity.bookanything.dom01geolocation.domain.models.*
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.ContinentModel
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.RegionModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.EventPublisherPort
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.CreateGeoLocationRequest
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos.UpdateGeoLocationRequest
@@ -14,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 class GeoLocationCRUDServiceTest {
@@ -101,13 +106,15 @@ class GeoLocationCRUDServiceTest {
             ContinentModel(id = GeoLocationId(2), friendlyId = "europe", name = "Europe", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList())
         )
 
-        every { continentUseCase.findAll() } returns continents
+        var pageOfResults = PageImpl(continents)
 
-        val result = service.findAll(GeoLocationType.CONTINENT)
+        every { continentUseCase.findAll(any()) } returns pageOfResults
+
+        val result = service.findAll(GeoLocationType.CONTINENT, Pageable.unpaged())
 
         assertEquals(2, result.size)
-        assertEquals(continents, result)
-        verify(exactly = 1) { continentUseCase.findAll() }
+        assertEquals(continents, result.content)
+        verify(exactly = 1) { continentUseCase.findAll(Pageable.unpaged()) }
     }
 
     @Test
@@ -144,11 +151,13 @@ class GeoLocationCRUDServiceTest {
         val namePrefix = "A"
         val continents = listOf(ContinentModel(id = GeoLocationId(1), friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, regionsList = emptyList()))
 
-        every { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix) } returns continents
+        val pageOfResults = PageImpl(continents)
 
-        val result = service.searchByParentIdAndNameStartingWith(GeoLocationType.CONTINENT, null, namePrefix)
+        every { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix, Pageable.unpaged()) } returns pageOfResults
 
-        assertEquals(continents, result)
-        verify(exactly = 1) { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix) }
+        val result = service.searchByParentIdAndNameStartingWith(GeoLocationType.CONTINENT, null, namePrefix, Pageable.unpaged())
+
+        assertEquals(continents, result.content)
+        verify(exactly = 1) { continentUseCase.findByParentIdAndNameStartingWith(null, namePrefix, Pageable.unpaged()) }
     }
 }

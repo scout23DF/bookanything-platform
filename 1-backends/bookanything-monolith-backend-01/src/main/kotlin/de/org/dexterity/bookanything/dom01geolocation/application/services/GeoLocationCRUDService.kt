@@ -9,8 +9,10 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.in
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
 import org.locationtech.jts.io.WKTReader
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Optional
 
 @Service
 class GeoLocationCRUDService(
@@ -69,9 +71,9 @@ class GeoLocationCRUDService(
         return useCase.findById(GeoLocationId(id))
     }
 
-    fun findAll(type: GeoLocationType): List<IGeoLocationModel> {
+    fun findAll(type: GeoLocationType, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
-        return useCase.findAll()
+        return useCase.findAll(pageable)
     }
 
     fun update(type: GeoLocationType, id: Long, request: UpdateGeoLocationRequest): IGeoLocationModel? {
@@ -112,16 +114,16 @@ class GeoLocationCRUDService(
         useCase.deleteByParentId(GeoLocationId(parentId))
     }
 
-    fun searchByParentIdAndNameStartingWith(type: GeoLocationType, parentId: Long?, namePrefix: String): List<IGeoLocationModel> {
+    fun searchByParentIdAndNameStartingWith(type: GeoLocationType, parentId: Long?, namePrefix: String, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
         val parentGeoLocationId = parentId?.let { GeoLocationId(it) }
-        return useCase.findByParentIdAndNameStartingWith(parentGeoLocationId, namePrefix)
+        return useCase.findByParentIdAndNameStartingWith(parentGeoLocationId, namePrefix, pageable)
     }
 
-    fun searchByParentIdAndAliasStartingWith(type: GeoLocationType, parentId: Long?, aliasPrefix: String): List<IGeoLocationModel> {
+    fun searchByParentIdAndAliasStartingWith(type: GeoLocationType, parentId: Long?, aliasPrefix: String, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
         val parentGeoLocationId = parentId?.let { GeoLocationId(it) }
-        return useCase.findByParentIdAndAliasStartingWith(parentGeoLocationId, aliasPrefix)
+        return useCase.findByParentIdAndAliasStartingWith(parentGeoLocationId, aliasPrefix, pageable)
     }
 
     fun findDeepGeoLocation(type: GeoLocationType, id: Long?, name: String?): IGeoLocationModel? {
@@ -133,14 +135,14 @@ class GeoLocationCRUDService(
         }
     }
 
-    fun findByFriendlyId(type: GeoLocationType, friendlyId: String): List<IGeoLocationModel> {
+    fun findByFriendlyId(type: GeoLocationType, friendlyId: String, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
-        return useCase.findByFriendlyIdContaining(friendlyId)
+        return useCase.findByFriendlyIdContaining(friendlyId, pageable)
     }
 
-    fun findByPropertiesDetailsMap(type: GeoLocationType, key: String, value: String): List<IGeoLocationModel> {
+    fun findByPropertiesDetailsMap(type: GeoLocationType, key: String, value: String, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
-        return useCase.findByPropertiesDetailsMapContains(key, value)
+        return useCase.findByPropertiesDetailsMapContains(key, value, pageable)
     }
 
 }

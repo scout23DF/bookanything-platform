@@ -12,10 +12,13 @@ import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.ou
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.io.WKTReader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.*
 
 class ProvincePersistenceJpaAdapterTest {
@@ -110,18 +113,19 @@ class ProvincePersistenceJpaAdapterTest {
         val countryId = 1L
         val countryEntity = CountryEntity(friendlyId = "thailand", name = "Thailand", region = mockk(), boundaryRepresentation = null, provincesList = emptyList())
         val entities = listOf(ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", country = countryEntity, boundaryRepresentation = null, citiesList = emptyList()))
+        val pageOfResults = PageImpl(entities)
 
         val countryModel = CountryModel(id = GeoLocationId(countryId), friendlyId = "thailand", name = "Thailand", additionalDetailsMap = null, parentId = 1L, region = mockk(), boundaryRepresentation = null, provincesList = emptyList())
         every { geoLocationJpaMappers.countryToDomainModel(countryEntity, true) } returns countryModel
 
         val models = listOf(ProvinceModel(id = GeoLocationId(2), friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, parentId = countryEntity.id, country = geoLocationJpaMappers.countryToDomainModel(countryEntity, true), boundaryRepresentation = null, citiesList = emptyList()))
 
-        every { provinceJpaRepository.findAll() } returns entities
+        every { provinceJpaRepository.findAll(Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.provinceToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findAll()
+        val result = adapter.findAll(Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 
     @Test
@@ -141,17 +145,18 @@ class ProvincePersistenceJpaAdapterTest {
         val namePrefix = "B"
         val countryEntity = CountryEntity(friendlyId = "thailand", name = "Thailand", region = mockk(), boundaryRepresentation = null, provincesList = emptyList())
         val entities = listOf(ProvinceEntity(friendlyId = "bangkok", name = "Bangkok", country = countryEntity, boundaryRepresentation = null, citiesList = emptyList()))
+        val pageOfResults = PageImpl(entities)
 
         val countryModel = CountryModel(id = GeoLocationId(countryId), friendlyId = "thailand", name = "Thailand", additionalDetailsMap = null, parentId = 1L, region = mockk(), boundaryRepresentation = null, provincesList = emptyList())
         every { geoLocationJpaMappers.countryToDomainModel(countryEntity, true) } returns countryModel
 
         val models = listOf(ProvinceModel(id = GeoLocationId(2), friendlyId = "bangkok", name = "Bangkok", additionalDetailsMap = null, parentId = countryEntity.id, country = geoLocationJpaMappers.countryToDomainModel(countryEntity, true), boundaryRepresentation = null, citiesList = emptyList()))
 
-        every { provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId, namePrefix) } returns entities
+        every { provinceJpaRepository.findByCountryIdAndNameStartingWithIgnoreCase(countryId, namePrefix, Pageable.unpaged()) } returns pageOfResults
         every { geoLocationJpaMappers.provinceToDomainModel(any(), true) } answers { models[0] }
 
-        val result = adapter.findByCountryIdAndNameStartingWith(GeoLocationId(countryId), namePrefix)
+        val result = adapter.findByCountryIdAndNameStartingWith(GeoLocationId(countryId), namePrefix, Pageable.unpaged())
 
-        assertEquals(models, result)
+        assertEquals(models, result.content)
     }
 }
