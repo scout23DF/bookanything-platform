@@ -18,7 +18,7 @@ class GeoLocationRestMapper {
     private fun String.toGeometry(): Geometry = wktReader.read(this)
     private fun Geometry.toText(): String = wktWriter.write(this)
 
-    fun fromIGeoLocationModelToResponse(sourceModel: IGeoLocationModel) : GeoLocationResponse {
+    fun fromIGeoLocationModelToResponse(sourceModel: IGeoLocationModel, includeBoundary: Boolean) : GeoLocationResponse {
         return GeoLocationResponse(
             type = sourceModel.type,
             id = sourceModel.id.id,
@@ -26,7 +26,7 @@ class GeoLocationRestMapper {
             name = sourceModel.name,
             alias = sourceModel.alias,
             additionalDetailsMap = sourceModel.additionalDetailsMap,
-            boundaryRepresentation = sourceModel.boundaryRepresentation?.toText(),
+            boundaryRepresentation = if (includeBoundary) sourceModel.boundaryRepresentation?.toText() else null,
             parentId = sourceModel.parentId
         )
     }

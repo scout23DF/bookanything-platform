@@ -42,7 +42,7 @@ class GeoLocationControllerTest {
         val responseDto = GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
 
         every { geoLocationCRUDService.create(type, request) } returns continentModel
-        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel) } returns responseDto
+        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel, true) } returns responseDto
 
         val response = controller.create(type.name, request)
 
@@ -59,9 +59,9 @@ class GeoLocationControllerTest {
         val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null)
 
         every { geoLocationCRUDService.findById(type, id) } returns Optional.of(continentModel)
-        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel) } returns responseDto
+        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(continentModel, false) } returns responseDto
 
-        val response = controller.findById(type.name, id)
+        val response = controller.findById(type.name, id, false)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(responseDto, response.body)
@@ -81,9 +81,9 @@ class GeoLocationControllerTest {
         )
 
         every { geoLocationCRUDService.findAll(type) } returns continents
-        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any()) } answers { callOriginal() }
+        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any(), false) } answers { callOriginal() }
 
-        val result = controller.findAll(type.name)
+        val result = controller.findAll(type.name, false)
 
         assertEquals(2, result.body?.size)
         // Note: Direct comparison of lists of complex objects might fail if equals/hashCode are not properly implemented
@@ -106,7 +106,7 @@ class GeoLocationControllerTest {
         val responseDto = GeoLocationResponse(type = type, id = id, friendlyId = "asia-updated", name = "Updated Asia", additionalDetailsMap = null, boundaryRepresentation = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))", parentId = null)
 
         every { geoLocationCRUDService.update(type, id, request) } returns updatedModel
-        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(updatedModel) } returns responseDto
+        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(updatedModel, true) } returns responseDto
 
         val response = controller.update(type.name, id, request)
 
@@ -136,9 +136,9 @@ class GeoLocationControllerTest {
         val responseList = listOf(GeoLocationResponse(type = type, id = 1, friendlyId = "asia", name = "Asia", additionalDetailsMap = null, boundaryRepresentation = null, parentId = null))
 
         every { geoLocationCRUDService.searchByParentIdAndNameStartingWith(type, null, namePrefix) } returns continents
-        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any()) } answers { callOriginal() }
+        every { geoLocationRestMapper.fromIGeoLocationModelToResponse(any(), false) } answers { callOriginal() }
 
-        val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix)
+        val result = controller.searchByParentIdAndNameStartingWith(type.name, null, namePrefix, false)
 
         assertEquals(1, result.body?.size)
         assertEquals(responseList[0].id, result.body?.get(0)?.id)

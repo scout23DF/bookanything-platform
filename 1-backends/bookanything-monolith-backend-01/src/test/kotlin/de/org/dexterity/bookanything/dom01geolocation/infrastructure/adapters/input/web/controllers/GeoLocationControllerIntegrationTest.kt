@@ -241,7 +241,9 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
 
 
         // 4. Retrieve all
-        val findAllResult = mockMvc.get("/api/v1/geolocations/" + geoLocationType.name.lowercase()) {
+        val findAllResult = mockMvc.get(
+            "/api/v1/geolocations/" + geoLocationType.name.lowercase() + "?includeBoundary=true"
+        ) {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 

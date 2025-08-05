@@ -26,25 +26,29 @@ class GeoLocationController(
     ): ResponseEntity<GeoLocationResponse> {
         val geoLocationType = parseGeoLocationType(type)
         val newCreatedModel = geoLocationCRUDService.create(geoLocationType, request)
-        return ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(newCreatedModel))
+        return ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(newCreatedModel, true))
     }
 
     @GetMapping("/{type}/{id}")
     fun findById(
         @PathVariable type: String,
-        @PathVariable id: Long
+        @PathVariable id: Long,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
     ): ResponseEntity<GeoLocationResponse> {
         val geoLocationType = parseGeoLocationType(type)
         return geoLocationCRUDService.findById(geoLocationType, id)
-            .map { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it) ) }
+            .map { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) ) }
             .orElse(ResponseEntity.notFound().build())
     }
 
     @GetMapping("/{type}")
-    fun findAll(@PathVariable type: String): ResponseEntity<List<GeoLocationResponse>> {
+    fun findAll(
+        @PathVariable type: String,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
+    ): ResponseEntity<List<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
         val results = geoLocationCRUDService.findAll(geoLocationType)
-            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
 
@@ -52,11 +56,12 @@ class GeoLocationController(
     fun searchByParentIdAndNameStartingWith(
         @PathVariable type: String,
         @RequestParam(required = false) parentId: Long?,
-        @RequestParam namePrefix: String
+        @RequestParam namePrefix: String,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
     ): ResponseEntity<List<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
         val results = geoLocationCRUDService.searchByParentIdAndNameStartingWith(geoLocationType, parentId, namePrefix)
-            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
 
@@ -64,11 +69,12 @@ class GeoLocationController(
     fun searchByParentIdAndAliasStartingWith(
         @PathVariable type: String,
         @RequestParam(required = true) parentId: Long,
-        @RequestParam aliasPrefix: String
+        @RequestParam aliasPrefix: String,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
     ): ResponseEntity<List<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
         val results = geoLocationCRUDService.searchByParentIdAndAliasStartingWith(geoLocationType, parentId, aliasPrefix)
-            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
 
@@ -100,7 +106,7 @@ class GeoLocationController(
         val geoLocationType = parseGeoLocationType(type)
         val updated = geoLocationCRUDService.update(geoLocationType, id, request)
 
-        return updated?.let { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it)) } ?: ResponseEntity.notFound().build()
+        return updated?.let { ResponseEntity.ok(geoLocationRestMapper.fromIGeoLocationModelToResponse(it, true)) } ?: ResponseEntity.notFound().build()
     }
 
     @DeleteMapping("/{type}/{id}")
@@ -137,11 +143,12 @@ class GeoLocationController(
     @GetMapping("/{type}/search-by-friendlyid")
     fun searchByFriendlyId(
         @PathVariable type: String,
-        @RequestParam friendlyId: String
+        @RequestParam friendlyId: String,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
     ): ResponseEntity<List<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
         val results = geoLocationCRUDService.findByFriendlyId(geoLocationType, friendlyId)
-            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
 
@@ -149,11 +156,12 @@ class GeoLocationController(
     fun searchByAdditionalProperty(
         @PathVariable type: String,
         @RequestParam key: String,
-        @RequestParam value: String
+        @RequestParam value: String,
+        @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean
     ): ResponseEntity<List<GeoLocationResponse>> {
         val geoLocationType = parseGeoLocationType(type)
         val results = geoLocationCRUDService.findByPropertiesDetailsMap(geoLocationType, key, value)
-            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it) }
+            .map { geoLocationRestMapper.fromIGeoLocationModelToResponse(it, includeBoundary) }
         return ResponseEntity.ok(results)
     }
 
