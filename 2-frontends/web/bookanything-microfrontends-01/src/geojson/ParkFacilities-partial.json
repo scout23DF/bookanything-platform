@@ -1,0 +1,3605 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83743062647609,
+          1.4629982480503967
+        ]
+      },
+      "properties": {
+        "OBJECTID": 1,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e4b0a122-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "Semb Pk Toilet 1 - beachfront"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91983747848083,
+          1.3419846629188985
+        ]
+      },
+      "properties": {
+        "OBJECTID": 2,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "af30ea47-2a86-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.76275025446552,
+          1.2967410732655256
+        ]
+      },
+      "properties": {
+        "OBJECTID": 3,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "421d6113-0786-ee11-be36-6045bd1d3e66",
+        "NAME": "Toilet at West Coast Park Area 3"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.76614587522552,
+          1.2920671677975053
+        ]
+      },
+      "properties": {
+        "OBJECTID": 4,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c74e40ce-0486-ee11-be36-6045bd1fd7f7",
+        "NAME": "Area 2 Toilet cum bicycle kiosk"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.77025050427025,
+          1.2898752284413824
+        ]
+      },
+      "properties": {
+        "OBJECTID": 5,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4629696e-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "Toilet at West Coast Park Area 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.70755298622085,
+          1.3375148978894051
+        ]
+      },
+      "properties": {
+        "OBJECTID": 6,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3c33be40-9a8b-ee11-be36-000d3a097569",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 7,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8987892167588,
+          1.2971619230502696
+        ]
+      },
+      "properties": {
+        "OBJECTID": 7,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "045341de-0486-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 8,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.89332455401464,
+          1.295180169339723
+        ]
+      },
+      "properties": {
+        "OBJECTID": 8,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "0568cc3f-0586-ee11-be36-000d3a097688",
+        "NAME": "ECP TOILET B1 (near CP B1)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 9,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90128630724227,
+          1.2979267029224297
+        ]
+      },
+      "properties": {
+        "OBJECTID": 9,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "09ce0b4c-2a86-ee11-be36-6045bd1fd731",
+        "NAME": "Buggy Shed"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 10,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94784709197846,
+          1.3820505025388636
+        ]
+      },
+      "properties": {
+        "OBJECTID": 10,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "75df9d48-2a86-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 11,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.86658069229898,
+          1.300982411494085
+        ]
+      },
+      "properties": {
+        "OBJECTID": 11,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3e25dd8c-0786-ee11-be36-6045bd1d36d9",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 12,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90978058979861,
+          1.4211890351015632
+        ]
+      },
+      "properties": {
+        "OBJECTID": 12,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8121024b-2a86-ee11-be36-000d3a097d13",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 13,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90977750649226,
+          1.421208842564468
+        ]
+      },
+      "properties": {
+        "OBJECTID": 13,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1978c84a-2a86-ee11-be36-6045bd1d3454",
+        "NAME": "Buggy Shed (near Bicycle Shop)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 14,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.89820694990344,
+          1.4095746483101768
+        ]
+      },
+      "properties": {
+        "OBJECTID": 14,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "605fe3de-0586-ee11-be36-000d3aa335c8",
+        "NAME": "Toilet 2 (Jewel toilet)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 15,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73178247222991,
+          1.338249951241906
+        ]
+      },
+      "properties": {
+        "OBJECTID": 15,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9708302d-0786-ee11-be36-6045bd1d397f",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 16,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73006612807058,
+          1.340031845109894
+        ]
+      },
+      "properties": {
+        "OBJECTID": 16,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "afce55af-0786-ee11-be36-6045bd1fd731",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 17,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81754151611771,
+          1.4011044863643196
+        ]
+      },
+      "properties": {
+        "OBJECTID": 17,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6623b084-0586-ee11-be36-6045bd1d397f",
+        "NAME": "Springleaf Nature Park Toilet/office"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 18,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94335919091256,
+          1.3590997050584612
+        ]
+      },
+      "properties": {
+        "OBJECTID": 18,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "124102cc-0486-ee11-be36-6045bd1fd731",
+        "NAME": "Toilet Block: PWD:Blgd No: 2537-03 / NPB/SPP/TL01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 19,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91112017560962,
+          1.4209690643756512
+        ]
+      },
+      "properties": {
+        "OBJECTID": 19,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d9420b1a-0786-ee11-be36-000d3a097688",
+        "NAME": "Toilet (at Punggol End) near look out deck"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 20,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.75315384859553,
+          1.3889542298266744
+        ]
+      },
+      "properties": {
+        "OBJECTID": 20,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "481b1ad1-0486-ee11-be36-000d3a097d13",
+        "NAME": "Handicap and Family Friendly Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 21,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92536605068507,
+          1.3473394672140162
+        ]
+      },
+      "properties": {
+        "OBJECTID": 21,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "305fc3d5-0786-ee11-be36-000d3a097569",
+        "NAME": "Toilet C"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 22,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.76827524253068,
+          1.2987340078034952
+        ]
+      },
+      "properties": {
+        "OBJECTID": 22,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "16352cd9-0786-ee11-be36-6045bd1fd731",
+        "NAME": "Toilet at Clementi Woods Park"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 23,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.76694893632808,
+          1.3030846720448068
+        ]
+      },
+      "properties": {
+        "OBJECTID": 23,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1d3fbb0a-0686-ee11-be36-000d3a097569",
+        "NAME": "Toilet at Clementi Woods Park"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 24,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82460288473823,
+          1.2879619634686372
+        ]
+      },
+      "properties": {
+        "OBJECTID": 24,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1e48ba43-0586-ee11-be36-6045bd1d3454",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 25,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.00118685155125,
+          1.3839494005526032
+        ]
+      },
+      "properties": {
+        "OBJECTID": 25,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c5f1a95e-0686-ee11-be36-6045bd1fd7f7",
+        "NAME": "Changi Beach Park Toilet 3"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 26,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.99083777219583,
+          1.3914070201834952
+        ]
+      },
+      "properties": {
+        "OBJECTID": 26,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b46733c2-0686-ee11-be36-000d3a0975a5",
+        "NAME": "Changi Beach Park Toilet 2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 27,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.98924837687443,
+          1.3919785901734238
+        ]
+      },
+      "properties": {
+        "OBJECTID": 27,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7141524c-0686-ee11-be36-000d3a0975a5",
+        "NAME": "Toilet 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 28,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.00593692080368,
+          1.373797245588812
+        ]
+      },
+      "properties": {
+        "OBJECTID": 28,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9962d6d2-0486-ee11-be36-6045bd1d36d9",
+        "NAME": "Changi Beach Park Toilet 4"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 29,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.89805149536046,
+          1.2955980621284695
+        ]
+      },
+      "properties": {
+        "OBJECTID": 29,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2c25dc47-2a86-ee11-be36-6045bd1d397f",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 30,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95642757564062,
+          1.3124650440785544
+        ]
+      },
+      "properties": {
+        "OBJECTID": 30,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9f2b4c49-2a86-ee11-be36-000d3aa335c8",
+        "NAME": "Area G Bicycle Kiosk"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 31,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95543338202998,
+          1.3811053008059648
+        ]
+      },
+      "properties": {
+        "OBJECTID": 31,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6c5bdab0-0786-ee11-be36-000d3aa335c8",
+        "NAME": "Toilet A2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 32,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95187408027294,
+          1.3818300028957062
+        ]
+      },
+      "properties": {
+        "OBJECTID": 32,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "47d3d479-0786-ee11-be36-6045bd1fd7f7",
+        "NAME": "Toilet C2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 33,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82779623857404,
+          1.3705953263482442
+        ]
+      },
+      "properties": {
+        "OBJECTID": 33,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "34ea1ba3-0586-ee11-be36-000d3a0975a5",
+        "NAME": "toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 34,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.89724688316811,
+          1.377679214545891
+        ]
+      },
+      "properties": {
+        "OBJECTID": 34,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b6312bd2-0486-ee11-be36-000d3aa335c8",
+        "NAME": "Toilet 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 35,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90560819463644,
+          1.2984183628817807
+        ]
+      },
+      "properties": {
+        "OBJECTID": 35,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6feb35ef-0586-ee11-be36-000d3a0975a5",
+        "NAME": "Parkland Green Toilet near Blk 2B"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 36,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90715696094217,
+          1.299887423792111
+        ]
+      },
+      "properties": {
+        "OBJECTID": 36,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4f2ad692-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "Parkland Green Toilet in Blk 1A"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 37,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.814327747163,
+          1.3141017987405572
+        ]
+      },
+      "properties": {
+        "OBJECTID": 37,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "178cf146-0786-ee11-be36-000d3a0975a5",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 38,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88824522258024,
+          1.294895167140527
+        ]
+      },
+      "properties": {
+        "OBJECTID": 38,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "862b4c49-2a86-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 39,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88397428209468,
+          1.3553690558552454
+        ]
+      },
+      "properties": {
+        "OBJECTID": 39,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "cebacea9-0786-ee11-be36-6045bd1fd7f7",
+        "NAME": "Toilet 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 40,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83356103948934,
+          1.4383412858628426
+        ]
+      },
+      "properties": {
+        "OBJECTID": 40,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "66560ab0-0786-ee11-be36-6045bd1fd663",
+        "NAME": "Toilet 2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 41,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82341238391317,
+          1.4345801943765257
+        ]
+      },
+      "properties": {
+        "OBJECTID": 41,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "cca11be6-0586-ee11-be36-6045bd1d3454",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 42,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.77884224178327,
+          1.4524404399258513
+        ]
+      },
+      "properties": {
+        "OBJECTID": 42,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "fecf729f-0586-ee11-be36-000d3a097569",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 43,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.93227668689275,
+          1.3418964968395966
+        ]
+      },
+      "properties": {
+        "OBJECTID": 43,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "77c37da1-0486-ee11-be36-6045bd1d3454",
+        "NAME": "Toilet B"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 44,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83299233891476,
+          1.4105094544359105
+        ]
+      },
+      "properties": {
+        "OBJECTID": 44,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "40c07192-0786-ee11-be36-000d3aa335c8",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 45,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9524832724094,
+          1.3747273923202972
+        ]
+      },
+      "properties": {
+        "OBJECTID": 45,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8cdf9d48-2a86-ee11-be36-000d3a097688",
+        "NAME": "Bicycle Kiosk"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 46,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.7632255081448,
+          1.3495286287423784
+        ]
+      },
+      "properties": {
+        "OBJECTID": 46,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "392060a0-0686-ee11-be36-6045bd1d3454",
+        "NAME": "Toilet block"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 47,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80244156159951,
+          1.267097558088698
+        ]
+      },
+      "properties": {
+        "OBJECTID": 47,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d52e30d2-0486-ee11-be36-000d3a097688",
+        "NAME": "Office Blk A (former management post)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 48,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80232969161985,
+          1.2672382813488705
+        ]
+      },
+      "properties": {
+        "OBJECTID": 48,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9c9f52dd-0486-ee11-be36-000d3a0975a5",
+        "NAME": "Toilet A"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 49,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80353088755065,
+          1.2647574172676066
+        ]
+      },
+      "properties": {
+        "OBJECTID": 49,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "09785e97-0786-ee11-be36-6045bd1fd663",
+        "NAME": "Toilet B"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 50,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9451782465001,
+          1.3615073924209968
+        ]
+      },
+      "properties": {
+        "OBJECTID": 50,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "dd5547b7-0786-ee11-be36-000d3a097688",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 51,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81643772926644,
+          1.3194624896748643
+        ]
+      },
+      "properties": {
+        "OBJECTID": 51,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "94e9bb15-0586-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 52,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81341912303373,
+          1.3123499486582446
+        ]
+      },
+      "properties": {
+        "OBJECTID": 52,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "54b5f244-0586-ee11-be36-6045bd1d397f",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 53,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81467029324105,
+          1.3119265963272695
+        ]
+      },
+      "properties": {
+        "OBJECTID": 53,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a96821b8-0686-ee11-be36-000d3a097569",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 54,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81776750571403,
+          1.3161989023541605
+        ]
+      },
+      "properties": {
+        "OBJECTID": 54,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a5599393-0786-ee11-be36-000d3a097d13",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 55,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81758339182363,
+          1.3221920224922454
+        ]
+      },
+      "properties": {
+        "OBJECTID": 55,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2fe48b59-0686-ee11-be36-6045bd1fd731",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 56,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81709591681937,
+          1.3081769219880577
+        ]
+      },
+      "properties": {
+        "OBJECTID": 56,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "5e3b744f-0786-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 57,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.86919974690531,
+          1.379203809941152
+        ]
+      },
+      "properties": {
+        "OBJECTID": 57,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3e6d214d-2a86-ee11-be36-6045bd1d3e66",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 58,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.87046421532808,
+          1.3793216326783901
+        ]
+      },
+      "properties": {
+        "OBJECTID": 58,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2625dc47-2a86-ee11-be36-6045bd1d397f",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 59,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.87313971444719,
+          1.3793997868008983
+        ]
+      },
+      "properties": {
+        "OBJECTID": 59,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "08ce0b4c-2a86-ee11-be36-6045bd1fd731",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 60,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.86814108056734,
+          1.3791997913900045
+        ]
+      },
+      "properties": {
+        "OBJECTID": 60,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "76df9d48-2a86-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 61,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.87265090198626,
+          1.3793428272811254
+        ]
+      },
+      "properties": {
+        "OBJECTID": 61,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "45a98ea1-1da3-ed11-aad0-6045bd1c7805",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 62,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.86729190488981,
+          1.3057217319826198
+        ]
+      },
+      "properties": {
+        "OBJECTID": 62,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "177d2c16-0786-ee11-be36-6045bd1fd731",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 63,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.86701404605515,
+          1.3038086428453897
+        ]
+      },
+      "properties": {
+        "OBJECTID": 63,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c4b6dcb6-0786-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 64,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8710897702061,
+          1.3081720658943279
+        ]
+      },
+      "properties": {
+        "OBJECTID": 64,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6fed48db-0786-ee11-be36-6045bd1fd663",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 65,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.70755298622085,
+          1.3375148978894051
+        ]
+      },
+      "properties": {
+        "OBJECTID": 65,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "859b106e-0786-ee11-be36-000d3a097569",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 66,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.85047947655299,
+          1.3599794234743188
+        ]
+      },
+      "properties": {
+        "OBJECTID": 66,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9221024b-2a86-ee11-be36-000d3a097d13",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 67,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88389589262916,
+          1.3983368152105653
+        ]
+      },
+      "properties": {
+        "OBJECTID": 67,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2a684143-0786-ee11-be36-6045bd1fd461",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 68,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.7627815311038,
+          1.3508434919787864
+        ]
+      },
+      "properties": {
+        "OBJECTID": 68,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "411875e9-0486-ee11-be36-000d3a097d13",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 69,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80560955697145,
+          1.264033971100069
+        ]
+      },
+      "properties": {
+        "OBJECTID": 69,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1f0f0440-0786-ee11-be36-000d3a097688",
+        "NAME": "Toilet C male"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 70,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.7985943045994,
+          1.2786714019099015
+        ]
+      },
+      "properties": {
+        "OBJECTID": 70,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4d423b42-0586-ee11-be36-6045bd1d36d9",
+        "NAME": "Workers Shed (AG Toilet Block)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 71,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.79101188317475,
+          1.2834386567013676
+        ]
+      },
+      "properties": {
+        "OBJECTID": 71,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3e930768-0786-ee11-be36-000d3a097569",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 72,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.79101188317475,
+          1.2834386567013676
+        ]
+      },
+      "properties": {
+        "OBJECTID": 72,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f128ebe9-0486-ee11-be36-6045bd1d3e66",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 73,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.79027612123703,
+          1.28395263457283
+        ]
+      },
+      "properties": {
+        "OBJECTID": 73,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "71586d8c-0786-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 74,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.79027612123703,
+          1.28395263457283
+        ]
+      },
+      "properties": {
+        "OBJECTID": 74,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8d5fe3de-0586-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 75,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88799166906314,
+          1.399295787834705
+        ]
+      },
+      "properties": {
+        "OBJECTID": 75,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4fd2f942-0786-ee11-be36-6045bd1fd731",
+        "NAME": "1 Family Toilet and 1 Handicap Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 76,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84136849164189,
+          1.3725787067217041
+        ]
+      },
+      "properties": {
+        "OBJECTID": 76,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e6a7337f-0586-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 77,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84138787601336,
+          1.372695171589466
+        ]
+      },
+      "properties": {
+        "OBJECTID": 77,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "0ea95398-0786-ee11-be36-6045bd1d3454",
+        "NAME": "Handicap toilet & family friendly toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 78,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.75117539368513,
+          1.3673034863575888
+        ]
+      },
+      "properties": {
+        "OBJECTID": 78,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2525dd8c-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "BUKIT GOMBAK PARK (NPB/BLG/BGP/01)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 79,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.87320038180842,
+          1.3793551933991017
+        ]
+      },
+      "properties": {
+        "OBJECTID": 79,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "32b52cde-0486-ee11-be36-6045bd1fd461",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 80,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9336088895259,
+          1.338592598497462
+        ]
+      },
+      "properties": {
+        "OBJECTID": 80,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1f47b630-0586-ee11-be36-6045bd1fd731",
+        "NAME": "Toilet A"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 81,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8865073383546,
+          1.296748236311472
+        ]
+      },
+      "properties": {
+        "OBJECTID": 81,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6d8a324b-0586-ee11-be36-6045bd1d397f",
+        "NAME": "Female toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 82,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88653525651003,
+          1.2966817803094357
+        ]
+      },
+      "properties": {
+        "OBJECTID": 82,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6e4d5fec-0586-ee11-be36-6045bd1fd731",
+        "NAME": "Male toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 83,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81263522351534,
+          1.278985677480515
+        ]
+      },
+      "properties": {
+        "OBJECTID": 83,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "300ffbe4-0486-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 84,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81335053825178,
+          1.278088942985411
+        ]
+      },
+      "properties": {
+        "OBJECTID": 84,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "cbed6fef-0486-ee11-be36-000d3a097d13",
+        "NAME": "Toilet at Telok Blangah Hill Park"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 85,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83491679240177,
+          1.3424428125519878
+        ]
+      },
+      "properties": {
+        "OBJECTID": 85,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "087d925f-0686-ee11-be36-6045bd1fd731",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 86,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83291530083841,
+          1.3412456849468144
+        ]
+      },
+      "properties": {
+        "OBJECTID": 86,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "87015a9c-0686-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 87,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73810140592377,
+          1.4388762382112181
+        ]
+      },
+      "properties": {
+        "OBJECTID": 87,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "88a9beae-0686-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 88,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.74275888209849,
+          1.439178530488092
+        ]
+      },
+      "properties": {
+        "OBJECTID": 88,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "61d479f2-0486-ee11-be36-6045bd1fd7f7",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 89,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95189280596941,
+          1.3725263026052121
+        ]
+      },
+      "properties": {
+        "OBJECTID": 89,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f6cd0b4c-2a86-ee11-be36-6045bd1fd731",
+        "NAME": "Outdoor Dining"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 90,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94388922362481,
+          1.385033540996739
+        ]
+      },
+      "properties": {
+        "OBJECTID": 90,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f1cd0b4c-2a86-ee11-be36-6045bd1fd731",
+        "NAME": "Buggy Shed near CP E"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 91,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.89929832766808,
+          1.367129433273843
+        ]
+      },
+      "properties": {
+        "OBJECTID": 91,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "28e73066-0786-ee11-be36-000d3a0975a5",
+        "NAME": "Family friendly toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 92,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.98353037559455,
+          1.3170078135106928
+        ]
+      },
+      "properties": {
+        "OBJECTID": 92,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a6131602-0786-ee11-be36-000d3a097688",
+        "NAME": "Toilet near NSRCC"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 93,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.88756797071734,
+          1.3993606188993757
+        ]
+      },
+      "properties": {
+        "OBJECTID": 93,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b0e73949-0786-ee11-be36-6045bd1fd461",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 94,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9249520109128,
+          1.3354048920574917
+        ]
+      },
+      "properties": {
+        "OBJECTID": 94,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "296e7afe-0586-ee11-be36-6045bd1fd731",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 95,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94436389948551,
+          1.3854658979782404
+        ]
+      },
+      "properties": {
+        "OBJECTID": 95,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "5b5e8f6a-0786-ee11-be36-6045bd1d3e66",
+        "NAME": "Toilet at Therapeutic Garden"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 96,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9039885881209,
+          1.411367536586856
+        ]
+      },
+      "properties": {
+        "OBJECTID": 96,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "df9255eb-0586-ee11-be36-000d3aa335c8",
+        "NAME": "Punggol Waterway Park Playground Toilet "
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 97,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91821984429303,
+          1.302501916160984
+        ]
+      },
+      "properties": {
+        "OBJECTID": 97,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "91ac2e68-0786-ee11-be36-000d3a097d13",
+        "NAME": "ECP TOILET C4"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 98,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9215874522303,
+          1.3031776370771564
+        ]
+      },
+      "properties": {
+        "OBJECTID": 98,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a5979295-0786-ee11-be36-6045bd1d3e66",
+        "NAME": "Toilet D1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 99,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92146379498936,
+          1.3031412181858462
+        ]
+      },
+      "properties": {
+        "OBJECTID": 99,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "96e55c8a-0586-ee11-be36-6045bd1fd731",
+        "NAME": "NPB/D/TOILET/D1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 100,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94484277843353,
+          1.31041862036372
+        ]
+      },
+      "properties": {
+        "OBJECTID": 100,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "695240f4-0586-ee11-be36-000d3a097d13",
+        "NAME": "TOILET F2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 101,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9342528542977,
+          1.30604408166341
+        ]
+      },
+      "properties": {
+        "OBJECTID": 101,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b5f7f34b-0586-ee11-be36-000d3a097688",
+        "NAME": "TOILET E1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 102,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.93972369446686,
+          1.3084752458814588
+        ]
+      },
+      "properties": {
+        "OBJECTID": 102,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6929696e-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "TOILET F1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 103,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92890137322163,
+          1.3049489388538735
+        ]
+      },
+      "properties": {
+        "OBJECTID": 103,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e46c70c8-0686-ee11-be36-000d3a097d13",
+        "NAME": "Toilet D5"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 104,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95131957855152,
+          1.3723914717146093
+        ]
+      },
+      "properties": {
+        "OBJECTID": 104,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b45547b7-0786-ee11-be36-000d3a097688",
+        "NAME": "Male Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 105,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95129326735352,
+          1.3723142829816297
+        ]
+      },
+      "properties": {
+        "OBJECTID": 105,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "27fe1704-0686-ee11-be36-000d3aa335c8",
+        "NAME": "Female Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 106,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.7292631483208,
+          1.3375089681813357
+        ]
+      },
+      "properties": {
+        "OBJECTID": 106,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "61b946e0-0586-ee11-be36-6045bd1fd461",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 107,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.72973605774102,
+          1.3347042094039092
+        ]
+      },
+      "properties": {
+        "OBJECTID": 107,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7699ae5a-0586-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 108,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73046097375442,
+          1.336850812708373
+        ]
+      },
+      "properties": {
+        "OBJECTID": 108,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c72783b2-0686-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 109,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91449520540782,
+          1.3159068087272767
+        ]
+      },
+      "properties": {
+        "OBJECTID": 109,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f7be7298-0786-ee11-be36-000d3a097569",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 110,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95190409936883,
+          1.3764105010616206
+        ]
+      },
+      "properties": {
+        "OBJECTID": 110,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c713f198-0586-ee11-be36-000d3a097d13",
+        "NAME": "Pasir Ris Park Extension Toilet B"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 111,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8458904943084,
+          1.2921356038403047
+        ]
+      },
+      "properties": {
+        "OBJECTID": 111,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "ad77988d-0786-ee11-be36-000d3a097d13",
+        "NAME": "Blk3 with toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 112,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84787683076199,
+          1.292321770243985
+        ]
+      },
+      "properties": {
+        "OBJECTID": 112,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "07a50bbb-0686-ee11-be36-6045bd1d36d9",
+        "NAME": "-"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 113,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92501350782831,
+          1.3354211990393707
+        ]
+      },
+      "properties": {
+        "OBJECTID": 113,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "184a2a6e-0786-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 114,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84717341809663,
+          1.3311506966305502
+        ]
+      },
+      "properties": {
+        "OBJECTID": 114,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d89acf52-0686-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 115,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83578169185135,
+          1.3649917546611994
+        ]
+      },
+      "properties": {
+        "OBJECTID": 115,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "022abfd5-0786-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 116,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83839258591688,
+          1.3644541150141754
+        ]
+      },
+      "properties": {
+        "OBJECTID": 116,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "61637cc0-0586-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 117,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84610385370257,
+          1.3626534064778568
+        ]
+      },
+      "properties": {
+        "OBJECTID": 117,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7241c78c-0586-ee11-be36-000d3a097d13",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 118,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94604677486086,
+          1.3843033885563458
+        ]
+      },
+      "properties": {
+        "OBJECTID": 118,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "cdf75010-0786-ee11-be36-6045bd1fd7f7",
+        "NAME": "Toilet E1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 119,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94820489720048,
+          1.3829789270677888
+        ]
+      },
+      "properties": {
+        "OBJECTID": 119,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "115a133d-0786-ee11-be36-000d3a097569",
+        "NAME": "Toilet D"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 120,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94305431155954,
+          1.3863056328173602
+        ]
+      },
+      "properties": {
+        "OBJECTID": 120,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "757b3fa4-0686-ee11-be36-000d3a0975a5",
+        "NAME": "Toilet E2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 121,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9461517214449,
+          1.384291266886692
+        ]
+      },
+      "properties": {
+        "OBJECTID": 121,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "ec586d8c-0786-ee11-be36-000d3aa335c8",
+        "NAME": "Toilet E1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 122,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94922214925357,
+          1.3777905016893233
+        ]
+      },
+      "properties": {
+        "OBJECTID": 122,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "fee63066-0786-ee11-be36-000d3a0975a5",
+        "NAME": "Toilet C1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 123,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.96007394876611,
+          1.3807122087466477
+        ]
+      },
+      "properties": {
+        "OBJECTID": 123,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c34fafa7-0486-ee11-be36-6045bd1d3454",
+        "NAME": "Toilet A1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 124,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91838817987087,
+          1.3937126172048153
+        ]
+      },
+      "properties": {
+        "OBJECTID": 124,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "80706e49-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "Toilet (Near Tebing Lane)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 125,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92002188974078,
+          1.3988184472210952
+        ]
+      },
+      "properties": {
+        "OBJECTID": 125,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3c0bfc7e-0686-ee11-be36-000d3a097d13",
+        "NAME": "Punggol Waterway Park Sunrise Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 126,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.7292631483208,
+          1.3375089681813357
+        ]
+      },
+      "properties": {
+        "OBJECTID": 126,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c039668a-0586-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 127,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.72973605774102,
+          1.3347042094039092
+        ]
+      },
+      "properties": {
+        "OBJECTID": 127,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e6ca31ac-0586-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 128,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73046097375442,
+          1.336850812708373
+        ]
+      },
+      "properties": {
+        "OBJECTID": 128,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f2481ff8-0586-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 129,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73178247222991,
+          1.338249951241906
+        ]
+      },
+      "properties": {
+        "OBJECTID": 129,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4ace488c-0786-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 130,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.73006612807058,
+          1.340031845109894
+        ]
+      },
+      "properties": {
+        "OBJECTID": 130,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4e84bccc-0586-ee11-be36-000d3aa335c8",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 131,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84692681817961,
+          1.286052374708368
+        ]
+      },
+      "properties": {
+        "OBJECTID": 131,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "28ccb16d-0786-ee11-be36-6045bd1fd7f7",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 132,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8189455085341,
+          1.321189532686116
+        ]
+      },
+      "properties": {
+        "OBJECTID": 132,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7a8f6dac-0686-ee11-be36-6045bd1d3e66",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 133,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81451189556107,
+          1.3207454960239453
+        ]
+      },
+      "properties": {
+        "OBJECTID": 133,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8947af8b-0786-ee11-be36-6045bd1fd461",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 134,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.00525041968191,
+          1.3732838611862983
+        ]
+      },
+      "properties": {
+        "OBJECTID": 134,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "576d214d-2a86-ee11-be36-6045bd1d3e66",
+        "NAME": "GoCyling (Bicycle Rental at Carpark 7)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 135,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.9903396109911,
+          1.3914179330569483
+        ]
+      },
+      "properties": {
+        "OBJECTID": 135,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2525dc47-2a86-ee11-be36-6045bd1d397f",
+        "NAME": "NPB/SE/CBP/RBS02"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 136,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.75109663705003,
+          1.3674297038308887
+        ]
+      },
+      "properties": {
+        "OBJECTID": 136,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "07ce0b4c-2a86-ee11-be36-6045bd1fd731",
+        "NAME": "Resturant"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 137,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84105926302982,
+          1.4262373789202563
+        ]
+      },
+      "properties": {
+        "OBJECTID": 137,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "82de71af-0786-ee11-be36-000d3a0975a5",
+        "NAME": "Yishun Central / Yishun Ave 11"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 138,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84187278460759,
+          1.4234076242473808
+        ]
+      },
+      "properties": {
+        "OBJECTID": 138,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9361dc3a-0686-ee11-be36-6045bd1d3454",
+        "NAME": "Near amphitheatre/SAFRA"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 139,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8439637090751,
+          1.4242055230704538
+        ]
+      },
+      "properties": {
+        "OBJECTID": 139,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7dbe5ef2-0586-ee11-be36-6045bd1fd731",
+        "NAME": "Yishun Ring Rd / Yishun Ave 11"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 140,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83598096664535,
+          1.4371556607277831
+        ]
+      },
+      "properties": {
+        "OBJECTID": 140,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "085e051b-0786-ee11-be36-6045bd1d397f",
+        "NAME": "Toilet Block"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 141,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.83662767897904,
+          1.4613678582289407
+        ]
+      },
+      "properties": {
+        "OBJECTID": 141,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1bbbcea9-0786-ee11-be36-6045bd1fd7f7",
+        "NAME": "Sembawang Pk - Toilet 2 - Event Lawn"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 142,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80763200875806,
+          1.3268086248780988
+        ]
+      },
+      "properties": {
+        "OBJECTID": 142,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f57d41d5-0786-ee11-be36-6045bd1d3454",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 143,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.93513999521534,
+          1.3070366115338548
+        ]
+      },
+      "properties": {
+        "OBJECTID": 143,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e6671291-0586-ee11-be36-6045bd1d397f",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 144,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.93527367168537,
+          1.3068749050124981
+        ]
+      },
+      "properties": {
+        "OBJECTID": 144,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d46733c2-0686-ee11-be36-000d3a0975a5",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 145,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.96136998158988,
+          1.314383628089649
+        ]
+      },
+      "properties": {
+        "OBJECTID": 145,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "92e73949-0786-ee11-be36-6045bd1fd461",
+        "NAME": "ECP TOILET G2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 146,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95671339045093,
+          1.3123810408470604
+        ]
+      },
+      "properties": {
+        "OBJECTID": 146,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "77eebed3-0486-ee11-be36-000d3a097569",
+        "NAME": "ECP TOILET G1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 147,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.94860327873323,
+          1.3785366878416483
+        ]
+      },
+      "properties": {
+        "OBJECTID": 147,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "160e004b-2a86-ee11-be36-6045bd1fd7f7",
+        "NAME": "51 Pasir Ris Green (Ex-Bicycle Kiosk)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 148,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8013521392826,
+          1.2789843518169288
+        ]
+      },
+      "properties": {
+        "OBJECTID": 148,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "c429bfd5-0786-ee11-be36-000d3a097688",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 149,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91481648553389,
+          1.3152163598580404
+        ]
+      },
+      "properties": {
+        "OBJECTID": 149,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "be30ea47-2a86-ee11-be36-6045bd1fd663",
+        "NAME": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 150,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.91566503482913,
+          1.4157486541999627
+        ]
+      },
+      "properties": {
+        "OBJECTID": 150,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "de2ad692-0786-ee11-be36-6045bd1d36d9",
+        "NAME": "Toilet near West Entrance"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 151,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.77701387266771,
+          1.3607866285510541
+        ]
+      },
+      "properties": {
+        "OBJECTID": 151,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "149fe09e-e5ad-ee11-a569-000d3a097569",
+        "NAME": "WEC Toilet block"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 152,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.77701194413359,
+          1.3483027232468348
+        ]
+      },
+      "properties": {
+        "OBJECTID": 152,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "11e2a62b-f2ad-ee11-a569-6045bd1fd461",
+        "NAME": "Toilel block "
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 153,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.77648587919343,
+          1.364247461163289
+        ]
+      },
+      "properties": {
+        "OBJECTID": 153,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "75c39f2c-74ab-ee11-be37-000d3a0975a5",
+        "NAME": "Carpark B toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 154,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.84612792267012,
+          1.295416331652615
+        ]
+      },
+      "properties": {
+        "OBJECTID": 154,
+        "CLASS": "AMPHITHEATRE",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "50a83086-6faf-ee11-a569-6045bd1d397f",
+        "NAME": "Battle Box"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 155,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82244214713789,
+          1.434273848466254
+        ]
+      },
+      "properties": {
+        "OBJECTID": 155,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "20c2cc22-b2b9-ee11-9078-6045bd1fd663",
+        "NAME": "Trellis shelter 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 156,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.72440400313997,
+          1.3403419494359388
+        ]
+      },
+      "properties": {
+        "OBJECTID": 156,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "0538f460-a8ba-ee11-9078-000d3a097d13",
+        "NAME": "Blk C - Clusia Cove Toilet Block"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 157,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8224146301444,
+          1.434320253048139
+        ]
+      },
+      "properties": {
+        "OBJECTID": 157,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f99db268-b2b9-ee11-9078-6045bd1fd663",
+        "NAME": "Trellis shelter 2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 158,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82238926618328,
+          1.434366658544387
+        ]
+      },
+      "properties": {
+        "OBJECTID": 158,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b49e0791-b2b9-ee11-9078-6045bd1d3e66",
+        "NAME": "trellis shelter 3"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 159,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80310123216273,
+          1.3971027593123893
+        ]
+      },
+      "properties": {
+        "OBJECTID": 159,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "2cc5ae6c-cab9-ee11-9078-000d3a097688",
+        "NAME": "Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 160,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82702656040043,
+          1.3603675193148737
+        ]
+      },
+      "properties": {
+        "OBJECTID": 160,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4a0e941f-c2ba-ee11-9078-6045bd1fd7f7",
+        "NAME": "Windsor nature park toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 161,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82721954125797,
+          1.360308239635645
+        ]
+      },
+      "properties": {
+        "OBJECTID": 161,
+        "CLASS": "DROP-OFF/PICK-UP POINT",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4dbc8e25-c2ba-ee11-9078-6045bd1fd7f7",
+        "NAME": "wnp coach drop off"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 162,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80088345178075,
+          1.2688938608019853
+        ]
+      },
+      "properties": {
+        "OBJECTID": 162,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "57072f55-01c4-ee11-9079-6045bd1fd461",
+        "NAME": "Tenanted building- Villa Samadhi (5 Feb 24)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 163,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.82064081229903,
+          1.3852849825612044
+        ]
+      },
+      "properties": {
+        "OBJECTID": 163,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "5673893b-04c4-ee11-9079-6045bd1d397f",
+        "NAME": "toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 164,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81513319232185,
+          1.3100907846818273
+        ]
+      },
+      "properties": {
+        "OBJECTID": 164,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "4c7e6f0e-46ca-ee11-9079-6045bd1d3e66",
+        "NAME": "Tyersall VC Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 165,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81179798086798,
+          1.3744533036927926
+        ]
+      },
+      "properties": {
+        "OBJECTID": 165,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "38fb5919-accb-ee11-9078-6045bd1e9743",
+        "NAME": "toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 166,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.95315940938107,
+          1.3274604276446234
+        ]
+      },
+      "properties": {
+        "OBJECTID": 166,
+        "CLASS": "AMPHITHEATRE",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d6519f1e-60d0-ee11-9078-000d3aa1188a",
+        "NAME": "Amphitheatre"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 167,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81739671153424,
+          1.307967673830907
+        ]
+      },
+      "properties": {
+        "OBJECTID": 167,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "5bd645a6-f4d1-ee11-9078-000d3aa1188a",
+        "NAME": "Shelter at Saraca Stream"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 168,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81590312239314,
+          1.3103855316857593
+        ]
+      },
+      "properties": {
+        "OBJECTID": 168,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "50f95c78-f9d1-ee11-9078-000d3aa1188a",
+        "NAME": "Trellis near Vanda Miss Joaquim Plot"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 169,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90726273418987,
+          1.3860510955771834
+        ]
+      },
+      "properties": {
+        "OBJECTID": 169,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7698300f-12da-ee11-904c-002248568b84",
+        "NAME": "Sungei Serangoon Park - Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 170,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81732567671617,
+          1.3096874114876023
+        ]
+      },
+      "properties": {
+        "OBJECTID": 170,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d45dbc2a-8fda-ee11-904d-6045bd1d36d9",
+        "NAME": "Trellis for Curtain of Roots"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 171,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81416578812896,
+          1.3127905456169149
+        ]
+      },
+      "properties": {
+        "OBJECTID": 171,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "ecce4ecc-ecdc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Trellis 6 (near shelter 1)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 172,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81440569145269,
+          1.3126059738634785
+        ]
+      },
+      "properties": {
+        "OBJECTID": 172,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b48c41c9-f3dc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Trellis 4 (near the terrari"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 173,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81429575552842,
+          1.3126320440481887
+        ]
+      },
+      "properties": {
+        "OBJECTID": 173,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "66e9eb06-f4dc-ee11-904c-6045bd225d4e",
+        "NAME": "National Orchid Garden Trellis 7"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 174,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.724706742581,
+          1.3390357256431709
+        ]
+      },
+      "properties": {
+        "OBJECTID": 174,
+        "CLASS": "DROP-OFF/PICK-UP POINT",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "e840b0d6-24dd-ee11-904c-6045bd203afe",
+        "NAME": "Blk A - Arrival Pavilion"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 175,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80704611233755,
+          1.4001447474151811
+        ]
+      },
+      "properties": {
+        "OBJECTID": 175,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a5c3da9d-e2cb-ee11-9078-00224859e0fe",
+        "NAME": "toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 176,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81608984237312,
+          1.3094988025034155
+        ]
+      },
+      "properties": {
+        "OBJECTID": 176,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "6f418df5-fad1-ee11-9078-6045bd1e9743",
+        "NAME": "Sundial Garden Shelter 1"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 177,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81501792741525,
+          1.313920745603184
+        ]
+      },
+      "properties": {
+        "OBJECTID": 177,
+        "CLASS": "AMPHITHEATRE",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8e87883a-1fd2-ee11-9078-000d3aa1188a",
+        "NAME": "Shaw Foundation Symphony Stage"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 178,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81651963663813,
+          1.3095404243047553
+        ]
+      },
+      "properties": {
+        "OBJECTID": 178,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "522ceb7b-fbd1-ee11-9078-6045bd1e9743",
+        "NAME": "Sundial Garden Shelter 2"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 179,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81750899464217,
+          1.3104557391995229
+        ]
+      },
+      "properties": {
+        "OBJECTID": 179,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "031cfb6e-90da-ee11-904c-00224857d3d1",
+        "NAME": "Trellis at Fernery"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 180,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8169146489461,
+          1.3119371181650301
+        ]
+      },
+      "properties": {
+        "OBJECTID": 180,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "aeae5d64-98da-ee11-904d-6045bd1d3e66",
+        "NAME": "Potting Yard Toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 181,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81569299860435,
+          1.3155108342690869
+        ]
+      },
+      "properties": {
+        "OBJECTID": 181,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "493b3f2b-c8da-ee11-904d-6045bd1d397f",
+        "NAME": "Trellis Behind HQ Building"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 182,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92436149588966,
+          1.3044458796846243
+        ]
+      },
+      "properties": {
+        "OBJECTID": 182,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1cd05032-8cdb-ee11-904c-6045bd1d026d",
+        "NAME": "Area D Cyclist Park toilet"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 183,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92424233982474,
+          1.3045223018412737
+        ]
+      },
+      "properties": {
+        "OBJECTID": 183,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f402f81d-8edb-ee11-904c-0022485a3eb1",
+        "NAME": "KNS Restaurant (#01-03 to #01-04)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 184,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92434788930882,
+          1.3042233687451033
+        ]
+      },
+      "properties": {
+        "OBJECTID": 184,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1abe4040-8fdb-ee11-904c-6045bd1cac43",
+        "NAME": "PS Cafe (#01-05 to #01-07)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 185,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92386235068936,
+          1.3043814582780675
+        ]
+      },
+      "properties": {
+        "OBJECTID": 185,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f9d151b1-90db-ee11-904c-6045bd1cac43",
+        "NAME": "7-Eleven"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 186,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.80943962014163,
+          1.3144749597454652
+        ]
+      },
+      "properties": {
+        "OBJECTID": 186,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b143c177-35dc-ee11-904c-6045bd1cac43",
+        "NAME": "Pangium"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 187,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81523112594853,
+          1.3113530487803764
+        ]
+      },
+      "properties": {
+        "OBJECTID": 187,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "1cafddfc-4cdc-ee11-904c-00224857d3d1",
+        "NAME": "Villa Halia"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 188,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81432495211997,
+          1.31179558473239
+        ]
+      },
+      "properties": {
+        "OBJECTID": 188,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "113ee6e1-e7dc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Bird Cage"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 189,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81425036793792,
+          1.311691446569668
+        ]
+      },
+      "properties": {
+        "OBJECTID": 189,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "a2d0be61-e8dc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Crown"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 190,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.8141635718552,
+          1.312141668476783
+        ]
+      },
+      "properties": {
+        "OBJECTID": 190,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "0f6f35ba-ebdc-ee11-904c-0022485a5358",
+        "NAME": "National Orchid Garden Trellis 5 (near bird cage)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 191,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81447453135223,
+          1.3129351088616426
+        ]
+      },
+      "properties": {
+        "OBJECTID": 191,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "fef35c3a-f3dc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Trellis 3 (near the base of"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 192,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81430052121677,
+          1.3121854154566104
+        ]
+      },
+      "properties": {
+        "OBJECTID": 192,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "b75065e5-f4dc-ee11-904c-6045bd1cac43",
+        "NAME": "National Orchid Garden Trellis 2 (near celebrity g"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 193,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.72507119976838,
+          1.3409071191897928
+        ]
+      },
+      "properties": {
+        "OBJECTID": 193,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "7ca98c86-23dd-ee11-904d-6045bd1d701c",
+        "NAME": "Tenanted by LBD (F&B) - Fusion Spoon"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 194,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92402538799938,
+          1.3044521437627332
+        ]
+      },
+      "properties": {
+        "OBJECTID": 194,
+        "CLASS": "DROP-OFF/PICK-UP POINT",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "8b19416f-8cdb-ee11-904c-0022485742ff",
+        "NAME": "Drop-off point at Cyclist Park"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 195,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.92384876531509,
+          1.3040722098152977
+        ]
+      },
+      "properties": {
+        "OBJECTID": 195,
+        "CLASS": "BICYCLE RENTAL SHOP",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "cf653d60-90db-ee11-904d-6045bd1d3454",
+        "NAME": "Khcycle  (#01-08 to #01-10)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 196,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81488661184113,
+          1.311303705921509
+        ]
+      },
+      "properties": {
+        "OBJECTID": 196,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f4b1b40f-2fdc-ee11-904c-6045bd1c75d1",
+        "NAME": "Halia Restaurant"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 197,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81534478186187,
+          1.3150890641311945
+        ]
+      },
+      "properties": {
+        "OBJECTID": 197,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "9017a45a-37dc-ee11-904c-6045bd1d026d",
+        "NAME": "EJH Cornerhouse"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 198,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81554708234322,
+          1.3188972383571358
+        ]
+      },
+      "properties": {
+        "OBJECTID": 198,
+        "CLASS": "F&B",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "f6f55539-4adc-ee11-904c-6045bd1cac43",
+        "NAME": "The Garage"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 199,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.90249732492815,
+          1.4110153204273395
+        ]
+      },
+      "properties": {
+        "OBJECTID": 199,
+        "CLASS": "TOILET",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "d875a44f-60dc-ee11-904c-0022485742ff",
+        "NAME": "Punggol Waterway Park - Toilet (LOT03122V MK21)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 200,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.81410907398111,
+          1.3130780020071755
+        ]
+      },
+      "properties": {
+        "OBJECTID": 200,
+        "CLASS": "SHELTER",
+        "ADDITIONAL_INFO": null,
+        "UNIQUEID": "3b34844a-eddc-ee11-904c-0022485a3eb1",
+        "NAME": "National Orchid Garden Trellis 1 (near Tan Hoon Si"
+      }
+    }
+  ]
+}
