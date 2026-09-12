@@ -22,7 +22,7 @@ class SecurityConfig {
                     "/swagger-ui.html"
                 ).permitAll()
                 auth.requestMatchers("/api/v1/localizable-places/**").authenticated()
-                auth.requestMatchers("/api/v1/geolocation/**").authenticated()
+                // auth.requestMatchers("/api/v1/geolocation/**").authenticated()
                 auth.requestMatchers("/api/v1/addresses/**").authenticated()
                 auth.anyRequest().permitAll()
             }
