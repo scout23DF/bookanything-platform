@@ -40,6 +40,11 @@ spring:
   elasticsearch:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://opensearch.drr-corpshared-obs.svc.cluster.local:9200}
 
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
 application:
   domain-settings:
     asset-mgmnt:

@@ -151,6 +151,9 @@ spring:
                             # safety-settings: []
 
 management:
+    health:
+        elasticsearch:
+            enabled: false
     endpoint:
         health:
             probes:
