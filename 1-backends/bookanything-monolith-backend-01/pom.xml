@@ -64,6 +64,16 @@
 
     <repositories>
         <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
             <id>desespero-repo</id>
             <url>https://nexus.terrestris.de/repository/public/</url>
             <snapshots>
@@ -73,7 +83,6 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-
     </repositories>
 
     <dependencyManagement>

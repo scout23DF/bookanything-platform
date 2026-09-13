@@ -5,13 +5,9 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy pom.xml and cache dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline -B || true
-
-# Copy source code and build runnable fat jar
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -B
 
 # ==============================================================================
 # Runtime Stage (Non-root, Minimal Temurin 21 JRE)
