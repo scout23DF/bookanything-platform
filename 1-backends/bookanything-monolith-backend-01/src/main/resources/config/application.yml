@@ -108,7 +108,7 @@ spring:
                 heartbeat.interval.ms: 1000
                 max.poll.interval.ms: 9000000
                 max.poll.records: 100
-                session.timeout.ms: 600000
+                session.timeout.ms: ${KAFKA_CONSUMER_SESSION_TIMEOUT_MS:45000}
 
     elasticsearch:
         uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}

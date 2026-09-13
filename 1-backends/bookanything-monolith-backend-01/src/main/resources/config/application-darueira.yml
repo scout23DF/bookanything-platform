@@ -33,9 +33,19 @@ spring:
 
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:10.152.183.188:9092}
+    properties:
+      host.resolver: de.org.dexterity.bookanything.wire.dns.KafkaDnsHostResolver
+    consumer:
+      properties:
+        session.timeout.ms: 45000
 
   elasticsearch:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://10.152.183.238:9200}
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
 
 application:
   domain-settings:
