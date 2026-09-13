@@ -106,13 +106,25 @@ class GeoLocationBeansConfig {
     )
 
     @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(ChatClient.Builder::class)
     fun getSpringAIChatClient(chatClientBuilder: ChatClient.Builder): ChatClient {
         return chatClientBuilder.build()
     }
 
     @Bean
-    fun getSearchEngineInIAProxyPort(chatClient: ChatClient): SearchEngineInIAProxyPort {
-        return VertexGeminiIAProxyAdapter(chatClient)
+    fun getSearchEngineInIAProxyPort(
+        @org.springframework.beans.factory.annotation.Autowired(required = false)
+        chatClient: ChatClient? = null
+    ): SearchEngineInIAProxyPort {
+        return if (chatClient != null) {
+            VertexGeminiIAProxyAdapter(chatClient)
+        } else {
+            object : SearchEngineInIAProxyPort {
+                override fun simpleSearchByPrompt(promptToSearch: String): String? {
+                    return "Vertex AI Gemini is not configured in this environment."
+                }
+            }
+        }
     }
 
 }
