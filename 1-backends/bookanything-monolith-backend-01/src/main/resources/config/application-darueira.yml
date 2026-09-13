@@ -1,0 +1,51 @@
+# ==============================================================================
+# Spring Profile: darueira
+# Runs locally on host machine connecting directly to Darueira MicroK8s services
+# ==============================================================================
+server:
+  port: 8060
+
+spring:
+  docker:
+    compose:
+      enabled: false
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://10.152.183.122:5432/DBBookAnythingPlatform}
+    username: ${SPRING_DATASOURCE_USERNAME:dbabookanythingapps01}
+    password: ${SPRING_DATASOURCE_PASSWORD:1a88a1}
+
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://10.152.183.49:8080/realms/dexterity-apps-01/protocol/openid-connect/certs}
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://10.152.183.49:8080/realms/dexterity-apps-01}
+        registration:
+          oidc:
+            client-id: ${KEYCLOAK_CLIENT_ID:web_app}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:web_app}
+            scope: openid,profile,email
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:10.152.183.188:9092}
+
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://10.152.183.238:9200}
+
+application:
+  domain-settings:
+    asset-mgmnt:
+      storage-providers:
+        minio:
+          url: ${MINIO_URL:http://10.152.183.51:9000}
+          access-key: ${MINIO_ACCESS_KEY:admin@dexterity.org.de}
+          secret-key: ${MINIO_SECRET_KEY:admin_1a88a1}
+
+springdoc:
+  oauth2:
+    authorization-url: ${SWAGGER_OAUTH_AUTH_URL:http://10.152.183.49:8080/realms/dexterity-apps-01/protocol/openid-connect/auth}
