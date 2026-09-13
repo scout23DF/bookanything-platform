@@ -1,0 +1,28 @@
+# ==============================================================================
+# Build Stage - React 19 / Vite / TypeScript
+# ==============================================================================
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY tsconfig*.json vite.config.ts index.html ./
+COPY public/ ./public/
+COPY src/ ./src/
+
+RUN npm run build
+
+# ==============================================================================
+# Runtime Stage (Nginx unprivileged, PSS Restricted Non-root)
+# ==============================================================================
+FROM nginxinc/nginx-unprivileged:alpine-slim
+
+WORKDIR /usr/share/nginx/html
+
+COPY --from=builder --chown=101:101 /app/dist ./
+
+EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]

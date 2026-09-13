@@ -3,7 +3,7 @@
 # Runs in-cluster inside MicroK8s using Kubernetes DNS service names
 # ==============================================================================
 server:
-  port: 8080
+  port: ${SERVER_PORT:8060}
 
 spring:
   docker:
