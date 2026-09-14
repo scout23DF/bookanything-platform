@@ -19,8 +19,10 @@ function App() {
         <a href="https://react.dev" target="_blank">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
-      </div>
       <h1>Vite + React</h1>
+      <div style={{ padding: '8px 16px', margin: '16px auto', maxWidth: '480px', backgroundColor: '#e8f5e9', color: '#1b5e20', border: '1px solid #a5d6a7', borderRadius: '8px', fontWeight: 'bold' }}>
+        🚀 CI/CD Pipeline Active: Tekton + ArgoCD Verified
+      </div>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
