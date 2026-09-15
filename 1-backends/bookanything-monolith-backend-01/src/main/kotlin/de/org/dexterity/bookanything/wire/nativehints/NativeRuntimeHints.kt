@@ -23,7 +23,18 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             "org.locationtech.jts.geom.GeometryFactory",
             "org.geolatte.geom.Geometry",
             "org.geolatte.geom.Point",
-            "org.geolatte.geom.Polygon"
+            "org.geolatte.geom.Polygon",
+            "org.hibernate.dialect.PostgreSQLDialect",
+            "org.hibernate.dialect.DatabaseVersion",
+            "org.hibernate.spatial.dialect.postgis.PostgisDialect",
+            "org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect",
+            "org.hibernate.spatial.contributor.SpatialTypeContributor",
+            "org.hibernate.spatial.contributor.ContributorResolver",
+            "org.postgresql.Driver",
+            "org.postgresql.util.PGobject",
+            "org.postgresql.geometric.PGpoint",
+            "org.postgresql.geometric.PGpolygon",
+            "org.postgresql.geometric.PGbox"
         )
 
         for (className in reflectionClasses) {
