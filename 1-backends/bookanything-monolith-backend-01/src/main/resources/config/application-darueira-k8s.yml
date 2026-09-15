@@ -19,6 +19,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:dbabookanythingapps01}
     password: ${SPRING_DATASOURCE_PASSWORD:1a88a1}
 
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   security:
     oauth2:
       resource-server:
