@@ -54,6 +54,31 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             }
         }
 
+        val arrayTypes = listOf(
+            "java.util.UUID[]",
+            "java.lang.Long[]",
+            "java.lang.String[]",
+            "java.lang.Integer[]",
+            "java.lang.Object[]",
+            "[Ljava.util.UUID;",
+            "[Ljava.lang.Long;",
+            "[Ljava.lang.String;",
+            "[Ljava.lang.Integer;",
+            "[Ljava.lang.Object;"
+        )
+        for (arrType in arrayTypes) {
+            try {
+                if (arrType.endsWith("[]")) {
+                    hints.reflection().registerType(org.springframework.aot.hint.TypeReference.of(arrType))
+                } else {
+                    val arrClazz = Class.forName(arrType, false, classLoader ?: javaClass.classLoader)
+                    hints.reflection().registerType(arrClazz)
+                }
+            } catch (_: Throwable) {
+                // Ignore if type reference parsing or class loading differs
+            }
+        }
+
         hints.resources().registerPattern("org/hibernate/spatial/*")
         hints.resources().registerPattern("org/locationtech/jts/*")
         try {
