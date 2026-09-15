@@ -1,22 +1,23 @@
 package de.org.dexterity.bookanything
 
-import org.springframework.ai.autoconfigure.vertexai.gemini.VertexAiGeminiAutoConfiguration
-import org.springframework.boot.actuate.autoconfigure.data.elasticsearch.ElasticsearchReactiveHealthContributorAutoConfiguration
-import org.springframework.boot.actuate.autoconfigure.elasticsearch.ElasticsearchRestHealthContributorAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.data.web.config.EnableSpringDataWebSupport
 
+import org.springframework.context.annotation.ImportRuntimeHints
+import de.org.dexterity.bookanything.wire.nativehints.NativeRuntimeHints
+
 @SpringBootApplication(
-	exclude = [
-		VertexAiGeminiAutoConfiguration::class,
-		ElasticsearchRestHealthContributorAutoConfiguration::class,
-		ElasticsearchReactiveHealthContributorAutoConfiguration::class
+	excludeName = [
+		"org.springframework.ai.autoconfigure.vertexai.gemini.VertexAiGeminiAutoConfiguration",
+		"org.springframework.boot.elasticsearch.autoconfigure.health.ElasticsearchRestHealthContributorAutoConfiguration",
+		"org.springframework.boot.data.elasticsearch.autoconfigure.health.DataElasticsearchReactiveHealthContributorAutoConfiguration"
 	]
 )
 @EnableCaching
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
+@ImportRuntimeHints(NativeRuntimeHints::class)
 class BookAnythingBackendApplication
 
 @org.springframework.web.bind.annotation.RestController

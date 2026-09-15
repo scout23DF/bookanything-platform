@@ -33,7 +33,7 @@ class TestKafkaConfig {
         consumerFactory: ConsumerFactory<String, Any>
     ): ConcurrentKafkaListenerContainerFactory<String, Any> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
-        factory.consumerFactory = consumerFactory
+        factory.setConsumerFactory(consumerFactory)
         return factory
     }
 }

@@ -1,0 +1,1 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=de.org.dexterity.bookanything.wire.nativehints.NativeRuntimeHints
