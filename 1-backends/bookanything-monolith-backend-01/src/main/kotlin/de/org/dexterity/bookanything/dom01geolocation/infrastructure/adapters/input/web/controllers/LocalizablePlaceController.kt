@@ -150,7 +150,7 @@ class LocalizablePlaceController(
     @PostMapping(value = ["/upload-geojson"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadGeoJson(@RequestParam("contentDataType") contentDataType : String,
                             @RequestPart("file") uploadedGeoJSONFile: MultipartFile
-    ): ResponseEntity<Map<String, String>?> {
+    ): ResponseEntity<Map<String, String>> {
 
         val cqrsCommandRequest = UploadGeoJsonCentroDistribuicaoCQRSRequest(
             commandId = UUID.randomUUID(),

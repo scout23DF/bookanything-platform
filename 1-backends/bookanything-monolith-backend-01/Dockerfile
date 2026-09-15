@@ -1,20 +1,34 @@
 # ==============================================================================
-# Build Stage - Spring Boot 3.5 Kotlin Maven Multi-Stage Builder (Java 21)
+# Build Stage - GraalVM 25 Native Image Multi-Stage Builder (Spring Boot 4 / Kotlin 2.4)
 # ==============================================================================
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM container-registry.oracle.com/graalvm/native-image:latest AS builder
+
+# Inject Maven 3.9 from official image
+COPY --from=maven:3.9-eclipse-temurin-25 /usr/share/maven /usr/share/maven
+ENV MAVEN_HOME=/usr/share/maven
+ENV PATH="/usr/share/maven/bin:${PATH}"
 
 WORKDIR /app
 
+# 1. Dependency caching layer
 COPY pom.xml .
+RUN mvn dependency:go-offline -B -Pnative || true
+
+# 2. Source compilation & GraalVM Native Image generation
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -B
+RUN mvn -Pnative native:compile -DskipTests -B
 
 # ==============================================================================
-# Runtime Stage (Non-root, Minimal Temurin 21 JRE)
+# Runtime Stage (Non-root Minimal Debian Slim)
 # ==============================================================================
-FROM eclipse-temurin:21-jre
+FROM debian:bookworm-slim
 
 WORKDIR /app
+
+# Install runtime dependencies (glibc, zlib, CA certificates)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates libc6 zlib1g && \
+    rm -rf /var/lib/apt/lists/*
 
 # Run as unprivileged UID 10001 (PSS Restricted Compliance)
 RUN groupadd -g 10001 darueira && \
@@ -24,11 +38,11 @@ RUN groupadd -g 10001 darueira && \
 
 USER 10001:10001
 
-COPY --from=builder --chown=10001:10001 /app/target/bookanything-monolith-backend-01-*.jar /app/app.jar
+# Copy the native image binary from the builder stage
+COPY --from=builder --chown=10001:10001 /app/target/bookanything-monolith-backend-01 /app/bookanything-monolith-backend-01
 
 EXPOSE 8060
 
-ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
 ENV SPRING_PROFILES_ACTIVE="darueira-k8s"
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar /app/app.jar"]
+ENTRYPOINT ["/app/bookanything-monolith-backend-01"]
