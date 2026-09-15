@@ -1,0 +1,39 @@
+[
+  {
+    "name": "java.util.UUID[]"
+  },
+  {
+    "name": "java.lang.Long[]"
+  },
+  {
+    "name": "java.lang.String[]"
+  },
+  {
+    "name": "java.lang.Integer[]"
+  },
+  {
+    "name": "java.lang.Object[]"
+  },
+  {
+    "name": "[Ljava.util.UUID;"
+  },
+  {
+    "name": "[Ljava.lang.Long;"
+  },
+  {
+    "name": "[Ljava.lang.String;"
+  },
+  {
+    "name": "[Ljava.lang.Integer;"
+  },
+  {
+    "name": "[Ljava.lang.Object;"
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLDialect",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  }
+]
