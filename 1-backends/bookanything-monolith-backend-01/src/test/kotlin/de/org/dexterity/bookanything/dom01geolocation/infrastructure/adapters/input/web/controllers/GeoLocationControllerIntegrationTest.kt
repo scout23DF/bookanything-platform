@@ -1,5 +1,7 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.controllers
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
@@ -14,12 +16,29 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.*
 import java.util.stream.IntStream
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class RestResponsePage<T>(
+    @JsonProperty("content") val content: List<T> = emptyList(),
+    @JsonProperty("totalElements") private val topLevelTotalElements: Long? = null,
+    @JsonProperty("page") private val pageMetadata: PageMetadata? = null
+) {
+    val totalElements: Long
+        get() = pageMetadata?.totalElements ?: topLevelTotalElements ?: 0L
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    class PageMetadata(
+        @JsonProperty("size") val size: Long = 0,
+        @JsonProperty("number") val number: Long = 0,
+        @JsonProperty("totalElements") val totalElements: Long = 0,
+        @JsonProperty("totalPages") val totalPages: Long = 0
+    )
+}
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -248,7 +267,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        val foundAllResponse = objectMapper.readValue<RestResponsePage<GeoLocationResponse>>(findAllResult.response.contentAsString)
         assertEquals(1, foundAllResponse.content.size)
         assertEquals(updatedGeoLocationName, foundAllResponse.content[0].name)
         assertEquals(updatedFriendlyId, foundAllResponse.content[0].friendlyId)
@@ -307,7 +326,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        var foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        var foundAllResponse = objectMapper.readValue<RestResponsePage<GeoLocationResponse>>(findAllResult.response.contentAsString)
         assertEquals(existingRowsCount, foundAllResponse.totalElements.toInt())
 
         // 1. Delete
@@ -321,7 +340,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        foundAllResponse = objectMapper.readValue<Page<GeoLocationResponse>>(findAllResult.response.contentAsString)
+        foundAllResponse = objectMapper.readValue<RestResponsePage<GeoLocationResponse>>(findAllResult.response.contentAsString)
         assertEquals(0, foundAllResponse.content.size)
 
     }
@@ -335,7 +354,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val response = objectMapper.readValue<Page<GeoLocationResponse>>(result.response.contentAsString)
+        val response = objectMapper.readValue<RestResponsePage<GeoLocationResponse>>(result.response.contentAsString)
         assertEquals(1, response.content.size)
         assertEquals("SearchContinent", response.content[0].name)
     }
@@ -360,7 +379,7 @@ class GeoLocationControllerIntegrationTest : AbstractIntegrationTest() {
             with(jwt())
         }.andExpect { status { isOk() } }.andReturn()
 
-        val response = objectMapper.readValue<Page<GeoLocationResponse>>(result.response.contentAsString)
+        val response = objectMapper.readValue<RestResponsePage<GeoLocationResponse>>(result.response.contentAsString)
         assertEquals(1, response.content.size)
         assertEquals("PropContinent", response.content[0].name)
     }
