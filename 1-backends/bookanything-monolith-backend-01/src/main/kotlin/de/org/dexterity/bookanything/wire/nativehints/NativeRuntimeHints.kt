@@ -65,7 +65,14 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             "org.apache.kafka.common.serialization.ByteArrayDeserializer",
             "org.springframework.kafka.support.serializer.JsonSerializer",
             "org.springframework.kafka.support.serializer.JsonDeserializer",
-            "org.springframework.kafka.support.serializer.ErrorHandlingDeserializer"
+            "org.springframework.kafka.support.serializer.ErrorHandlingDeserializer",
+            "org.springframework.security.oauth2.jwt.JwtDecoder",
+            "org.springframework.security.oauth2.jwt.NimbusJwtDecoder",
+            "org.springframework.security.oauth2.jwt.JwtValidators",
+            "com.nimbusds.jose.jwk.JWKSet",
+            "com.nimbusds.jose.jwk.RSAKey",
+            "com.nimbusds.jose.jwk.ECKey",
+            "com.nimbusds.jose.jwk.OctetSequenceKey"
         )
 
         for (className in reflectionClasses) {

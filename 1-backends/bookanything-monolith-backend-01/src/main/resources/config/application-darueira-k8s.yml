@@ -27,6 +27,9 @@ spring:
 
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://tenant-keycloak.drr-tnt-swfabrik-europe-dev.svc.cluster.local:8080/realms/dexterity-apps-01/protocol/openid-connect/certs}
       resource-server:
         jwt:
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://tenant-keycloak.drr-tnt-swfabrik-europe-dev.svc.cluster.local:8080/realms/dexterity-apps-01/protocol/openid-connect/certs}

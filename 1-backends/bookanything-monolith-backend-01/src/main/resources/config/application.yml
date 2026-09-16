@@ -67,6 +67,9 @@ spring:
 
     security:
         oauth2:
+            resourceserver:
+                jwt:
+                    jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/certs}
             resource-server:
                 jwt:
                     jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9080/realms/dexterity-apps-01/protocol/openid-connect/certs}
