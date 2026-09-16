@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "includes": [
+      { "pattern": "org/postgresql/driverconfig.properties" },
+      { "pattern": "org/hibernate/spatial/.*" },
+      { "pattern": "org/locationtech/jts/.*" },
+      { "pattern": "net/postgis/.*" }
+    ]
+  },
+  "bundles": [
+    { "name": "org.hibernate.spatial.HSMessageLogger" },
+    { "name": "org.hibernate.spatial.HSMessageLogger.i18n" }
+  ]
+}

@@ -34,7 +34,31 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             "org.postgresql.util.PGobject",
             "org.postgresql.geometric.PGpoint",
             "org.postgresql.geometric.PGpolygon",
-            "org.postgresql.geometric.PGbox"
+            "org.postgresql.geometric.PGbox",
+            "org.postgresql.geometric.PGcircle",
+            "org.postgresql.geometric.PGline",
+            "org.postgresql.geometric.PGlseg",
+            "org.postgresql.geometric.PGpath",
+            "org.postgresql.util.PGmoney",
+            "org.postgresql.util.PGInterval",
+            "net.postgis.jdbc.PGboxbase",
+            "net.postgis.jdbc.PGbox3d",
+            "net.postgis.jdbc.PGbox2d",
+            "net.postgis.jdbc.PGgeometry",
+            "net.postgis.jdbc.PGgeography",
+            "net.postgis.jdbc.PGgeo",
+            "net.postgis.jdbc.PGgeometryLW",
+            "net.postgis.jdbc.PGgeographyLW",
+            "net.postgis.jdbc.DriverWrapper",
+            "net.postgis.jdbc.geometry.Geometry",
+            "net.postgis.jdbc.geometry.Point",
+            "net.postgis.jdbc.geometry.Polygon",
+            "net.postgis.jdbc.geometry.LineString",
+            "net.postgis.jdbc.geometry.MultiPoint",
+            "net.postgis.jdbc.geometry.MultiPolygon",
+            "net.postgis.jdbc.geometry.MultiLineString",
+            "net.postgis.jdbc.geometry.GeometryCollection",
+            "net.postgis.jdbc.geometry.LinearRing"
         )
 
         for (className in reflectionClasses) {
@@ -81,6 +105,9 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
 
         hints.resources().registerPattern("org/hibernate/spatial/*")
         hints.resources().registerPattern("org/locationtech/jts/*")
+        hints.resources().registerPattern("org/postgresql/*")
+        hints.resources().registerPattern("org/postgresql/driverconfig.properties")
+        hints.resources().registerPattern("net/postgis/*")
         try {
             hints.resources().registerResourceBundle("org.hibernate.spatial.HSMessageLogger")
             hints.resources().registerResourceBundle("org.hibernate.spatial.HSMessageLogger.i18n")
