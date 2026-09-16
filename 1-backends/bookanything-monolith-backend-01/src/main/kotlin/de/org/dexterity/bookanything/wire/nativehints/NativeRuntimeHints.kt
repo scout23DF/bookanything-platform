@@ -58,7 +58,14 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             "net.postgis.jdbc.geometry.MultiPolygon",
             "net.postgis.jdbc.geometry.MultiLineString",
             "net.postgis.jdbc.geometry.GeometryCollection",
-            "net.postgis.jdbc.geometry.LinearRing"
+            "net.postgis.jdbc.geometry.LinearRing",
+            "org.apache.kafka.common.serialization.StringSerializer",
+            "org.apache.kafka.common.serialization.StringDeserializer",
+            "org.apache.kafka.common.serialization.ByteArraySerializer",
+            "org.apache.kafka.common.serialization.ByteArrayDeserializer",
+            "org.springframework.kafka.support.serializer.JsonSerializer",
+            "org.springframework.kafka.support.serializer.JsonDeserializer",
+            "org.springframework.kafka.support.serializer.ErrorHandlingDeserializer"
         )
 
         for (className in reflectionClasses) {
