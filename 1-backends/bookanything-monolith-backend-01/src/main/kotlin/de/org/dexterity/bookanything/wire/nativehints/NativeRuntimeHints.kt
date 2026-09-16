@@ -72,7 +72,12 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             "com.nimbusds.jose.jwk.JWKSet",
             "com.nimbusds.jose.jwk.RSAKey",
             "com.nimbusds.jose.jwk.ECKey",
-            "com.nimbusds.jose.jwk.OctetSequenceKey"
+            "com.nimbusds.jose.jwk.OctetSequenceKey",
+            "java.lang.reflect.RecordComponent",
+            "io.swagger.v3.oas.models.OpenAPI",
+            "io.swagger.v3.oas.models.Paths",
+            "io.swagger.v3.oas.models.PathItem",
+            "io.swagger.v3.oas.models.Operation"
         )
 
         for (className in reflectionClasses) {
