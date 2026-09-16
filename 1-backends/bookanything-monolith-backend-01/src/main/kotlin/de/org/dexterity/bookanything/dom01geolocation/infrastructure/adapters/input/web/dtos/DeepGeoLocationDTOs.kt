@@ -1,9 +1,13 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.dtos
 
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import java.util.UUID
 
 // Base interface for deep GeoLocation responses
+@JsonIgnoreProperties(ignoreUnknown = true)
 sealed interface IDeepGeoLocationResponse {
     val id: Long
     val name: String
@@ -13,6 +17,7 @@ sealed interface IDeepGeoLocationResponse {
     val parentId: Long?
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepContinentResponse(
     override val id: Long,
     override val name: String,
@@ -23,6 +28,7 @@ data class DeepContinentResponse(
     val regionsList: List<DeepRegionResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepRegionResponse(
     override val id: Long,
     override val name: String,
@@ -33,6 +39,7 @@ data class DeepRegionResponse(
     val countriesList: List<DeepCountryResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepCountryResponse(
     override val id: Long,
     override val name: String,
@@ -43,6 +50,7 @@ data class DeepCountryResponse(
     val provincesList: List<DeepProvinceResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepProvinceResponse(
     override val id: Long,
     override val name: String,
@@ -53,6 +61,7 @@ data class DeepProvinceResponse(
     val citiesList: List<DeepCityResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepCityResponse(
     override val id: Long,
     override val name: String,
@@ -60,11 +69,16 @@ data class DeepCityResponse(
     override val type: GeoLocationType,
     override val boundaryRepresentation: String?,
     override val parentId: Long? = null,
+    @JsonProperty("isCountryCapital")
+    @JsonAlias("countryCapital")
     val isCountryCapital: Boolean? = false,
+    @JsonProperty("isProvinceCapital")
+    @JsonAlias("provinceCapital")
     val isProvinceCapital: Boolean? = false,
     val districtsList: List<DeepDistrictResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepDistrictResponse(
     override val id: Long,
     override val name: String,
@@ -75,6 +89,7 @@ data class DeepDistrictResponse(
     val addressesList: List<DeepAddressResponse>? = null
 ) : IDeepGeoLocationResponse
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DeepAddressResponse(
     val id: Long,
     val streetName: String,

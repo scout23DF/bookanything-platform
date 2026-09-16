@@ -376,6 +376,7 @@ class LocalizablePlaceControllerIntegrationTest : AbstractIntegrationTest() {
             .file(sampleFile)
             .param("contentDataType", "ev-charging-stations")
             .contentType(MediaType.MULTIPART_FORM_DATA)
+            .with(jwt())
         ).andExpect(status().isOk())
 
         // Wait for Kafka and Elasticsearch to process the events
