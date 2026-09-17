@@ -45,6 +45,8 @@ spring:
         open-in-view: true
         properties:
             hibernate:
+                bytecode:
+                    provider: bytebuddy
                 connection:
                     provider_disables_autocommit: true
                 generate_statistics: false
@@ -219,6 +221,9 @@ topics:
             ready-to-make-geo-locations: "geolocation.geojson-imported-file.ready-to-make-geo-locations"
         batch-import:
             completed: "geolocation.batch-import.completed"
+        nifi-import:
+            requested: "geolocation.nifi-import.requested"
+            completed: "geolocation.nifi-import.completed"
     asset-manager:
         asset-creation:
             registered: "asset-manager.asset-creation.registered.topic"
@@ -234,4 +239,14 @@ nifi:
 
 jsreport:
     base-url: "${JSREPORT_BASE_URL:http://10.152.183.35:5488}"
+    username: "${JSREPORT_USERNAME:admin}"
+    password: "${JSREPORT_PASSWORD:change-me-in-openbao}"
+    template-name: "${JSREPORT_TEMPLATE_NAME:geolocation-batch-summary}"
+
+corporate:
+    minio:
+        endpoint: "${CORPORATE_MINIO_ENDPOINT:http://central-minio.drr-corpshared-plat.svc.cluster.local:9000}"
+        access-key: "${CORPORATE_MINIO_ACCESS_KEY:minioadmin}"
+        secret-key: "${CORPORATE_MINIO_SECRET_KEY:Darueira@2026!}"
+        reports-bucket: "${CORPORATE_MINIO_REPORTS_BUCKET:darueira-reports}"
 

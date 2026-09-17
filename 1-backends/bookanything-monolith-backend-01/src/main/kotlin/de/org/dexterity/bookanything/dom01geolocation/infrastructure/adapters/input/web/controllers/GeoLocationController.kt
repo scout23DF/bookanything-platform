@@ -72,7 +72,7 @@ class GeoLocationController(
     @GetMapping("/{type}/search-by-alias")
     fun searchByParentIdAndAliasStartingWith(
         @PathVariable type: String,
-        @RequestParam(required = true) parentId: Long,
+        @RequestParam(required = false) parentId: Long?,
         @RequestParam aliasPrefix: String,
         @RequestParam(name = "includeBoundary", defaultValue = "false") includeBoundary: Boolean,
         pageable: Pageable

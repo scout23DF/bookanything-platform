@@ -94,7 +94,7 @@ open class RegionEntity(
     additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_region_continent"))
     open var continent: ContinentEntity,
 
@@ -118,7 +118,7 @@ open class CountryEntity(
     additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_country_region"))
     open var region: RegionEntity,
 
@@ -142,7 +142,7 @@ open class ProvinceEntity(
     additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_province_country"))
     open var country: CountryEntity,
 
@@ -166,7 +166,7 @@ open class CityEntity(
     additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_city_province"))
     open var province: ProvinceEntity,
 
@@ -190,7 +190,7 @@ open class DistrictEntity(
     additionalDetailsMap: Map<String, Any?>? = null,
     boundaryRepresentation: Geometry?,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", foreignKey = ForeignKey(name = "fk01_district_city"))
     open var city: CityEntity,
 
