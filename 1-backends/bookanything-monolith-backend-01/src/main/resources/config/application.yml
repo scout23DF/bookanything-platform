@@ -211,7 +211,21 @@ topics:
             downloaded: "geolocation.geojson-file.downloaded"
         geojson-imported-file:
             ready-to-make-geo-locations: "geolocation.geojson-imported-file.ready-to-make-geo-locations"
+        batch-import:
+            completed: "geolocation.batch-import.completed"
     asset-manager:
         asset-creation:
             registered: "asset-manager.asset-creation.registered.topic"
             uploaded-to-storage: "asset-manager.asset-creation.uploaded-to-storage.topic"
+
+temporal:
+    service-address: "${TEMPORAL_SERVICE_ADDRESS:10.152.183.189:7233}"
+    namespace: "${TEMPORAL_NAMESPACE:corporate-core}"
+    task-queue: "${TEMPORAL_TASK_QUEUE:GEOLOCATION_INGESTION_TASK_QUEUE}"
+
+nifi:
+    base-url: "${NIFI_BASE_URL:https://nifi.darueira-corpshared.127.0.0.1.nip.io}"
+
+jsreport:
+    base-url: "${JSREPORT_BASE_URL:http://10.152.183.35:5488}"
+
