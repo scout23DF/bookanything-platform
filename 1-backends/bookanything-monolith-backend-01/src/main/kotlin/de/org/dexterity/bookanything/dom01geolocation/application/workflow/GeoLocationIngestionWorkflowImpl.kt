@@ -19,7 +19,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
         .build()
 
     private val activityOptions = ActivityOptions.newBuilder()
-        .setStartToCloseTimeout(Duration.ofMinutes(10))
+        .setStartToCloseTimeout(Duration.ofMinutes(30))
         .setRetryOptions(retryOptions)
         .build()
 

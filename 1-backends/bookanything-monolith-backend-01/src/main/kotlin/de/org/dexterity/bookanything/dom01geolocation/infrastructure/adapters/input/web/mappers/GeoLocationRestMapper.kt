@@ -14,8 +14,18 @@ class GeoLocationRestMapper {
 
     private val wktReader = WKTReader()
     private val wktWriter = WKTWriter()
+    private val geoJsonReader = org.locationtech.jts.io.geojson.GeoJsonReader()
 
-    private fun String.toGeometry(): Geometry = wktReader.read(this)
+    private fun String.toGeometry(): Geometry = try {
+        val trimmed = this.trim()
+        if (trimmed.startsWith("{")) {
+            geoJsonReader.read(trimmed)
+        } else {
+            wktReader.read(trimmed)
+        }
+    } catch (e: Exception) {
+        wktReader.read(this)
+    }
     private fun Geometry.toText(): String = wktWriter.write(this)
 
     fun fromIGeoLocationModelToResponse(sourceModel: IGeoLocationModel, includeBoundary: Boolean) : GeoLocationResponse {

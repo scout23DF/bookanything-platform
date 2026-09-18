@@ -59,9 +59,8 @@ class GeoLocationCRUDService(
         var savedModel : IGeoLocationModel = geoLocationRestMapper.fromCreateGeoLocationRequestToModel(type, request, parent)
         savedModel = useCase.create(savedModel)
 
-        if (shouldUpdateBoundaryViaIA) {
-            eventPublisherPort.publish(GeoLocationEnrichmentEvent(savedModel.id.id, savedModel.type))
-        }
+        // Always publish event for downstream processing (artifacts and reports)
+        eventPublisherPort.publish(GeoLocationEnrichmentEvent(savedModel.id.id, savedModel.type))
 
         return savedModel
     }
@@ -80,23 +79,50 @@ class GeoLocationCRUDService(
         val useCase = getUseCase<IGeoLocationModel>(type)
         val existingModel = useCase.findById(GeoLocationId(id)).orElse(null) ?: return null
 
+        val boundary = request.boundaryRepresentation?.let {
+            try {
+                val trimmed = it.trim()
+                if (trimmed.startsWith("{")) {
+                    org.locationtech.jts.io.geojson.GeoJsonReader().read(trimmed)
+                } else {
+                    WKTReader().read(trimmed)
+                }
+            } catch (e: Exception) {
+                WKTReader().read(it)
+            }
+        } ?: existingModel.boundaryRepresentation
+
         var updatedModel : IGeoLocationModel = when (type) {
-            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
-            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = request.boundaryRepresentation?.let { WKTReader().read(it) })
+            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
         }
 
         updatedModel = useCase.update(updatedModel)!!
 
-        if (shouldUpdateBoundaryViaIA) {
-            eventPublisherPort.publish(GeoLocationEnrichmentEvent(updatedModel.id.id, updatedModel.type))
-        }
+        // Always publish event for downstream processing (artifacts and reports)
+        eventPublisherPort.publish(GeoLocationEnrichmentEvent(updatedModel.id.id, updatedModel.type))
 
         return updatedModel
+    }
 
+    fun updateAdditionalDetails(type: GeoLocationType, id: Long, details: Map<String, Any?>): IGeoLocationModel? {
+        val useCase = getUseCase<IGeoLocationModel>(type)
+        val existingModel = useCase.findById(GeoLocationId(id)).orElse(null) ?: return null
+
+        val updatedModel: IGeoLocationModel = when (type) {
+            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(additionalDetailsMap = details)
+            GeoLocationType.REGION -> (existingModel as RegionModel).copy(additionalDetailsMap = details)
+            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(additionalDetailsMap = details)
+            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(additionalDetailsMap = details)
+            GeoLocationType.CITY -> (existingModel as CityModel).copy(additionalDetailsMap = details)
+            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(additionalDetailsMap = details)
+        }
+
+        return useCase.update(updatedModel)
     }
 
     fun deleteById(type: GeoLocationType, id: Long) {
@@ -143,6 +169,35 @@ class GeoLocationCRUDService(
     fun findByPropertiesDetailsMap(type: GeoLocationType, key: String, value: String, pageable: Pageable): Page<IGeoLocationModel> {
         val useCase = getUseCase<IGeoLocationModel>(type)
         return useCase.findByPropertiesDetailsMapContains(key, value, pageable)
+    }
+
+    /**
+     * Attempts to find a GeoLocation by ID across all hierarchy levels (Continent, Region, Country, Province, City, District).
+     */
+    fun findAnyById(id: Long): IGeoLocationModel? {
+        for (type in GeoLocationType.entries) {
+            val found = findById(type, id)
+            if (found.isPresent) {
+                return found.get()
+            }
+        }
+        return null
+    }
+
+    /**
+     * Resolves the parent GeoLocation model for a given GeoLocation if parentId exists.
+     */
+    fun findParentModel(model: IGeoLocationModel): IGeoLocationModel? {
+        val pId = model.parentId ?: return null
+        val parentType = when (model.type) {
+            GeoLocationType.REGION -> GeoLocationType.CONTINENT
+            GeoLocationType.COUNTRY -> GeoLocationType.REGION
+            GeoLocationType.PROVINCE -> GeoLocationType.COUNTRY
+            GeoLocationType.CITY -> GeoLocationType.PROVINCE
+            GeoLocationType.DISTRICT -> GeoLocationType.CITY
+            GeoLocationType.CONTINENT -> null
+        } ?: return null
+        return findById(parentType, pId).orElse(null)
     }
 
 }

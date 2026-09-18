@@ -17,4 +17,7 @@ interface GeoLocationIngestionActivities {
 
     @ActivityMethod
     fun publishBatchImportCompletedEvent(result: GeoLocationBatchImportResult)
+
+    @ActivityMethod
+    fun generateGeoLocationArtifactsAndReport(geoLocationId: Long): de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationDetailReportResultDto
 }

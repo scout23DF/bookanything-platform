@@ -51,3 +51,20 @@ data class GeoLocationBatchImportResult(
     val countrySummaries: List<CountryImportSummaryDto> = emptyList(),
     val status: String = "COMPLETED"
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class GeoLocationDetailReportResultDto(
+    val geoLocationId: Long = 0L,
+    val name: String = "",
+    val type: String = "",
+    val friendlyId: String = "",
+    val localMapAssetId: Long? = null,
+    val localMapAssetUrl: String? = null,
+    val worldHighlightAssetId: Long? = null,
+    val worldHighlightAssetUrl: String? = null,
+    val reportPdfUrl: String? = null,
+    val aiEnrichmentSummary: String? = null,
+    val status: String = "SUCCESS",
+    val errorMessage: String? = null
+)

@@ -9,6 +9,7 @@ import de.org.dexterity.bookanything.dom01geolocation.application.usecases.*
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.*
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.ia.gemini.VertexGeminiIAProxyAdapter
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.mappers.GeoLocationRestMapper
+import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -102,22 +103,33 @@ class GeoLocationBeansConfig {
     )
 
     @Bean
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(ChatClient.Builder::class)
-    fun getSpringAIChatClient(chatClientBuilder: ChatClient.Builder): ChatClient {
-        return chatClientBuilder.build()
-    }
-
-    @Bean
     fun getSearchEngineInIAProxyPort(
         @org.springframework.beans.factory.annotation.Autowired(required = false)
-        chatClient: ChatClient? = null
+        chatClientBuilder: ChatClient.Builder? = null,
+        @org.springframework.beans.factory.annotation.Autowired(required = false)
+        chatModel: org.springframework.ai.chat.model.ChatModel? = null
     ): SearchEngineInIAProxyPort {
-        return if (chatClient != null) {
-            VertexGeminiIAProxyAdapter(chatClient)
+        val client = when {
+            chatClientBuilder != null -> {
+                LoggerFactory.getLogger(GeoLocationBeansConfig::class.java).info("Spring AI: Building ChatClient from ChatClient.Builder...")
+                chatClientBuilder.build()
+            }
+            chatModel != null -> {
+                LoggerFactory.getLogger(GeoLocationBeansConfig::class.java).info("Spring AI: Creating ChatClient from ChatModel (${chatModel.javaClass.simpleName})...")
+                ChatClient.create(chatModel)
+            }
+            else -> {
+                LoggerFactory.getLogger(GeoLocationBeansConfig::class.java).warn("Spring AI: Neither ChatClient.Builder nor ChatModel available in context!")
+                null
+            }
+        }
+
+        return if (client != null) {
+            VertexGeminiIAProxyAdapter(client)
         } else {
             object : SearchEngineInIAProxyPort {
                 override fun simpleSearchByPrompt(promptToSearch: String): String? {
-                    return "Vertex AI Gemini is not configured in this environment."
+                    return "Google Gemini AI is not configured in this environment."
                 }
             }
         }

@@ -132,27 +132,19 @@ spring:
                 log-level: debug
 
     ai:
-        vertex:
-            ai:
-                gemini:
-                    project-id: ${SPRING_AI_VERTEX_AI_GEMINI_PROJECT_ID:alns-dexterity-labs-01}
-                    credentials-uri: ${SPRING_AI_VERTEX_AI_GEMINI_CREDENTIALS_URI:}
-                    # credentials-uri: file:~/.config/gcloud/client_secret_25147608565_credential.json
-                    location: europe-west1
-                    chat:
-                        options:
-                            # max-output-tokens: 256
-                            model: gemini-2.5-flash-lite
-                            temperature: 0.1
-                            top-k: 2
-                            top-p: 0.5
-                            # stopSequences: null
-                            candidateCount: 1
-                            # response-mime-type: 'null'
-                            # tool-call-backs: []
-                            # tool-names: []
-                            # google-search-retrieval: true
-                            # safety-settings: []
+        model:
+            chat: google-genai
+        google:
+            genai:
+                api-key: ${GEMINI_API_KEY:AIzaSyAJ85F9hPExyK48KSsa_AJu8jAXz87f8f4}
+                chat:
+                    model: gemini-2.5-flash-lite
+                    temperature: 0.2
+                    top-p: 0.8
+                    options:
+                        model: gemini-2.5-flash-lite
+                        temperature: 0.2
+                        top-p: 0.8
 
 management:
     health:
@@ -184,7 +176,7 @@ application:
     domain-settings:
         geolocation:
             update-boundary-via-ia:
-                feature-enabled: true
+                feature-enabled: false
         asset-mgmnt:
             storage-providers:
                 minio:
@@ -236,6 +228,7 @@ temporal:
 
 nifi:
     base-url: "${NIFI_BASE_URL:https://nifi.darueira-corpshared.127.0.0.1.nip.io}"
+    import-timeout-minutes: "${NIFI_IMPORT_TIMEOUT_MINUTES:25}"
 
 jsreport:
     base-url: "${JSREPORT_BASE_URL:http://10.152.183.35:5488}"

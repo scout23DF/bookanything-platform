@@ -1,0 +1,19 @@
+FROM eclipse-temurin:25-jre
+
+WORKDIR /app
+
+RUN groupadd -g 10001 darueira && \
+    useradd -u 10001 -g darueira -s /bin/sh -m darueira && \
+    mkdir -p /app/data && \
+    chown -R darueira:darueira /app
+
+USER 10001:10001
+
+COPY --chown=10001:10001 target/bookanything-monolith-backend-01-1.0.0-SNAPSHOT.jar /app/app.jar
+
+EXPOSE 8060
+
+ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
+ENV SPRING_PROFILES_ACTIVE="darueira-k8s"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar /app/app.jar"]
