@@ -18,13 +18,21 @@ class GeoLocationRestMapper {
 
     private fun String.toGeometry(): Geometry = try {
         val trimmed = this.trim()
-        if (trimmed.startsWith("{")) {
+        val geom = if (trimmed.startsWith("{")) {
             geoJsonReader.read(trimmed)
         } else {
             wktReader.read(trimmed)
         }
+        if (geom.srid == 0) {
+            geom.srid = 4326
+        }
+        geom
     } catch (e: Exception) {
-        wktReader.read(this)
+        val geom = wktReader.read(this)
+        if (geom.srid == 0) {
+            geom.srid = 4326
+        }
+        geom
     }
     private fun Geometry.toText(): String = wktWriter.write(this)
 

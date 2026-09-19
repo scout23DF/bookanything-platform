@@ -82,23 +82,34 @@ class GeoLocationCRUDService(
         val boundary = request.boundaryRepresentation?.let {
             try {
                 val trimmed = it.trim()
-                if (trimmed.startsWith("{")) {
+                val geom = if (trimmed.startsWith("{")) {
                     org.locationtech.jts.io.geojson.GeoJsonReader().read(trimmed)
                 } else {
                     WKTReader().read(trimmed)
                 }
+                if (geom.srid == 0) {
+                    geom.srid = 4326
+                }
+                geom
             } catch (e: Exception) {
-                WKTReader().read(it)
+                val geom = WKTReader().read(it)
+                if (geom.srid == 0) {
+                    geom.srid = 4326
+                }
+                geom
             }
         } ?: existingModel.boundaryRepresentation
 
+        val alias = request.alias ?: existingModel.alias
+        val details = request.additionalDetailsMap ?: existingModel.additionalDetailsMap
+
         var updatedModel : IGeoLocationModel = when (type) {
-            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
-            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
-            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
-            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
-            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
-            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, friendlyId = request.friendlyId, boundaryRepresentation = boundary)
+            GeoLocationType.CONTINENT -> (existingModel as ContinentModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
+            GeoLocationType.REGION -> (existingModel as RegionModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
+            GeoLocationType.COUNTRY -> (existingModel as CountryModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
+            GeoLocationType.PROVINCE -> (existingModel as ProvinceModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
+            GeoLocationType.CITY -> (existingModel as CityModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
+            GeoLocationType.DISTRICT -> (existingModel as DistrictModel).copy(name = request.name, friendlyId = request.friendlyId, alias = alias, additionalDetailsMap = details, boundaryRepresentation = boundary)
         }
 
         updatedModel = useCase.update(updatedModel)!!

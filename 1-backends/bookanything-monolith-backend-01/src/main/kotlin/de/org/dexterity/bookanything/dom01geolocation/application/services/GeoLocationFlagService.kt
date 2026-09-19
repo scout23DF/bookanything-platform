@@ -38,7 +38,7 @@ class GeoLocationFlagService(
      * 4. Deterministic vexillological SVG generation if AI is completely unavailable.
      */
     fun obtainFlag(geoLocation: IGeoLocationModel, parentName: String? = null): GeoLocationFlagResult {
-        val name = geoLocation.humanReadableName()
+        val name = geoLocation.name
         val type = geoLocation.type
         val code = geoLocation.alias ?: geoLocation.friendlyId
         val parent = parentName ?: "Global / Continente"

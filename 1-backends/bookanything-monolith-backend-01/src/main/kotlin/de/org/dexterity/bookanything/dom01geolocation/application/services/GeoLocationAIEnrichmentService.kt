@@ -17,7 +17,7 @@ class GeoLocationAIEnrichmentService(
      * demographic, and historical facts using Spring AI (max 2000 characters).
      */
     fun enrichGeoLocation(geoLocation: IGeoLocationModel, parentName: String? = null): String {
-        val name = geoLocation.humanReadableName()
+        val name = geoLocation.name
         val type = geoLocation.type.name
         val code = geoLocation.alias ?: geoLocation.friendlyId
         val parent = parentName ?: "Global / Continente"
