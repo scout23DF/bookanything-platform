@@ -33,7 +33,8 @@ class GeoLocationBeansConfig {
     @Bean
     fun webClient(): WebClient {
         return WebClient.builder()
-            .defaultHeader("User-Agent", "BookAnythingBackendApplication/1.0")
+            .defaultHeader("User-Agent", "BookAnythingBackendApplication/1.0 (dev@darueira.org)")
+            .codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .build()
     }
 
