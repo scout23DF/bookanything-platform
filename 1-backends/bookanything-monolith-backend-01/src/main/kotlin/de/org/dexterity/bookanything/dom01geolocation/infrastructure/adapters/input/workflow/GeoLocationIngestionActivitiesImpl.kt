@@ -11,6 +11,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportI
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportSummaryDto
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationBatchImportResult
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationDetailReportResultDto
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationMapsRequestDto
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.rest.GeoLocationPythonMapsClient
 import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
@@ -68,11 +70,22 @@ class GeoLocationIngestionActivitiesImpl(
     @Value("\${corporate.minio.secret-key:Darueira@2026!}")
     private val corporateMinioSecretKey: String,
     @Value("\${corporate.minio.reports-bucket:darueira-reports}")
-    private val corporateMinioReportsBucket: String
+    private val corporateMinioReportsBucket: String,
+    private val pythonMapsClient: GeoLocationPythonMapsClient,
+    @Value("\${application.domain-settings.geolocation.map-svg-generator-mechanism:KOTLIN}")
+    private val configuredMapMechanism: String = "KOTLIN"
 ) : GeoLocationIngestionActivities {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val pendingReplies = ConcurrentHashMap<String, CompletableFuture<CountryImportSummaryDto>>()
+
+    @Volatile
+    var currentMapSvgGeneratorMechanism: String = configuredMapMechanism
+
+    override fun configureMapSvgGeneratorMechanism(mechanism: String) {
+        logger.info("Temporal Activity: Configured map SVG generator mechanism to: $mechanism")
+        this.currentMapSvgGeneratorMechanism = mechanism
+    }
 
     @KafkaListener(
         topics = ["\${topics.geolocation.nifi-import.completed:geolocation.nifi-import.completed}"],
@@ -259,10 +272,47 @@ class GeoLocationIngestionActivitiesImpl(
         }
 
         try {
-            // 3. Generate SVGs
-            logger.info("Activity: Generating Local Vector Map and World Highlight SVG for #$geoLocationId ($name)...")
-            val localMapSvg = svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId)
-            val worldHighlightSvg = svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
+            // 3. Generate SVGs using selected mechanism (GEOPANDAS via Python vs KOTLIN native)
+            val mechanism = currentMapSvgGeneratorMechanism
+            logger.info("Activity: Map SVG generation mechanism: '$mechanism' for #$geoLocationId ($name)...")
+
+            val (localMapSvg, worldHighlightSvg) = if (mechanism.equals("GEOPANDAS", ignoreCase = true)) {
+                try {
+                    logger.info("Activity: Invoking Python Maps Generator (GeoPandas) for #$geoLocationId...")
+                    val pyRequest = GeoLocationMapsRequestDto(
+                        geoLocationId = geoLocationId,
+                        name = name,
+                        type = type,
+                        friendlyId = friendlyId,
+                        alias = alias,
+                        boundaryWkt = boundary.toText(),
+                        saveToMinio = true,
+                        minioBucket = "bookanything-images"
+                    )
+                    val pyResponse = pythonMapsClient.generateMaps(pyRequest)
+                    if (pyResponse.status == "SUCCESS" && pyResponse.localMapSvg.isNotBlank()) {
+                        logger.info("Activity: Successfully received high-fidelity GeoPandas SVGs for #$geoLocationId")
+                        Pair(pyResponse.localMapSvg, pyResponse.worldHighlightSvg)
+                    } else {
+                        logger.warn("Activity: Python Maps Generator returned non-success (${pyResponse.errorMessage}). Falling back to Kotlin SVG generator.")
+                        Pair(
+                            svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
+                            svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
+                        )
+                    }
+                } catch (e: Exception) {
+                    logger.error("Activity: Error calling Python Maps Generator (${e.message}). Falling back to Kotlin SVG generator.")
+                    Pair(
+                        svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
+                        svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
+                    )
+                }
+            } else {
+                Pair(
+                    svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
+                    svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
+                )
+            }
 
             // 4. Save SVGs into Tenant MinIO using Asset Management Domain
             logger.info("Activity: Uploading SVG maps to Tenant MinIO for #$geoLocationId...")
@@ -399,7 +449,8 @@ class GeoLocationIngestionActivitiesImpl(
                         MakeBucketArgs.builder().bucket(corporateMinioReportsBucket).build()
                     )
                 }
-                val corpObjectKey = "geolocations/detail-report-$geoLocationId.pdf"
+                val idOrAlias = (alias ?: friendlyId).replace("/", "-")
+                val corpObjectKey = "geolocations/geolocation-detail-report-$idOrAlias.pdf"
                 ByteArrayInputStream(pdfBytes).use { bais ->
                     minioClient.putObject(
                         PutObjectArgs.builder()

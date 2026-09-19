@@ -50,6 +50,9 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
             details = "Starting batch ingestion for $totalItems items"
         )
 
+        val mechanism = request.mapSvgGeneratorMechanism ?: "KOTLIN"
+        activities.configureMapSvgGeneratorMechanism(mechanism)
+
         val summaries = mutableListOf<CountryImportSummaryDto>()
 
         request.items.forEachIndexed { index, item ->

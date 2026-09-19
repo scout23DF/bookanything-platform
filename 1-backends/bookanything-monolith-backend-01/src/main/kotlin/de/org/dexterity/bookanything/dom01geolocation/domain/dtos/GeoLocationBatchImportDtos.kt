@@ -14,7 +14,36 @@ data class CountryImportItem(
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class GeoLocationBatchImportRequest(
-    val items: List<CountryImportItem> = emptyList()
+    val items: List<CountryImportItem> = emptyList(),
+    val mapSvgGeneratorMechanism: String? = "KOTLIN"
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class GeoLocationMapsRequestDto(
+    val geoLocationId: Long = 0L,
+    val name: String = "",
+    val type: String = "COUNTRY",
+    val friendlyId: String = "",
+    val alias: String? = null,
+    val boundaryWkt: String = "",
+    val saveToMinio: Boolean = true,
+    val minioBucket: String? = "bookanything-images"
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class GeoLocationMapsResponseDto(
+    val geoLocationId: Long = 0L,
+    val friendlyId: String = "",
+    val localMapSvg: String = "",
+    val worldHighlightSvg: String = "",
+    val localMapStorageKey: String? = null,
+    val worldHighlightStorageKey: String? = null,
+    val localMapUrl: String? = null,
+    val worldHighlightUrl: String? = null,
+    val status: String = "SUCCESS",
+    val errorMessage: String? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

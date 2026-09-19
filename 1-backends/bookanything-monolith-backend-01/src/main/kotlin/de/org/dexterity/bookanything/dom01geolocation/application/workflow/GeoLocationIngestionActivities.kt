@@ -20,4 +20,7 @@ interface GeoLocationIngestionActivities {
 
     @ActivityMethod
     fun generateGeoLocationArtifactsAndReport(geoLocationId: Long): de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationDetailReportResultDto
+
+    @ActivityMethod
+    fun configureMapSvgGeneratorMechanism(mechanism: String)
 }

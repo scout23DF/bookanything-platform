@@ -50,7 +50,8 @@ class GeoLocationAIEnrichmentService(
                 return aiResponse.trim().take(2000)
             }
         } catch (e: Exception) {
-            logger.warn("Spring AI: Error invoking AI engine for '$name': ${e.message}. Using intelligent synthesis fallback.")
+            val rootCause = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e)
+            logger.warn("Spring AI: Error invoking AI engine for '$name': [${rootCause.javaClass.simpleName}] ${rootCause.message}. Using intelligent synthesis fallback.")
         }
 
         return generateFallbackSynthesis(name, type, parent, code).take(2000)

@@ -64,8 +64,12 @@ class GeoLocationWorkflowController(
 
     @PostMapping(value = ["/artifacts-and-report/{geoLocationId}", "/{geoLocationId}/artifacts-and-report", "/batch-import/artifacts-and-report/{geoLocationId}"])
     fun generateGeoLocationArtifactsAndReport(
-        @PathVariable geoLocationId: Long
+        @PathVariable geoLocationId: Long,
+        @RequestParam(required = false) mapSvgGeneratorMechanism: String?
     ): ResponseEntity<GeoLocationDetailReportResultDto> {
+        if (!mapSvgGeneratorMechanism.isNullOrBlank()) {
+            activities.configureMapSvgGeneratorMechanism(mapSvgGeneratorMechanism)
+        }
         val result = activities.generateGeoLocationArtifactsAndReport(geoLocationId)
         return when (result.status) {
             "SUCCESS" -> ResponseEntity.ok(result)

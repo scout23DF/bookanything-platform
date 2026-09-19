@@ -51,7 +51,41 @@ class GeoLocationFlagService(
         var wikipediaTitle: String? = null
         var aiSvgFallback: String? = null
 
-        // 1. Invoke Spring AI Gemini for flag vexillology metadata
+        // 1. Fast-Path for COUNTRY: Try authoritative FlagCDN directly using ISO2/ISO3 before consuming AI quota
+        if (type == GeoLocationType.COUNTRY) {
+            val directIso = when (code.uppercase()) {
+                "BRA" -> "br"
+                "DEU" -> "de"
+                "USA" -> "us"
+                "ARG" -> "ar"
+                "FRA" -> "fr"
+                "GBR" -> "gb"
+                "ESP" -> "es"
+                "ITA" -> "it"
+                "PRT" -> "pt"
+                else -> if (code.length == 2) code.lowercase() else code.take(2).lowercase()
+            }
+
+            if (directIso.length == 2 && directIso.all { it.isLetter() }) {
+                val flagCdnSvgUrl = "https://flagcdn.com/$directIso.svg"
+                val svgBytes = downloadBytes(flagCdnSvgUrl)
+                if (svgBytes != null && isValidSvg(svgBytes)) {
+                    val svgContent = String(svgBytes, StandardCharsets.UTF_8)
+                    logger.info("Flag Service: Fast-path authoritative SVG retrieved from FlagCDN ($flagCdnSvgUrl) without consuming AI quota")
+                    return GeoLocationFlagResult(
+                        flagName = "Bandeira Oficial de $name",
+                        flagDescription = "Bandeira soberana nacional de $name ($code).",
+                        flagImageContent = svgContent,
+                        rawBytes = svgBytes,
+                        isSvg = true,
+                        mimeType = "image/svg+xml",
+                        sourceUrl = flagCdnSvgUrl
+                    )
+                }
+            }
+        }
+
+        // 2. Invoke Spring AI Gemini for flag vexillology metadata
         try {
             val prompt = """
                 Atue como um especialista em vexilologia (estudo de bandeiras) e geografia política.
@@ -85,7 +119,8 @@ class GeoLocationFlagService(
                 logger.info("Flag Service: AI identified flag '$aiFlagName' (ISO: $countryIso2, Wiki: $wikipediaTitle)")
             }
         } catch (e: Exception) {
-            logger.warn("Flag Service: Spring AI flag metadata lookup encountered error: ${e.message}")
+            val rootCause = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e)
+            logger.warn("Flag Service: Spring AI flag metadata lookup encountered error: [${rootCause.javaClass.simpleName}] ${rootCause.message}")
         }
 
         // 2. Strategy A: For COUNTRY, attempt FlagCDN vector SVG (ultra-reliable, pure vector)

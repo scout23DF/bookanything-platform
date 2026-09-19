@@ -140,7 +140,8 @@ class GeoLocationAssetIntegrationService(
             )
         }
 
-        val reportFileName = "report-$friendlyId.pdf"
+        val idOrAlias = (geoLocation.alias ?: friendlyId).replace("/", "-")
+        val reportFileName = "geolocation-detail-report-$idOrAlias.pdf"
         val reportStorageKey = "documents/geolocations/$geoId/$reportFileName"
 
         storageProvider.upload(
