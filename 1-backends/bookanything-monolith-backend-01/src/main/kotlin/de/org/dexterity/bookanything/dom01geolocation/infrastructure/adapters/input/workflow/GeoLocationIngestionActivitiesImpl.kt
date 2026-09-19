@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationAIEnrichmentService
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationAssetIntegrationService
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
+import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationFlagService
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationSvgGeneratorService
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportItem
@@ -39,6 +40,7 @@ class GeoLocationIngestionActivitiesImpl(
     private val svgGeneratorService: GeoLocationSvgGeneratorService,
     private val assetIntegrationService: GeoLocationAssetIntegrationService,
     private val aiEnrichmentService: GeoLocationAIEnrichmentService,
+    private val flagService: GeoLocationFlagService,
     @Value("\${topics.geolocation.nifi-import.requested:geolocation.nifi-import.requested}")
     private val nifiImportRequestedTopic: String,
     @Value("\${topics.geolocation.nifi-import.completed:geolocation.nifi-import.completed}")
@@ -271,9 +273,19 @@ class GeoLocationIngestionActivitiesImpl(
             val worldMapUrl = "s3://${worldAsset.bucket.name}/${worldAsset.storageKey}"
             logger.info("Activity: Both SVGs successfully persisted in Tenant MinIO (Local: Asset #${localAsset.id}, World: Asset #${worldAsset.id})")
 
-            // 5. Spring AI Enrichment
             val parentModel = geoLocationCRUDService.findParentModel(geoLocation)
             val parentName = parentModel?.name
+
+            // 5. Flag Resolution & Tenant MinIO Asset Persistence
+            logger.info("Activity: Resolving official flag for #$geoLocationId ($name)...")
+            val flagResult = flagService.obtainFlag(geoLocation, parentName)
+            val flagAsset = runBlocking {
+                assetIntegrationService.saveGeoLocationFlag(geoLocation, flagResult.rawBytes, flagResult.isSvg)
+            }
+            val flagAssetUrl = "s3://${flagAsset.bucket.name}/${flagAsset.storageKey}"
+            logger.info("Activity: Flag successfully persisted in Tenant MinIO as Asset #${flagAsset.id} (key: ${flagAsset.storageKey})")
+
+            // 6. Spring AI Enrichment
             logger.info("Activity: Requesting Spring AI synthesis for #$geoLocationId ($name) [Parent: $parentName]...")
             val aiSummary = aiEnrichmentService.enrichGeoLocation(geoLocation, parentName)
 
@@ -286,7 +298,7 @@ class GeoLocationIngestionActivitiesImpl(
                 logger.warn("Activity: Could not persist AI summary in entity details: ${e.message}")
             }
 
-            // 6. Generate PDF via JSReport
+            // 7. Generate PDF via JSReport
             logger.info("Activity: Calling JSReport '$jsreportDetailTemplateName' for #$geoLocationId ($name)...")
             val env = boundary.envelopeInternal
             val envelopeStr = String.format(Locale.US, "[%.3f, %.3f] to [%.3f, %.3f]", env.minX, env.minY, env.maxX, env.maxY)
@@ -310,6 +322,12 @@ class GeoLocationIngestionActivitiesImpl(
                 "worldHighlightSvg" to worldHighlightSvg,
                 "worldHighlightAssetId" to worldAsset.id,
                 "worldHighlightAssetUrl" to worldMapUrl,
+                "flagName" to flagResult.flagName,
+                "flagDescription" to flagResult.flagDescription,
+                "flagImage" to flagResult.flagImageContent,
+                "isFlagSvg" to flagResult.isSvg,
+                "flagAssetId" to flagAsset.id,
+                "flagAssetUrl" to flagAssetUrl,
                 "aiEnrichment" to aiSummary,
                 "generatedAt" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
             )
@@ -407,6 +425,9 @@ class GeoLocationIngestionActivitiesImpl(
                 localMapAssetUrl = localMapUrl,
                 worldHighlightAssetId = worldAsset.id,
                 worldHighlightAssetUrl = worldMapUrl,
+                flagAssetId = flagAsset.id,
+                flagAssetUrl = flagAssetUrl,
+                flagName = flagResult.flagName,
                 reportPdfUrl = tenantReportUrl,
                 aiEnrichmentSummary = aiSummary,
                 status = "SUCCESS"

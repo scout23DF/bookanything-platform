@@ -170,6 +170,62 @@ class GeoLocationAssetIntegrationService(
         return reportAsset
     }
 
+    /**
+     * Stores the official Flag image (SVG or PNG) into the Tenant MinIO and registers it in tb_asset.
+     */
+    suspend fun saveGeoLocationFlag(
+        geoLocation: IGeoLocationModel,
+        flagBytes: ByteArray,
+        isSvg: Boolean
+    ): AssetModel {
+        val geoId = geoLocation.id.id
+        val friendlyId = geoLocation.friendlyId
+        val type = geoLocation.type.name
+        val ext = if (isSvg) "svg" else "png"
+        val mimeType = if (isSvg) SVG_MIME_TYPE else "image/png"
+
+        logger.info("Asset Management: Uploading Flag image for GeoLocation #$geoId ($friendlyId) to Tenant MinIO '$IMAGES_BUCKET_NAME'...")
+
+        storageProvider.createBucketIfNotExists(IMAGES_BUCKET_NAME)
+        val bucket = bucketRepository.findByName(IMAGES_BUCKET_NAME).orElseGet {
+            bucketRepository.save(
+                BucketModel(
+                    name = IMAGES_BUCKET_NAME,
+                    provider = StorageProviderType.MINIO
+                )
+            )
+        }
+
+        val fileName = "flag-$friendlyId.$ext"
+        val storageKey = "images/geolocations/$geoId/$fileName"
+
+        storageProvider.upload(
+            bucketName = IMAGES_BUCKET_NAME,
+            key = storageKey,
+            inputStream = ByteArrayInputStream(flagBytes),
+            size = flagBytes.size.toLong(),
+            mimeType = mimeType
+        )
+
+        val flagAsset = saveOrUpdateAsset(
+            bucket = bucket,
+            fileName = fileName,
+            storageKey = storageKey,
+            mimeType = mimeType,
+            size = flagBytes.size.toLong(),
+            category = AssetCategory.IMAGE,
+            metadata = mapOf(
+                "geoLocationId" to geoId,
+                "friendlyId" to friendlyId,
+                "type" to type,
+                "kind" to "FLAG",
+                "uploadedAt" to Instant.now().toString()
+            )
+        )
+        logger.info("Asset Management: Flag image registered as Asset #${flagAsset.id} (key: $storageKey)")
+        return flagAsset
+    }
+
     private fun saveOrUpdateAsset(
         bucket: BucketModel,
         fileName: String,
