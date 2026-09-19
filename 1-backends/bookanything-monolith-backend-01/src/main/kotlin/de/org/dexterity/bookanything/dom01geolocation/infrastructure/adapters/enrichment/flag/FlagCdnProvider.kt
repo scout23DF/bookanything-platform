@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.Locale
@@ -82,8 +83,9 @@ class FlagCdnProvider(
 
     private fun downloadBytes(url: String): ByteArray? {
         return try {
+            val uri = URI.create(url)
             webClient.get()
-                .uri(url)
+                .uri(uri)
                 .retrieve()
                 .bodyToMono(ByteArray::class.java)
                 .timeout(Duration.ofMillis(3500))

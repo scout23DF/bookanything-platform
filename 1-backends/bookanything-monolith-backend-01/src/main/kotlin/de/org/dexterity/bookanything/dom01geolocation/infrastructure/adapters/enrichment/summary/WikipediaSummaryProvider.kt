@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Duration
@@ -26,7 +27,6 @@ class WikipediaSummaryProvider(
 
     override fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
         val name = geoLocation.name.trim()
-        val type = geoLocation.type.name
         val parent = parentName?.trim()
 
         val candidateTitles = buildCandidateTitles(name, parent)
@@ -55,20 +55,38 @@ class WikipediaSummaryProvider(
 
     private fun buildCandidateTitles(name: String, parent: String?): List<String> {
         val titles = mutableListOf<String>()
-        titles.add(name)
 
-        // German state title normalization if English/German differs
-        when (name.lowercase()) {
-            "bavaria", "bayern" -> { titles.add("Baviera"); titles.add("Bavaria") }
-            "hesse", "hessen" -> { titles.add("Hesse"); titles.add("Hessen") }
-            "saxony", "sachsen" -> { titles.add("Saxônia"); titles.add("Saxony") }
-            "lower saxony", "niedersachsen" -> { titles.add("Baixa Saxônia"); titles.add("Lower Saxony") }
-            "north rhine-westphalia", "nordrhein-westfalen" -> { titles.add("Renânia do Norte-Vestfália"); titles.add("North Rhine-Westphalia") }
-            "rhineland-palatinate", "rheinland-pfalz" -> { titles.add("Renânia-Palatinado"); titles.add("Rhineland-Palatinate") }
-            "thuringia", "thüringen" -> { titles.add("Turíngia"); titles.add("Thuringia") }
+        // Specific disambiguation for Brazilian states where base name might be a city or ambiguous
+        when (name.trim().lowercase()) {
+            "distrito federal" -> titles.add("Distrito Federal (Brasil)")
+            "espírito santo" -> titles.add("Espírito Santo (estado)")
+            "rio de janeiro" -> titles.add("Rio de Janeiro (estado)")
+            "são paulo" -> titles.add("São Paulo (estado)")
         }
 
-        // Parent disambiguation (e.g. "Acre (estado)", "Amazonas (Brasil)")
+        // German state title normalization if English/German differs
+        when (name.trim().lowercase()) {
+            "bavaria", "bayern" -> { titles.add("Baviera"); titles.add("Bavaria"); titles.add("Bayern") }
+            "hesse", "hessen" -> { titles.add("Hesse"); titles.add("Hessen") }
+            "saxony", "sachsen" -> { titles.add("Saxônia"); titles.add("Saxony"); titles.add("Sachsen") }
+            "lower saxony", "niedersachsen" -> { titles.add("Baixa Saxônia"); titles.add("Lower Saxony"); titles.add("Niedersachsen") }
+            "north rhine-westphalia", "nordrhein-westfalen" -> { titles.add("Renânia do Norte-Vestfália"); titles.add("North Rhine-Westphalia"); titles.add("Nordrhein-Westfalen") }
+            "rhineland-palatinate", "rheinland-pfalz" -> { titles.add("Renânia-Palatinado"); titles.add("Rhineland-Palatinate"); titles.add("Rheinland-Pfalz") }
+            "thuringia", "thüringen" -> { titles.add("Turíngia"); titles.add("Thuringia"); titles.add("Thüringen") }
+            "bremen" -> { titles.add("Bremen (estado)"); titles.add("Freie Hansestadt Bremen"); titles.add("Bremen") }
+            "hamburg" -> { titles.add("Hamburgo"); titles.add("Hamburg") }
+            "berlin" -> { titles.add("Berlim"); titles.add("Berlin") }
+            "brandenburg" -> { titles.add("Brandemburgo"); titles.add("Brandenburg") }
+            "mecklenburg-vorpommern" -> { titles.add("Meclemburgo-Pomerânia Ocidental"); titles.add("Mecklenburg-Western Pomerania"); titles.add("Mecklenburg-Vorpommern") }
+            "saarland" -> { titles.add("Sarre"); titles.add("Saarland") }
+            "saxony-anhalt", "sachsen-anhalt" -> { titles.add("Saxônia-Anhalt"); titles.add("Saxony-Anhalt"); titles.add("Sachsen-Anhalt") }
+            "schleswig-holstein" -> { titles.add("Eslésvico-Holsácia"); titles.add("Schleswig-Holstein") }
+        }
+
+        titles.add(name)
+
+        // Additional state-level disambiguations
+        titles.add("$name (estado)")
         if (!parent.isNullOrBlank()) {
             titles.add("$name ($parent)")
         }
@@ -79,8 +97,9 @@ class WikipediaSummaryProvider(
     private fun fetchWikipediaExtract(lang: String, encodedTitle: String): String? {
         val url = "https://$lang.wikipedia.org/api/rest_v1/page/summary/$encodedTitle"
         return try {
+            val uri = URI.create(url)
             val json = webClient.get()
-                .uri(url)
+                .uri(uri)
                 .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
                 .retrieve()
                 .bodyToMono(String::class.java)

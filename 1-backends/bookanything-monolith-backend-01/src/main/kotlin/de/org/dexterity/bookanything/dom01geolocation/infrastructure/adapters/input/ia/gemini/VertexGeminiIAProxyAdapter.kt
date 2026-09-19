@@ -38,13 +38,22 @@ class VertexGeminiIAProxyAdapter(
                     }
                 }
 
+                val isDailyQuota = causeChain.contains("GenerateRequestsPerDayPerProjectPerModel", ignoreCase = true) ||
+                        causeChain.contains("FreeTier", ignoreCase = true) ||
+                        (causeChain.contains("Quota exceeded", ignoreCase = true) && !causeChain.contains("per minute", ignoreCase = true))
+
+                if (isDailyQuota) {
+                    logger.warn("VertexGeminiIAProxyAdapter: Gemini API daily quota exhausted (${duration}ms). Failing immediately to allow fallback pipeline without delay.")
+                    throw e
+                }
+
                 val isRateLimit = causeChain.contains("429") ||
                         causeChain.contains("RESOURCE_EXHAUSTED") ||
                         causeChain.contains("quota", ignoreCase = true) ||
                         causeChain.contains("rate", ignoreCase = true)
 
                 if (isRateLimit && retries > 1) {
-                    logger.warn("VertexGeminiIAProxyAdapter: Gemini API rate limit / quota exceeded after ${duration}ms! Root cause: [${rootCause.javaClass.simpleName}] ${rootCause.message}. Retrying in ${backoffMs}ms... (Remaining attempts: ${retries - 1})")
+                    logger.warn("VertexGeminiIAProxyAdapter: Gemini API rate limit / quota exceeded after ${duration}ms! Root cause: [${rootCause.javaClass.simpleName}] ${rootCause.message}. Retrying once in ${backoffMs}ms... (Remaining attempts: ${retries - 1})")
                     try {
                         Thread.sleep(backoffMs)
                     } catch (ie: InterruptedException) {

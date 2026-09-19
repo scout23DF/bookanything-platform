@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Duration
@@ -150,8 +151,9 @@ class WikimediaCommonsFlagProvider(
             val encoded = URLEncoder.encode(cand.replace(" ", "_"), StandardCharsets.UTF_8)
             val url = "https://en.wikipedia.org/api/rest_v1/page/summary/$encoded"
             try {
+                val uri = URI.create(url)
                 val json = webClient.get()
-                    .uri(url)
+                    .uri(uri)
                     .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
                     .retrieve()
                     .bodyToMono(String::class.java)
@@ -179,8 +181,9 @@ class WikimediaCommonsFlagProvider(
 
     private fun downloadBytes(url: String): ByteArray? {
         return try {
+            val uri = URI.create(url)
             webClient.get()
-                .uri(url)
+                .uri(uri)
                 .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
                 .retrieve()
                 .bodyToMono(ByteArray::class.java)
