@@ -5,18 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationSummaryProvider
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http.ResilientHttpFetcher
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import java.net.URI
-import java.time.Duration
 import java.util.Locale
 
 @Component
 @Order(20)
 class RestCountriesSummaryProvider(
-    private val webClient: WebClient,
+    private val http: ResilientHttpFetcher,
     private val objectMapper: ObjectMapper
 ) : IGeoLocationSummaryProvider {
 
@@ -38,13 +36,7 @@ class RestCountriesSummaryProvider(
 
         val url = "https://restcountries.com/v3.1/alpha/$cleanCode"
         return try {
-            val uri = URI.create(url)
-            val json = webClient.get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(String::class.java)
-                .timeout(Duration.ofMillis(3500))
-                .block() ?: return null
+            val json = http.getString(url) ?: return null
 
             val root: JsonNode = objectMapper.readTree(json)
             val countryNode = if (root.isArray && root.size() > 0) root[0] else root

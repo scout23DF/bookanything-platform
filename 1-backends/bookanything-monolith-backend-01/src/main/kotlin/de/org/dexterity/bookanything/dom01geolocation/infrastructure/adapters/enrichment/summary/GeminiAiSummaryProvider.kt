@@ -48,9 +48,13 @@ class GeminiAiSummaryProvider(
             logger.info("GeminiAiSummaryProvider: Requesting AI synthesis for '$name' ($type)...")
             val aiResponse = searchEngineInIAProxyPort.simpleSearchByPrompt(prompt)
 
-            if (!aiResponse.isNullOrBlank() && !aiResponse.contains("not configured in this environment", ignoreCase = true)) {
-                logger.info("GeminiAiSummaryProvider: AI summary generated successfully for '$name' (${aiResponse.length} chars)")
-                aiResponse.trim().take(2000)
+            // Drop markdown code fences the model sometimes wraps plain text in.
+            val summary = aiResponse
+                ?.replace(Regex("(?m)^\\s*```[a-zA-Z]*\\s*$"), "")
+                ?.trim()
+            if (!summary.isNullOrBlank()) {
+                logger.info("GeminiAiSummaryProvider: AI summary generated successfully for '$name' (${summary.length} chars)")
+                summary.take(2000)
             } else {
                 null
             }
