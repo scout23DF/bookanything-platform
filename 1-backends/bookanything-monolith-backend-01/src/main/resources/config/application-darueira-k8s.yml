@@ -66,6 +66,11 @@ management:
     elasticsearch:
       enabled: false
 
+temporal:
+  # Service DNS name instead of the hardcoded ClusterIP default in
+  # application.yml, which breaks silently if the Service is ever recreated.
+  service-address: ${TEMPORAL_SERVICE_ADDRESS:temporal-frontend.drr-corpshared-plat.svc.cluster.local:7233}
+
 application:
   domain-settings:
     asset-mgmnt:

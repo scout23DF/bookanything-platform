@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 @Configuration
 class TemporalConfig(
@@ -20,7 +23,11 @@ class TemporalConfig(
     @Value("\${temporal.namespace:corporate-core}")
     private val namespace: String,
     @Value("\${temporal.task-queue:GEOLOCATION_INGESTION_TASK_QUEUE}")
-    private val taskQueue: String
+    private val taskQueue: String,
+    @Value("\${temporal.worker-start.initial-backoff-seconds:5}")
+    private val initialBackoffSeconds: Long,
+    @Value("\${temporal.worker-start.max-backoff-seconds:60}")
+    private val maxBackoffSeconds: Long
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -48,33 +55,64 @@ class TemporalConfig(
         return WorkerFactory.newInstance(workflowClient)
     }
 
+    /**
+     * Starts the Temporal worker, retrying in the background until the server is reachable.
+     *
+     * Previously a single failed attempt (e.g. Temporal still booting after a node restart)
+     * only logged a warning and the app ran on with no worker polling the task queue, so
+     * workflows were accepted but never executed ("No Workers Running" in the Temporal UI).
+     *
+     * Retrying the same WorkerFactory is safe: in SDK 1.30.x, WorkerFactory.start() checks
+     * server reachability (getServerCapabilities) before any state change, so a failed start
+     * leaves it in its initial state. Workers must be registered exactly once, hence outside
+     * the retry loop.
+     */
     @Bean
     fun temporalWorkerManager(
         workerFactory: WorkerFactory,
         geoLocationIngestionActivities: GeoLocationIngestionActivities
     ): SmartLifecycle {
         return object : SmartLifecycle {
+            @Volatile
             private var running = false
+            private var retryExecutor: ScheduledExecutorService? = null
 
             override fun start() {
-                try {
-                    logger.info("Starting Temporal Worker on Task Queue: '$taskQueue' for namespace: '$namespace'...")
-                    val worker = workerFactory.newWorker(taskQueue)
-                    worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
-                    worker.registerActivitiesImplementations(geoLocationIngestionActivities)
+                val worker = workerFactory.newWorker(taskQueue)
+                worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
+                worker.registerActivitiesImplementations(geoLocationIngestionActivities)
 
+                retryExecutor = Executors.newSingleThreadScheduledExecutor { runnable ->
+                    Thread(runnable, "temporal-worker-starter").apply { isDaemon = true }
+                }
+                running = true
+                scheduleStartAttempt(attempt = 1, delaySeconds = 0)
+            }
+
+            private fun scheduleStartAttempt(attempt: Int, delaySeconds: Long) {
+                retryExecutor?.schedule({ tryStart(attempt, delaySeconds) }, delaySeconds, TimeUnit.SECONDS)
+            }
+
+            private fun tryStart(attempt: Int, previousDelaySeconds: Long) {
+                if (!running) return
+                try {
+                    logger.info("Starting Temporal Worker on Task Queue: '$taskQueue' for namespace: '$namespace' (attempt $attempt)...")
                     workerFactory.start()
-                    running = true
                     logger.info("Temporal Worker successfully started and listening on '$taskQueue'!")
+                    retryExecutor?.shutdown()
                 } catch (e: Exception) {
-                    logger.warn("Could not start Temporal Worker at $serviceAddress (will retry or continue): ${e.message}")
+                    val nextDelay = if (previousDelaySeconds == 0L) initialBackoffSeconds
+                                    else minOf(previousDelaySeconds * 2, maxBackoffSeconds)
+                    logger.warn("Could not start Temporal Worker at $serviceAddress (attempt $attempt): ${e.message}. Retrying in ${nextDelay}s")
+                    scheduleStartAttempt(attempt + 1, nextDelay)
                 }
             }
 
             override fun stop() {
                 logger.info("Stopping Temporal Worker...")
-                workerFactory.shutdown()
                 running = false
+                retryExecutor?.shutdownNow()
+                workerFactory.shutdown()
             }
 
             override fun isRunning(): Boolean = running

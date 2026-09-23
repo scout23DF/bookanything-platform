@@ -4,19 +4,17 @@ import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLo
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationFlagProvider
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http.ResilientHttpFetcher
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.time.Duration
 import java.util.Locale
 
 @Component
 @Order(10)
 class FlagCdnProvider(
-    private val webClient: WebClient
+    private val http: ResilientHttpFetcher
 ) : IGeoLocationFlagProvider {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -58,42 +56,23 @@ class FlagCdnProvider(
 
     private fun resolveIso2(code: String): String? {
         val clean = code.trim().uppercase(Locale.ROOT)
-        val iso2 = when (clean) {
-            "BRA" -> "br"
-            "DEU" -> "de"
-            "USA" -> "us"
-            "ARG" -> "ar"
-            "FRA" -> "fr"
-            "GBR" -> "gb"
-            "ESP" -> "es"
-            "ITA" -> "it"
-            "PRT" -> "pt"
-            "JPN" -> "jp"
-            "CAN" -> "ca"
-            "MEX" -> "mx"
-            "AUS" -> "au"
-            "CHN" -> "cn"
-            "IND" -> "in"
-            "RUS" -> "ru"
-            "ZAF" -> "za"
-            else -> if (clean.length == 2) clean.lowercase(Locale.ROOT) else null
+        val iso2 = when {
+            clean.length == 2 && clean.all { it.isLetter() } -> clean
+            clean.length == 3 -> ISO3_TO_ISO2[clean]
+            else -> null
         }
-        return if (iso2 != null && iso2.length == 2 && iso2.all { it.isLetter() }) iso2 else null
+        return iso2?.lowercase(Locale.ROOT)
     }
 
-    private fun downloadBytes(url: String): ByteArray? {
-        return try {
-            val uri = URI.create(url)
-            webClient.get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(ByteArray::class.java)
-                .timeout(Duration.ofMillis(3500))
-                .block()
-        } catch (e: Exception) {
-            logger.debug("FlagCdnProvider: Could not download from $url: ${e.message}")
-            null
-        }
+    private fun downloadBytes(url: String): ByteArray? = http.getBytes(url)
+
+    companion object {
+        // Full ISO 3166-1 alpha-3 -> alpha-2 table from the JDK (was a hand-written 17-country list).
+        private val ISO3_TO_ISO2: Map<String, String> = Locale.getISOCountries().mapNotNull { iso2 ->
+            runCatching { Locale.of("", iso2).isO3Country }.getOrNull()
+                ?.takeIf { it.isNotBlank() }
+                ?.let { it.uppercase(Locale.ROOT) to iso2 }
+        }.toMap()
     }
 
     private fun isValidSvg(content: String): Boolean {

@@ -108,7 +108,11 @@ class GeoLocationBeansConfig {
         @org.springframework.beans.factory.annotation.Autowired(required = false)
         chatClientBuilder: ChatClient.Builder? = null,
         @org.springframework.beans.factory.annotation.Autowired(required = false)
-        chatModel: org.springframework.ai.chat.model.ChatModel? = null
+        chatModel: org.springframework.ai.chat.model.ChatModel? = null,
+        @org.springframework.beans.factory.annotation.Value("\${application.domain-settings.geolocation.enrichment.gemini.call-timeout-seconds:40}")
+        geminiCallTimeoutSeconds: Long = 40,
+        @org.springframework.beans.factory.annotation.Value("\${application.domain-settings.geolocation.enrichment.gemini.max-cooldown-seconds:300}")
+        geminiMaxCooldownSeconds: Long = 300
     ): SearchEngineInIAProxyPort {
         val client = when {
             chatClientBuilder != null -> {
@@ -126,12 +130,16 @@ class GeoLocationBeansConfig {
         }
 
         return if (client != null) {
-            VertexGeminiIAProxyAdapter(client)
+            VertexGeminiIAProxyAdapter(
+                chatClient = client,
+                callTimeout = java.time.Duration.ofSeconds(geminiCallTimeoutSeconds),
+                maxCooldown = java.time.Duration.ofSeconds(geminiMaxCooldownSeconds)
+            )
         } else {
+            // null = "no answer": callers fall through to the next provider. (This used to return
+            // a "not configured" sentence, which callers had to string-match to avoid storing it.)
             object : SearchEngineInIAProxyPort {
-                override fun simpleSearchByPrompt(promptToSearch: String): String? {
-                    return "Google Gemini AI is not configured in this environment."
-                }
+                override fun simpleSearchByPrompt(promptToSearch: String): String? = null
             }
         }
     }

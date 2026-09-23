@@ -1,25 +1,24 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.flag
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationFlagResult
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationFlagProvider
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http.ResilientHttpFetcher
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.wikidata.WikidataGeoResolver
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.time.Duration
 import java.util.Locale
 
 @Component
 @Order(20)
 class WikimediaCommonsFlagProvider(
-    private val webClient: WebClient,
+    private val http: ResilientHttpFetcher,
+    private val wikidata: WikidataGeoResolver,
     private val objectMapper: ObjectMapper
 ) : IGeoLocationFlagProvider {
 
@@ -28,55 +27,56 @@ class WikimediaCommonsFlagProvider(
     override val providerId: String = "WIKIMEDIA"
     override val order: Int = 20
 
-    // Direct mapping for Brazilian states (ISO 3166-2 / GADM) to Wikimedia Commons canonical SVGs
-    private val brazilStateSvgUrls = mapOf(
-        "BR-AC" to "https://upload.wikimedia.org/wikipedia/commons/4/4c/Bandeira_do_Acre.svg",
-        "BR-AL" to "https://upload.wikimedia.org/wikipedia/commons/8/88/Bandeira_de_Alagoas.svg",
-        "BR-AP" to "https://upload.wikimedia.org/wikipedia/commons/0/0c/Bandeira_do_Amap%C3%A1.svg",
-        "BR-AM" to "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bandeira_do_Amazonas.svg",
-        "BR-BA" to "https://upload.wikimedia.org/wikipedia/commons/2/28/Bandeira_da_Bahia.svg",
-        "BR-CE" to "https://upload.wikimedia.org/wikipedia/commons/2/2e/Bandeira_do_Cear%C3%A1.svg",
-        "BR-DF" to "https://upload.wikimedia.org/wikipedia/commons/3/3c/Bandeira_do_Distrito_Federal_%28Brasil%29.svg",
-        "BR-ES" to "https://upload.wikimedia.org/wikipedia/commons/4/43/Bandeira_do_Esp%C3%ADrito_Santo.svg",
-        "BR-GO" to "https://upload.wikimedia.org/wikipedia/commons/b/be/Bandeira_de_Goi%C3%A1s.svg",
-        "BR-MA" to "https://upload.wikimedia.org/wikipedia/commons/4/45/Bandeira_do_Maranh%C3%A3o.svg",
-        "BR-MT" to "https://upload.wikimedia.org/wikipedia/commons/0/0b/Bandeira_de_Mato_Grosso.svg",
-        "BR-MS" to "https://upload.wikimedia.org/wikipedia/commons/6/64/Bandeira_de_Mato_Grosso_do_Sul.svg",
-        "BR-MG" to "https://upload.wikimedia.org/wikipedia/commons/f/f4/Bandeira_de_Minas_Gerais.svg",
-        "BR-PA" to "https://upload.wikimedia.org/wikipedia/commons/0/02/Bandeira_do_Par%C3%A1.svg",
-        "BR-PB" to "https://upload.wikimedia.org/wikipedia/commons/b/bb/Bandeira_da_Para%C3%ADba.svg",
-        "BR-PR" to "https://upload.wikimedia.org/wikipedia/commons/9/93/Bandeira_do_Paran%C3%A1.svg",
-        "BR-PE" to "https://upload.wikimedia.org/wikipedia/commons/5/59/Bandeira_de_Pernambuco.svg",
-        "BR-PI" to "https://upload.wikimedia.org/wikipedia/commons/3/33/Bandeira_do_Piau%C3%AD.svg",
-        "BR-RJ" to "https://upload.wikimedia.org/wikipedia/commons/7/73/Bandeira_do_estado_do_Rio_de_Janeiro.svg",
-        "BR-RN" to "https://upload.wikimedia.org/wikipedia/commons/3/30/Bandeira_do_Rio_Grande_do_Norte.svg",
-        "BR-RS" to "https://upload.wikimedia.org/wikipedia/commons/6/63/Bandeira_do_Rio_Grande_do_Sul.svg",
-        "BR-RO" to "https://upload.wikimedia.org/wikipedia/commons/f/fa/Bandeira_de_Rond%C3%B4nia.svg",
-        "BR-RR" to "https://upload.wikimedia.org/wikipedia/commons/9/98/Bandeira_de_Roraima.svg",
-        "BR-SC" to "https://upload.wikimedia.org/wikipedia/commons/1/1a/Bandeira_de_Santa_Catarina.svg",
-        "BR-SP" to "https://upload.wikimedia.org/wikipedia/commons/2/2b/Bandeira_do_estado_de_S%C3%A3o_Paulo.svg",
-        "BR-SE" to "https://upload.wikimedia.org/wikipedia/commons/9/9b/Bandeira_de_Sergipe.svg",
-        "BR-TO" to "https://upload.wikimedia.org/wikipedia/commons/f/ff/Bandeira_do_Tocantins.svg"
+    // Offline backup for when Wikidata is unreachable: Commons file names only. The upload URL
+    // (including its MD5 hash directories) is computed by WikidataGeoResolver.commonsFileUrl;
+    // hand-copied URLs had wrong hash directories for 12 of these 43 flags.
+    private val brazilStateFlagFiles = mapOf(
+        "BR-AC" to "Bandeira_do_Acre.svg",
+        "BR-AL" to "Bandeira_de_Alagoas.svg",
+        "BR-AP" to "Bandeira_do_Amapá.svg",
+        "BR-AM" to "Bandeira_do_Amazonas.svg",
+        "BR-BA" to "Bandeira_da_Bahia.svg",
+        "BR-CE" to "Bandeira_do_Ceará.svg",
+        "BR-DF" to "Bandeira_do_Distrito_Federal_(Brasil).svg",
+        "BR-ES" to "Bandeira_do_Espírito_Santo.svg",
+        "BR-GO" to "Flag_of_Goiás.svg",
+        "BR-MA" to "Bandeira_do_Maranhão.svg",
+        "BR-MT" to "Bandeira_de_Mato_Grosso.svg",
+        "BR-MS" to "Bandeira_de_Mato_Grosso_do_Sul.svg",
+        "BR-MG" to "Bandeira_de_Minas_Gerais.svg",
+        "BR-PA" to "Bandeira_do_Pará.svg",
+        "BR-PB" to "Bandeira_da_Paraíba.svg",
+        "BR-PR" to "Bandeira_do_Paraná.svg",
+        "BR-PE" to "Bandeira_de_Pernambuco.svg",
+        "BR-PI" to "Bandeira_do_Piauí.svg",
+        "BR-RJ" to "Bandeira_do_estado_do_Rio_de_Janeiro.svg",
+        "BR-RN" to "Bandeira_do_Rio_Grande_do_Norte.svg",
+        "BR-RS" to "Bandeira_do_Rio_Grande_do_Sul.svg",
+        "BR-RO" to "Bandeira_de_Rondônia.svg",
+        "BR-RR" to "Bandeira_de_Roraima.svg",
+        "BR-SC" to "Bandeira_de_Santa_Catarina.svg",
+        "BR-SP" to "Bandeira_do_estado_de_São_Paulo.svg",
+        "BR-SE" to "Bandeira_de_Sergipe.svg",
+        "BR-TO" to "Bandeira_do_Tocantins.svg"
     )
 
-    // Direct mapping for German Federal States to Wikimedia Commons canonical SVGs
-    private val germanyStateSvgUrls = mapOf(
-        "DE-BW" to "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Baden-W%C3%BCrttemberg.svg",
-        "DE-BY" to "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_Bavaria_%28lozengy%29.svg",
-        "DE-BE" to "https://upload.wikimedia.org/wikipedia/commons/e/ec/Flag_of_Berlin.svg",
-        "DE-BB" to "https://upload.wikimedia.org/wikipedia/commons/d/d4/Flag_of_Brandenburg.svg",
-        "DE-HB" to "https://upload.wikimedia.org/wikipedia/commons/0/07/Flag_of_Bremen.svg",
-        "DE-HH" to "https://upload.wikimedia.org/wikipedia/commons/7/74/Flag_of_Hamburg.svg",
-        "DE-HE" to "https://upload.wikimedia.org/wikipedia/commons/a/ad/Flag_of_Hesse.svg",
-        "DE-MV" to "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_Mecklenburg-Western_Pomerania.svg",
-        "DE-NI" to "https://upload.wikimedia.org/wikipedia/commons/7/74/Flag_of_Lower_Saxony.svg",
-        "DE-NW" to "https://upload.wikimedia.org/wikipedia/commons/c/c1/Flag_of_North_Rhine-Westphalia.svg",
-        "DE-RP" to "https://upload.wikimedia.org/wikipedia/commons/b/b6/Flag_of_Rhineland-Palatinate.svg",
-        "DE-SL" to "https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Saarland.svg",
-        "DE-SN" to "https://upload.wikimedia.org/wikipedia/commons/e/e9/Flag_of_Saxony.svg",
-        "DE-ST" to "https://upload.wikimedia.org/wikipedia/commons/b/b8/Flag_of_Saxony-Anhalt.svg",
-        "DE-SH" to "https://upload.wikimedia.org/wikipedia/commons/2/2b/Flag_of_Schleswig-Holstein.svg",
-        "DE-TH" to "https://upload.wikimedia.org/wikipedia/commons/8/87/Flag_of_Thuringia.svg"
+    private val germanyStateFlagFiles = mapOf(
+        "DE-BW" to "Flag_of_Baden-Württemberg.svg",
+        "DE-BY" to "Flag_of_Bavaria_(lozengy).svg",
+        "DE-BE" to "Flag_of_Berlin.svg",
+        "DE-BB" to "Flag_of_Brandenburg.svg",
+        "DE-HB" to "Flag_of_Bremen.svg",
+        "DE-HH" to "Flag_of_Hamburg.svg",
+        "DE-HE" to "Flag_of_Hesse.svg",
+        "DE-MV" to "Flag_of_Mecklenburg-Western_Pomerania.svg",
+        "DE-NI" to "Flag_of_Lower_Saxony.svg",
+        "DE-NW" to "Flag_of_North_Rhine-Westphalia.svg",
+        "DE-RP" to "Flag_of_Rhineland-Palatinate.svg",
+        "DE-SL" to "Flag_of_Saarland.svg",
+        "DE-SN" to "Flag_of_Saxony.svg",
+        "DE-ST" to "Flag_of_Saxony-Anhalt.svg",
+        "DE-SH" to "Flag_of_Schleswig-Holstein.svg",
+        "DE-TH" to "Flag_of_Thuringia.svg"
     )
 
     override fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
@@ -84,56 +84,41 @@ class WikimediaCommonsFlagProvider(
         val code = (geoLocation.alias ?: geoLocation.friendlyId).trim().uppercase(Locale.ROOT)
         val type = geoLocation.type
 
-        // 1. Check direct Brazilian state mapping (handles BR-SP, BR.SP, SP)
-        val brKey = normalizeSubdivisionKey("BR", code)
-        if (brKey != null && brazilStateSvgUrls.containsKey(brKey)) {
-            val svgUrl = brazilStateSvgUrls[brKey]!!
-            logger.info("WikimediaCommonsFlagProvider: Found direct SVG mapping for Brazilian state '$name' ($brKey): $svgUrl")
-            return downloadAndBuildResult(name, code, type, svgUrl)
+        // 1. Wikidata: official flag (P41) for any country or ISO 3166-2 subdivision.
+        val info = wikidata.resolve(geoLocation)
+        info?.flagSvgUrl?.let { url ->
+            download(name, code, type, url)?.let { return it }
         }
 
-        // 2. Check direct German state mapping (handles DE-BY, DE.BY, BY)
-        val deKey = normalizeSubdivisionKey("DE", code)
-        if (deKey != null && germanyStateSvgUrls.containsKey(deKey)) {
-            val svgUrl = germanyStateSvgUrls[deKey]!!
-            logger.info("WikimediaCommonsFlagProvider: Found direct SVG mapping for German state '$name' ($deKey): $svgUrl")
-            return downloadAndBuildResult(name, code, type, svgUrl)
+        // 2. Static tables (BR/DE states), used when Wikidata is unreachable or has no flag.
+        val staticFile = staticFlagFile(code)
+        if (staticFile != null && staticFile != info?.flagFileName?.replace(' ', '_')) {
+            download(name, code, type, WikidataGeoResolver.commonsFileUrl(staticFile))?.let { return it }
         }
 
-        // 3. Dynamic lookup via Wikipedia page summary thumbnail
-        val dynamicSvgUrl = findSvgFromWikipediaSummary(name, parentName)
-        if (dynamicSvgUrl != null) {
-            logger.info("WikimediaCommonsFlagProvider: Discovered Wikimedia SVG for '$name' via Wikipedia API: $dynamicSvgUrl")
-            return downloadAndBuildResult(name, code, type, dynamicSvgUrl)
-        }
-
-        return null
-    }
-
-    private fun normalizeSubdivisionKey(countryPrefix: String, code: String): String? {
-        if (code.startsWith("$countryPrefix-") || code.startsWith("$countryPrefix.")) {
-            return "$countryPrefix-" + code.substring(3).take(2)
-        }
-        if (code.length == 2 && code.all { it.isLetter() }) {
-            return "$countryPrefix-$code"
+        // 3. Flag-like SVG thumbnail of the Wikipedia article (exact titles from Wikidata first).
+        val titles = listOfNotNull(info?.enWikipediaTitle, name, parentName?.let { "$name ($it)" }).distinct()
+        for (title in titles) {
+            val svgUrl = findSvgFromWikipediaSummary(title) ?: continue
+            download(name, code, type, svgUrl)?.let { return it }
         }
         return null
     }
 
-    private fun downloadAndBuildResult(
-        name: String,
-        code: String,
-        type: GeoLocationType,
-        svgUrl: String
-    ): GeoLocationFlagResult? {
-        val bytes = downloadBytes(svgUrl) ?: return null
+    private fun staticFlagFile(code: String): String? {
+        val m = Regex("^(BR|DE)[.\\-]([A-Z]{2})$").matchEntire(code) ?: return null
+        val key = "${m.groupValues[1]}-${m.groupValues[2]}"
+        return brazilStateFlagFiles[key] ?: germanyStateFlagFiles[key]
+    }
+
+    private fun download(name: String, code: String, type: GeoLocationType, svgUrl: String): GeoLocationFlagResult? {
+        val bytes = http.getBytes(svgUrl) ?: return null
         val content = String(bytes, StandardCharsets.UTF_8)
         if (!content.contains("<svg", ignoreCase = true)) {
-            logger.warn("WikimediaCommonsFlagProvider: Downloaded payload from $svgUrl is not a valid SVG")
+            logger.warn("WikimediaCommonsFlagProvider: payload from $svgUrl is not an SVG")
             return null
         }
-
-        logger.info("WikimediaCommonsFlagProvider: Successfully retrieved SVG for '$name' (${bytes.size} bytes)")
+        logger.info("WikimediaCommonsFlagProvider: Retrieved SVG for '$name' (${bytes.size} bytes) from $svgUrl")
         return GeoLocationFlagResult(
             flagName = "Bandeira Oficial de $name",
             flagDescription = "Bandeira oficial de $name ($type - $code).",
@@ -145,53 +130,17 @@ class WikimediaCommonsFlagProvider(
         )
     }
 
-    private fun findSvgFromWikipediaSummary(name: String, parent: String?): String? {
-        val candidates = listOfNotNull(name, if (!parent.isNullOrBlank()) "$name ($parent)" else null)
-        for (cand in candidates) {
-            val encoded = URLEncoder.encode(cand.replace(" ", "_"), StandardCharsets.UTF_8)
-            val url = "https://en.wikipedia.org/api/rest_v1/page/summary/$encoded"
-            try {
-                val uri = URI.create(url)
-                val json = webClient.get()
-                    .uri(uri)
-                    .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
-                    .retrieve()
-                    .bodyToMono(String::class.java)
-                    .timeout(Duration.ofMillis(3000))
-                    .block() ?: continue
-
-                val node: JsonNode = objectMapper.readTree(json)
-                val thumbSrc = node.path("thumbnail").path("source").asText("")
-                if (thumbSrc.contains(".svg", ignoreCase = true)) {
-                    // Convert thumbnail URL to original SVG URL:
-                    // e.g. "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag.svg/500px-Flag.svg.png"
-                    // -> "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag.svg"
-                    val regex = """.*commons/thumb/([0-9a-f]/[0-9a-f]{2}/[^/]+\.svg)/.*""".toRegex(RegexOption.IGNORE_CASE)
-                    val match = regex.find(thumbSrc)
-                    if (match != null) {
-                        return "https://upload.wikimedia.org/wikipedia/commons/" + match.groupValues[1]
-                    }
-                }
-            } catch (e: Exception) {
-                // ignore and continue
-            }
-        }
-        return null
-    }
-
-    private fun downloadBytes(url: String): ByteArray? {
-        return try {
-            val uri = URI.create(url)
-            webClient.get()
-                .uri(uri)
-                .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
-                .retrieve()
-                .bodyToMono(ByteArray::class.java)
-                .timeout(Duration.ofMillis(4000))
-                .block()
-        } catch (e: Exception) {
-            logger.debug("WikimediaCommonsFlagProvider: Error downloading $url: ${e.message}")
-            null
-        }
+    private fun findSvgFromWikipediaSummary(title: String): String? {
+        val encoded = URLEncoder.encode(title.replace(" ", "_"), StandardCharsets.UTF_8)
+        val json = http.getString("https://en.wikipedia.org/api/rest_v1/page/summary/$encoded") ?: return null
+        val thumbSrc = runCatching { objectMapper.readTree(json).path("thumbnail").path("source").asText("") }.getOrDefault("")
+        if (!thumbSrc.contains(".svg", ignoreCase = true)) return null
+        // ".../commons/thumb/5/5c/Flag.svg/500px-Flag.svg.png" -> ".../commons/5/5c/Flag.svg"
+        val match = Regex(""".*commons/thumb/([0-9a-f]/[0-9a-f]{2}/[^/]+\.svg)/.*""", RegexOption.IGNORE_CASE).find(thumbSrc)
+            ?: return null
+        // Article thumbnails are often location maps or coats of arms, not flags.
+        val file = match.groupValues[1]
+        if (!Regex("flag|bandeira|flagge|drapeau|bandera", RegexOption.IGNORE_CASE).containsMatchIn(file)) return null
+        return "https://upload.wikimedia.org/wikipedia/commons/$file"
     }
 }

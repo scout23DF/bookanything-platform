@@ -4,19 +4,19 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationSummaryProvider
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http.ResilientHttpFetcher
+import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.wikidata.WikidataGeoResolver
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.time.Duration
 
 @Component
 @Order(10)
 class WikipediaSummaryProvider(
-    private val webClient: WebClient,
+    private val http: ResilientHttpFetcher,
+    private val wikidata: WikidataGeoResolver,
     private val objectMapper: ObjectMapper
 ) : IGeoLocationSummaryProvider {
 
@@ -29,29 +29,32 @@ class WikipediaSummaryProvider(
         val name = geoLocation.name.trim()
         val parent = parentName?.trim()
 
-        val candidateTitles = buildCandidateTitles(name, parent)
-
-        for (title in candidateTitles) {
-            val encodedTitle = URLEncoder.encode(title.replace(" ", "_"), StandardCharsets.UTF_8)
-            
-            // 1. Try Portuguese Wikipedia first
-            val ptSummary = fetchWikipediaExtract("pt", encodedTitle)
-            if (!ptSummary.isNullOrBlank()) {
-                logger.info("WikipediaSummaryProvider: Found PT extract for '$title' (${ptSummary.length} chars)")
-                return ptSummary.take(2000)
-            }
-
-            // 2. Try English Wikipedia
-            val enSummary = fetchWikipediaExtract("en", encodedTitle)
-            if (!enSummary.isNullOrBlank()) {
-                logger.info("WikipediaSummaryProvider: Found EN extract for '$title' (${enSummary.length} chars)")
-                return enSummary.take(2000)
+        // 1. Exact article titles from Wikidata sitelinks: one request per language, no guessing.
+        wikidata.resolve(geoLocation)?.let { info ->
+            for ((lang, title) in listOf("pt" to info.ptWikipediaTitle, "en" to info.enWikipediaTitle)) {
+                if (title.isNullOrBlank()) continue
+                fetchWikipediaExtract(lang, encode(title))?.let {
+                    logger.info("WikipediaSummaryProvider: Found $lang extract for '$title' via Wikidata ${info.qid} (${it.length} chars)")
+                    return it.take(2000)
+                }
             }
         }
 
+        // 2. Title heuristics, capped: each miss is an HTTP round trip.
+        val candidateTitles = buildCandidateTitles(name, parent).take(MAX_HEURISTIC_TITLES)
+        for (title in candidateTitles) {
+            for (lang in listOf("pt", "en")) {
+                fetchWikipediaExtract(lang, encode(title))?.let {
+                    logger.info("WikipediaSummaryProvider: Found $lang extract for '$title' (${it.length} chars)")
+                    return it.take(2000)
+                }
+            }
+        }
         logger.debug("WikipediaSummaryProvider: No extract found across candidates $candidateTitles")
         return null
     }
+
+    private fun encode(title: String): String = URLEncoder.encode(title.replace(" ", "_"), StandardCharsets.UTF_8)
 
     private fun buildCandidateTitles(name: String, parent: String?): List<String> {
         val titles = mutableListOf<String>()
@@ -95,28 +98,18 @@ class WikipediaSummaryProvider(
     }
 
     private fun fetchWikipediaExtract(lang: String, encodedTitle: String): String? {
-        val url = "https://$lang.wikipedia.org/api/rest_v1/page/summary/$encodedTitle"
+        val json = http.getString("https://$lang.wikipedia.org/api/rest_v1/page/summary/$encodedTitle") ?: return null
         return try {
-            val uri = URI.create(url)
-            val json = webClient.get()
-                .uri(uri)
-                .header("User-Agent", "BookAnythingApp/1.0 (dev@darueira.org)")
-                .retrieve()
-                .bodyToMono(String::class.java)
-                .timeout(Duration.ofMillis(3500))
-                .block()
-
-            if (json != null) {
-                val node: JsonNode = objectMapper.readTree(json)
-                val type = node.path("type").asText()
-                if (type == "disambiguation") {
-                    return null
-                }
-                val extract = node.path("extract").asText(null)
-                if (!extract.isNullOrBlank()) extract else null
-            } else null
+            val node: JsonNode = objectMapper.readTree(json)
+            if (node.path("type").asText() == "disambiguation") return null
+            node.path("extract").asText(null)?.takeIf { it.isNotBlank() }
         } catch (e: Exception) {
+            logger.warn("WikipediaSummaryProvider: unreadable summary payload for $lang:$encodedTitle: ${e.message}")
             null
         }
+    }
+
+    companion object {
+        private const val MAX_HEURISTIC_TITLES = 4
     }
 }
