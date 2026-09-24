@@ -50,11 +50,6 @@ class TemporalConfig(
         return WorkflowClient.newInstance(workflowServiceStubs, options)
     }
 
-    @Bean
-    fun workerFactory(workflowClient: WorkflowClient): WorkerFactory {
-        return WorkerFactory.newInstance(workflowClient)
-    }
-
     /**
      * Starts the Temporal worker, retrying in the background until the server is reachable.
      *
@@ -62,26 +57,24 @@ class TemporalConfig(
      * only logged a warning and the app ran on with no worker polling the task queue, so
      * workflows were accepted but never executed ("No Workers Running" in the Temporal UI).
      *
-     * Retrying the same WorkerFactory is safe: in SDK 1.30.x, WorkerFactory.start() checks
-     * server reachability (getServerCapabilities) before any state change, so a failed start
-     * leaves it in its initial state. Workers must be registered exactly once, hence outside
-     * the retry loop.
+     * Each attempt builds a fresh WorkerFactory. Retrying start() on the same factory is NOT
+     * safe in SDK 1.30.x: after a failed start (server UNAVAILABLE) the factory is left marked
+     * as started, so the next start() returns immediately without launching any pollers. The
+     * app then logs "successfully started" while the task queue has no pollers at all.
      */
     @Bean
     fun temporalWorkerManager(
-        workerFactory: WorkerFactory,
+        workflowClient: WorkflowClient,
         geoLocationIngestionActivities: GeoLocationIngestionActivities
     ): SmartLifecycle {
         return object : SmartLifecycle {
             @Volatile
             private var running = false
+            @Volatile
+            private var workerFactory: WorkerFactory? = null
             private var retryExecutor: ScheduledExecutorService? = null
 
             override fun start() {
-                val worker = workerFactory.newWorker(taskQueue)
-                worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
-                worker.registerActivitiesImplementations(geoLocationIngestionActivities)
-
                 retryExecutor = Executors.newSingleThreadScheduledExecutor { runnable ->
                     Thread(runnable, "temporal-worker-starter").apply { isDaemon = true }
                 }
@@ -93,14 +86,25 @@ class TemporalConfig(
                 retryExecutor?.schedule({ tryStart(attempt, delaySeconds) }, delaySeconds, TimeUnit.SECONDS)
             }
 
+            private fun newWorkerFactory(): WorkerFactory {
+                val factory = WorkerFactory.newInstance(workflowClient)
+                val worker = factory.newWorker(taskQueue)
+                worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
+                worker.registerActivitiesImplementations(geoLocationIngestionActivities)
+                return factory
+            }
+
             private fun tryStart(attempt: Int, previousDelaySeconds: Long) {
                 if (!running) return
+                val factory = newWorkerFactory()
                 try {
                     logger.info("Starting Temporal Worker on Task Queue: '$taskQueue' for namespace: '$namespace' (attempt $attempt)...")
-                    workerFactory.start()
+                    factory.start()
+                    workerFactory = factory
                     logger.info("Temporal Worker successfully started and listening on '$taskQueue'!")
                     retryExecutor?.shutdown()
                 } catch (e: Exception) {
+                    factory.shutdownNow()
                     val nextDelay = if (previousDelaySeconds == 0L) initialBackoffSeconds
                                     else minOf(previousDelaySeconds * 2, maxBackoffSeconds)
                     logger.warn("Could not start Temporal Worker at $serviceAddress (attempt $attempt): ${e.message}. Retrying in ${nextDelay}s")
@@ -112,7 +116,7 @@ class TemporalConfig(
                 logger.info("Stopping Temporal Worker...")
                 running = false
                 retryExecutor?.shutdownNow()
-                workerFactory.shutdown()
+                workerFactory?.shutdown()
             }
 
             override fun isRunning(): Boolean = running
