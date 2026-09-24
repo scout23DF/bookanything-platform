@@ -18,6 +18,7 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.temporal.activity.Activity
+import io.temporal.client.ActivityCompletionException
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -33,6 +34,7 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @Component
 class GeoLocationIngestionActivitiesImpl(
@@ -136,10 +138,14 @@ class GeoLocationIngestionActivitiesImpl(
             kafkaTemplate.flush()
             logger.info("Temporal Activity: Published NiFi trigger to $nifiImportRequestedTopic for ${item.countrySlug} level ${item.locationLevel}")
 
-            // Wait up to configured timeout (default 25 minutes) for NiFi to process and publish response
-            val summary = future.get(nifiImportTimeoutMinutes, TimeUnit.MINUTES)
+            // Wait up to configured timeout (default 25 minutes) for NiFi to process and publish
+            // response, heartbeating so Temporal can detect a lost task or dead worker early.
+            val summary = awaitWithHeartbeat(future, nifiImportTimeoutMinutes)
             logger.info("Temporal Activity: Ingestion finished for ${item.countrySlug} (Created=${summary.createdCount}, Updated=${summary.updatedCount}, Duration=${summary.durationMs}ms)")
             return summary
+        } catch (e: ActivityCompletionException) {
+            // Cancelled or timed out on the Temporal side: let the SDK handle it.
+            throw e
         } catch (e: Exception) {
             logger.error("Temporal Activity: Timeout or failure awaiting NiFi ingestion for ${item.countrySlug} (level ${item.locationLevel})", e)
             return CountryImportSummaryDto(
@@ -154,6 +160,21 @@ class GeoLocationIngestionActivitiesImpl(
             )
         } finally {
             pendingReplies.remove(correlationKey)
+        }
+    }
+
+    private fun <T> awaitWithHeartbeat(future: CompletableFuture<T>, timeoutMinutes: Long): T {
+        val context = try { Activity.getExecutionContext() } catch (e: IllegalStateException) { null }
+            ?: return future.get(timeoutMinutes, TimeUnit.MINUTES)
+        val deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(timeoutMinutes)
+        while (true) {
+            val remaining = deadline - System.nanoTime()
+            if (remaining <= 0) throw TimeoutException("No NiFi reply within $timeoutMinutes minutes")
+            try {
+                return future.get(minOf(remaining, TimeUnit.SECONDS.toNanos(15)), TimeUnit.NANOSECONDS)
+            } catch (e: TimeoutException) {
+                context.heartbeat<Any?>(null)
+            }
         }
     }
 
