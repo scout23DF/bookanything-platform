@@ -18,14 +18,35 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
         .setMaximumAttempts(3)
         .build()
 
-    private val activityOptions = ActivityOptions.newBuilder()
-        .setStartToCloseTimeout(Duration.ofMinutes(30))
-        .setRetryOptions(retryOptions)
-        .build()
+    // Per-activity timeouts. A single 30-minute StartToClose for everything meant that an
+    // activity task lost in dispatch (Temporal logs "Activity task already started") stalled
+    // the workflow for 30 minutes, even for activities that finish in milliseconds.
+    private fun options(startToClose: Duration, heartbeat: Duration? = null): ActivityOptions =
+        ActivityOptions.newBuilder()
+            .setStartToCloseTimeout(startToClose)
+            .apply { if (heartbeat != null) setHeartbeatTimeout(heartbeat) }
+            .setRetryOptions(retryOptions)
+            .build()
 
-    private val activities = Workflow.newActivityStub(
+    /** In-process work only (config, Kafka publish). */
+    private val quickActivities = Workflow.newActivityStub(
         GeoLocationIngestionActivities::class.java,
-        activityOptions
+        options(Duration.ofMinutes(1))
+    )
+
+    /** JSReport rendering + MinIO upload. */
+    private val reportActivities = Workflow.newActivityStub(
+        GeoLocationIngestionActivities::class.java,
+        options(Duration.ofMinutes(5))
+    )
+
+    /**
+     * Waits for NiFi (up to 25 min by default). The activity heartbeats while waiting, so a
+     * lost task or a dead worker is detected after [heartbeat] instead of the full 30 minutes.
+     */
+    private val nifiActivities = Workflow.newActivityStub(
+        GeoLocationIngestionActivities::class.java,
+        options(Duration.ofMinutes(30), heartbeat = Duration.ofMinutes(1))
     )
 
     private var progress = ImportProgressDto(
@@ -51,7 +72,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
         )
 
         val mechanism = request.mapSvgGeneratorMechanism ?: "KOTLIN"
-        activities.configureMapSvgGeneratorMechanism(mechanism)
+        quickActivities.configureMapSvgGeneratorMechanism(mechanism)
 
         val summaries = mutableListOf<CountryImportSummaryDto>()
 
@@ -68,7 +89,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
                 details = "Processing $countryCode (level $level) via NiFi [${index + 1}/$totalItems]"
             )
 
-            val summary = activities.processCountryLocationViaNiFi(item)
+            val summary = nifiActivities.processCountryLocationViaNiFi(item)
             summaries.add(summary)
         }
 
@@ -81,7 +102,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
             details = "Generating executive PDF summary report via JSReport"
         )
 
-        val reportPdfUrl = activities.generateJsReportSummaryPdf(workflowId, summaries)
+        val reportPdfUrl = reportActivities.generateJsReportSummaryPdf(workflowId, summaries)
 
         val totalCreated = summaries.sumOf { it.createdCount }
         val totalUpdated = summaries.sumOf { it.updatedCount }
@@ -104,7 +125,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
             details = "Publishing batch import completion event to Kafka"
         )
 
-        activities.publishBatchImportCompletedEvent(finalResult)
+        quickActivities.publishBatchImportCompletedEvent(finalResult)
 
         progress = ImportProgressDto(
             currentStage = "COMPLETED",
