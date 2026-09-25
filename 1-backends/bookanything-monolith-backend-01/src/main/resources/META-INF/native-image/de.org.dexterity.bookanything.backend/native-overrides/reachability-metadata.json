@@ -1,0 +1,62 @@
+{
+  "comment": [
+    "Hand-written native-image metadata. Kept outside the <group>/<artifact> directory because",
+    "Spring AOT generates its own reachability-metadata.json there and overwrites it in target/classes.",
+    "Temporal wraps its service stubs in JDK proxies (WorkflowThreadMarker.protectFromWorkflowThread);",
+    "temporal-serviceclient only registers the WorkflowClient proxy.",
+    "shutdown/shutdownNow: Spring calls them reflectively as the inferred destroy method."
+  ],
+  "reflection": [
+    {
+      "type": {
+        "proxy": [
+          "io.temporal.serviceclient.WorkflowServiceStubs"
+        ]
+      },
+      "methods": [
+        {
+          "name": "shutdown",
+          "parameterTypes": []
+        },
+        {
+          "name": "shutdownNow",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": {
+        "proxy": [
+          "io.temporal.serviceclient.OperatorServiceStubs"
+        ]
+      },
+      "methods": [
+        {
+          "name": "shutdown",
+          "parameterTypes": []
+        },
+        {
+          "name": "shutdownNow",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": {
+        "proxy": [
+          "io.temporal.serviceclient.CloudServiceStubs"
+        ]
+      },
+      "methods": [
+        {
+          "name": "shutdown",
+          "parameterTypes": []
+        },
+        {
+          "name": "shutdownNow",
+          "parameterTypes": []
+        }
+      ]
+    }
+  ]
+}

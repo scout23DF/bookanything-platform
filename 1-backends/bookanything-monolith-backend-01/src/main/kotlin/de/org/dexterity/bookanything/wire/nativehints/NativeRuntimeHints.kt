@@ -1,11 +1,18 @@
 package de.org.dexterity.bookanything.wire.nativehints
 
+import io.temporal.activity.ActivityInterface
+import io.temporal.workflow.WorkflowInterface
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 
 class NativeRuntimeHints : RuntimeHintsRegistrar {
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
+        registerApplicationTypes(hints, classLoader ?: javaClass.classLoader)
+
         val reflectionClasses = listOf(
             "org.hibernate.spatial.HSMessageLogger_\$logger",
             "org.hibernate.spatial.HSMessageLogger",
@@ -133,5 +140,66 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         } catch (_: Exception) {
             // Ignore if bundle registration format differs
         }
+    }
+
+    /**
+     * Spring AOT only registers reflection for types it can see in bean signatures (e.g.
+     * controller DTOs). Types that are (de)serialized elsewhere -- Kafka payloads, NiFi and
+     * Temporal messages, Wikidata/JSReport responses read with ObjectMapper -- and the
+     * Temporal workflow/activity stubs (JDK proxies built at run time) would fail only in the
+     * native image. Scan the application's own classes at build time instead of keeping a
+     * hand-written list that silently goes stale:
+     *  - Kotlin data classes, enums and records -> Jackson binding hints;
+     *  - @WorkflowInterface / @ActivityInterface -> JDK proxy + method reflection;
+     *  - their implementations -> constructor/method reflection (Temporal inspects them).
+     */
+    private fun registerApplicationTypes(hints: RuntimeHints, classLoader: ClassLoader) {
+        val scanner = object : ClassPathScanningCandidateComponentProvider(false) {
+            // Include interfaces and abstract types too; filtering happens below.
+            override fun isCandidateComponent(beanDefinition: AnnotatedBeanDefinition) = true
+        }.apply {
+            setResourceLoader(org.springframework.core.io.DefaultResourceLoader(classLoader))
+            addIncludeFilter { _, _ -> true }
+        }
+        val binding = BindingReflectionHintsRegistrar()
+        val temporalInterfaces = mutableListOf<Class<*>>()
+        val types = scanner.findCandidateComponents(APP_PACKAGE).mapNotNull { bd ->
+            try {
+                Class.forName(bd.beanClassName, false, classLoader)
+            } catch (_: Throwable) {
+                null
+            }
+        }
+
+        for (clazz in types) {
+            if (clazz.isAnnotationPresent(WorkflowInterface::class.java) || clazz.isAnnotationPresent(ActivityInterface::class.java)) {
+                temporalInterfaces += clazz
+                hints.proxies().registerJdkProxy(clazz)
+                hints.reflection().registerType(clazz, MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
+            } else if (clazz.isEnum || clazz.isRecord || isKotlinDataClass(clazz)) {
+                binding.registerReflectionHints(hints.reflection(), clazz)
+            }
+        }
+        for (clazz in types) {
+            if (!clazz.isInterface && temporalInterfaces.any { it.isAssignableFrom(clazz) }) {
+                hints.reflection().registerType(
+                    clazz,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_PUBLIC_METHODS,
+                    MemberCategory.INVOKE_DECLARED_METHODS
+                )
+            }
+        }
+    }
+
+    private fun isKotlinDataClass(clazz: Class<*>): Boolean =
+        try {
+            clazz.getAnnotation(Metadata::class.java) != null && clazz.kotlin.isData
+        } catch (_: Throwable) {
+            false
+        }
+
+    private companion object {
+        const val APP_PACKAGE = "de.org.dexterity.bookanything"
     }
 }

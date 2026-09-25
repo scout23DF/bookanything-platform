@@ -1,14 +1,29 @@
 {
   "resources": {
     "includes": [
-      { "pattern": "org/postgresql/driverconfig.properties" },
-      { "pattern": "org/hibernate/spatial/.*" },
-      { "pattern": "org/locationtech/jts/.*" },
-      { "pattern": "net/postgis/.*" }
+      {
+        "pattern": "org/postgresql/driverconfig.properties"
+      },
+      {
+        "pattern": "org/hibernate/spatial/.*"
+      },
+      {
+        "pattern": "org/locationtech/jts/.*"
+      },
+      {
+        "pattern": "net/postgis/.*"
+      },
+      {
+        "pattern": "spatial_ref_sys\\.txt"
+      }
     ]
   },
   "bundles": [
-    { "name": "org.hibernate.spatial.HSMessageLogger" },
-    { "name": "org.hibernate.spatial.HSMessageLogger.i18n" }
+    {
+      "name": "org.hibernate.spatial.HSMessageLogger"
+    },
+    {
+      "name": "org.hibernate.spatial.HSMessageLogger.i18n"
+    }
   ]
 }

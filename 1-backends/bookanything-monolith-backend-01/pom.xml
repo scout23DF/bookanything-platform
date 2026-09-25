@@ -529,4 +529,48 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Adds to the "native" profile of spring-boot-starter-parent (mvn -Pnative native:compile). -->
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <configuration>
+                            <buildArgs>
+                                <!--
+                                  temporal-serviceclient 1.30.x ships a native-image.properties written for
+                                  SLF4J 1.x: it forces org.slf4j.LoggerFactory to initialize at build time,
+                                  which with SLF4J 2.x bakes the half-initialized SubstituteServiceProvider
+                                  into the image heap and fails the build. Exclude that file and re-declare
+                                  its remaining arguments (its *-config.json files are still discovered).
+                                -->
+                                <buildArg>--exclude-config</buildArg>
+                                <buildArg>.*temporal-serviceclient-.*\.jar</buildArg>
+                                <buildArg>META-INF/native-image/io/temporal/temporal-serviceclient/native-image\.properties</buildArg>
+                                <!--
+                                  grpc-netty-shaded marks its whole shaded Netty for build-time init, so Netty
+                                  classes create their static loggers during the build and Logback Logger
+                                  instances end up in the image heap. Initialize the shaded Netty at run time
+                                  instead (this also covers the run-time packages Temporal listed).
+                                -->
+                                <buildArg>--initialize-at-run-time=io.grpc.netty.shaded.io.netty</buildArg>
+                                <!-- The metadata files the excluded Temporal properties file used to register. -->
+                                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                                <buildArg>-H:DynamicProxyConfigurationResources=META-INF/native-image/io/temporal/temporal-serviceclient/proxy-config.json</buildArg>
+                                <buildArg>-H:JNIConfigurationResources=META-INF/native-image/io/temporal/temporal-serviceclient/jni-config.json</buildArg>
+                                <buildArg>-H:ReflectionConfigurationResources=META-INF/native-image/io/temporal/temporal-serviceclient/reflect-config.json</buildArg>
+                                <buildArg>-H:ResourceConfigurationResources=META-INF/native-image/io/temporal/temporal-serviceclient/resource-config.json</buildArg>
+                                <buildArg>-H:SerializationConfigurationResources=META-INF/native-image/io/temporal/temporal-serviceclient/serialization-config.json</buildArg>
+                                <buildArg>-H:-UnlockExperimentalVMOptions</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
