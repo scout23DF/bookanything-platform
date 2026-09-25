@@ -339,5 +339,47 @@
   {
     "name": "org.geolatte.geom.codec.WktEncoder",
     "allDeclaredConstructors": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.Epoll",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollChannelOption",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollSocketChannel",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollServerSocketChannel",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "io.grpc.netty.shaded.io.netty.channel.epoll.EpollDomainSocketChannel",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
   }
 ]
