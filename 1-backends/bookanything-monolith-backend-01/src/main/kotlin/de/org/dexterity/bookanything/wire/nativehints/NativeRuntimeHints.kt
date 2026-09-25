@@ -6,12 +6,14 @@ import org.springframework.aot.hint.BindingReflectionHintsRegistrar
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
+import org.springframework.aot.hint.TypeReference
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 
 class NativeRuntimeHints : RuntimeHintsRegistrar {
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
         registerApplicationTypes(hints, classLoader ?: javaClass.classLoader)
+        registerTemporalErrorDetails(hints, classLoader ?: javaClass.classLoader)
 
         val reflectionClasses = listOf(
             "org.hibernate.spatial.HSMessageLogger_\$logger",
@@ -174,7 +176,12 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         for (clazz in types) {
             if (clazz.isAnnotationPresent(WorkflowInterface::class.java) || clazz.isAnnotationPresent(ActivityInterface::class.java)) {
                 temporalInterfaces += clazz
+                // A JDK proxy must be registered with its exact interface list. Temporal builds
+                // activity stubs as [interface, AsyncMarker] and workflow stubs as
+                // [interface, StubMarker] (client, child and external workflow stubs).
                 hints.proxies().registerJdkProxy(clazz)
+                hints.proxies().registerJdkProxy(TypeReference.of(clazz), TypeReference.of(TEMPORAL_STUB_MARKER))
+                hints.proxies().registerJdkProxy(TypeReference.of(clazz), TypeReference.of(TEMPORAL_ASYNC_MARKER))
                 hints.reflection().registerType(clazz, MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
             } else if (clazz.isEnum || clazz.isRecord || isKotlinDataClass(clazz)) {
                 binding.registerReflectionHints(hints.reflection(), clazz)
@@ -192,6 +199,29 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         }
     }
 
+    /**
+     * Temporal unpacks gRPC error details (google.protobuf.Any) into the messages of
+     * io.temporal.api.errordetails.v1, and protobuf looks up each message's
+     * getDefaultInstance() by reflection ("Failed to get default instance for class
+     * ...QueryFailedFailure" otherwise).
+     */
+    private fun registerTemporalErrorDetails(hints: RuntimeHints, classLoader: ClassLoader) {
+        val scanner = object : ClassPathScanningCandidateComponentProvider(false) {
+            override fun isCandidateComponent(beanDefinition: AnnotatedBeanDefinition) = true
+        }.apply {
+            setResourceLoader(org.springframework.core.io.DefaultResourceLoader(classLoader))
+            addIncludeFilter { _, _ -> true }
+        }
+        scanner.findCandidateComponents(TEMPORAL_ERROR_DETAILS_PACKAGE).forEach { bd ->
+            try {
+                val clazz = Class.forName(bd.beanClassName, false, classLoader)
+                hints.reflection().registerType(clazz, MemberCategory.INVOKE_PUBLIC_METHODS)
+            } catch (_: Throwable) {
+                // Not on the classpath or not loadable at build time: skip
+            }
+        }
+    }
+
     private fun isKotlinDataClass(clazz: Class<*>): Boolean =
         try {
             clazz.getAnnotation(Metadata::class.java) != null && clazz.kotlin.isData
@@ -201,5 +231,8 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
 
     private companion object {
         const val APP_PACKAGE = "de.org.dexterity.bookanything"
+        const val TEMPORAL_STUB_MARKER = "io.temporal.internal.sync.StubMarker"
+        const val TEMPORAL_ASYNC_MARKER = "io.temporal.internal.sync.AsyncInternal\$AsyncMarker"
+        const val TEMPORAL_ERROR_DETAILS_PACKAGE = "io.temporal.api.errordetails.v1"
     }
 }
