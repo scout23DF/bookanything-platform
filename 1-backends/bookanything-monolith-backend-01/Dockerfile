@@ -1,24 +1,42 @@
 # ==============================================================================
-# Build Stage - Spring Boot 3.5 Kotlin Maven Multi-Stage Builder (Java 21)
+# Build Stage - GraalVM 25 Native Image Multi-Stage Builder (Spring Boot 4 / Kotlin 2.4)
+#
+# This is the image the Tekton pipeline builds (task-kaniko-build uses ./Dockerfile).
+# Based on Dockerfile-native; the previous JVM image is kept as Dockerfile.jvm.
 # ==============================================================================
-FROM maven:3.9-eclipse-temurin-25 AS builder
+# GraalVM CE, pinned to the JDK 25 line (same distribution as the local sdkman build).
+FROM ghcr.io/graalvm/native-image-community:25 AS builder
+
+# Inject Maven 3.9 from official image
+COPY --from=maven:3.9-eclipse-temurin-25 /usr/share/maven /usr/share/maven
+ENV MAVEN_HOME=/usr/share/maven
+ENV PATH="/usr/share/maven/bin:${PATH}"
 
 WORKDIR /app
 
-# Copy pom.xml and cache dependencies
+# 1. Dependency caching layer
 COPY pom.xml .
-RUN mvn dependency:go-offline -B || true
+RUN mvn dependency:go-offline -B -Pnative || true
 
-# Copy source code and build runnable fat jar
+# 2. Source compilation & GraalVM Native Image generation.
+# Spring AOT fixes the bean graph at build time (profile-specific beans and
+# @ConditionalOnProperty auto-configurations included), so it must run with the
+# same profile the Pod uses at runtime.
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN mvn -Pnative native:compile -DskipTests -B \
+      "-Dspring-boot.aot.jvmArguments=-Dspring.profiles.active=darueira-k8s"
 
 # ==============================================================================
-# Runtime Stage (Non-root, Minimal Temurin 25 JRE)
+# Runtime Stage (Non-root Minimal Debian Slim)
 # ==============================================================================
-FROM eclipse-temurin:25-jre
+FROM debian:bookworm-slim
 
 WORKDIR /app
+
+# Install runtime dependencies (glibc, zlib, CA certificates)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates libc6 zlib1g && \
+    rm -rf /var/lib/apt/lists/*
 
 # Run as unprivileged UID 10001 (PSS Restricted Compliance)
 RUN groupadd -g 10001 darueira && \
@@ -28,11 +46,11 @@ RUN groupadd -g 10001 darueira && \
 
 USER 10001:10001
 
-COPY --from=builder --chown=10001:10001 /app/target/bookanything-monolith-backend-01-*.jar /app/app.jar
+# Copy the native image binary from the builder stage
+COPY --from=builder --chown=10001:10001 /app/target/bookanything-monolith-backend-01 /app/bookanything-monolith-backend-01
 
 EXPOSE 8060
 
-ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
 ENV SPRING_PROFILES_ACTIVE="darueira-k8s"
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar /app/app.jar"]
+ENTRYPOINT ["/app/bookanything-monolith-backend-01"]

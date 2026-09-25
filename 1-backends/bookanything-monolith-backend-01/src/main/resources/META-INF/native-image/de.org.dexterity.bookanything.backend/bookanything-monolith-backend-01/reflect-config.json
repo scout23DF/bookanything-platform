@@ -231,5 +231,113 @@
     "allPublicMethods": true,
     "allDeclaredFields": true,
     "allPublicFields": true
+  },
+  {
+    "name": "net.postgis.jdbc.DriverWrapper$TypesAdder80",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.CrsWktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Db2WktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Db2WktEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.HANAWkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.HANAWkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.HANAWktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.HANAWktEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.MySqlWkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.MySqlWkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWkbV2Encoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWktEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa110WkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa110WkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa110WktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa110WktEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa121WkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa121WkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa121WktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.Sfa121WktEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.WkbDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.WkbEncoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.WktDecoder",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.geolatte.geom.codec.WktEncoder",
+    "allDeclaredConstructors": true
   }
 ]
