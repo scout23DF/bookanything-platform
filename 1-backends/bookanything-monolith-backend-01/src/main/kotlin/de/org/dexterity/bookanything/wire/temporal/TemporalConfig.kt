@@ -2,6 +2,8 @@ package de.org.dexterity.bookanything.wire.temporal
 
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsActivities
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsWorkflowImpl
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationCleanupActivities
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationCleanupWorkflowImpl
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionWorkflowImpl
 import io.temporal.client.WorkflowClient
@@ -75,7 +77,8 @@ class TemporalConfig(
     fun temporalWorkerManager(
         workflowClient: WorkflowClient,
         geoLocationIngestionActivities: GeoLocationIngestionActivities,
-        geoLocationArtifactsActivities: GeoLocationArtifactsActivities
+        geoLocationArtifactsActivities: GeoLocationArtifactsActivities,
+        geoLocationCleanupActivities: GeoLocationCleanupActivities
     ): SmartLifecycle {
         return object : SmartLifecycle {
             @Volatile
@@ -99,8 +102,11 @@ class TemporalConfig(
             private fun newWorkerFactory(): WorkerFactory {
                 val factory = WorkerFactory.newInstance(workflowClient)
                 val worker = factory.newWorker(taskQueue)
-                worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
-                worker.registerActivitiesImplementations(geoLocationIngestionActivities)
+                worker.registerWorkflowImplementationTypes(
+                    GeoLocationIngestionWorkflowImpl::class.java,
+                    GeoLocationCleanupWorkflowImpl::class.java
+                )
+                worker.registerActivitiesImplementations(geoLocationIngestionActivities, geoLocationCleanupActivities)
 
                 // Per-GeoLocation artifacts: own queue, and at most N steps executing at the same time.
                 val artifactsWorker = factory.newWorker(
