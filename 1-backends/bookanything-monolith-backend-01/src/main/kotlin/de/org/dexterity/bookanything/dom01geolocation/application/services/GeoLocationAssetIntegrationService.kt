@@ -227,6 +227,18 @@ class GeoLocationAssetIntegrationService(
         return flagAsset
     }
 
+    /**
+     * Re-reads the content of a stored asset (SVG, flag or PDF). The artifacts workflow steps exchange asset
+     * ids instead of content (Temporal payloads are limited to 2 MB), so a later step loads what it needs here.
+     */
+    suspend fun readAssetBytes(assetId: Long): ByteArray {
+        val asset = assetRepository.findById(assetId)
+            .orElseThrow { IllegalStateException("Asset #$assetId not found") }
+        return storageProvider.readBytes(asset.bucket.name, asset.storageKey)
+    }
+
+    suspend fun readAssetText(assetId: Long): String = String(readAssetBytes(assetId), Charsets.UTF_8)
+
     private fun saveOrUpdateAsset(
         bucket: BucketModel,
         fileName: String,

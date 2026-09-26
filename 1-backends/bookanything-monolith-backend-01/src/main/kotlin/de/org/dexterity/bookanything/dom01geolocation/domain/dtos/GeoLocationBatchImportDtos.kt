@@ -78,6 +78,7 @@ data class GeoLocationBatchImportResult(
     val totalUpdated: Int = 0,
     val reportPdfUrl: String? = null,
     val countrySummaries: List<CountryImportSummaryDto> = emptyList(),
+    val artifactsSummaries: List<ArtifactsBatchSummary> = emptyList(),
     val status: String = "COMPLETED"
 )
 

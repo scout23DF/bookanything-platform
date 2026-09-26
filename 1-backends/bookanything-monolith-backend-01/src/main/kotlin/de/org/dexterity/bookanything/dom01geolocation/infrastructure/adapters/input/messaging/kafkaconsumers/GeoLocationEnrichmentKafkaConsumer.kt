@@ -1,7 +1,7 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.messaging.kafkaconsumers
 
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GetGeoLocationBoundaryViaAIService
-import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsLauncher
 import de.org.dexterity.bookanything.dom01geolocation.domain.events.GeoLocationEnrichmentEvent
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationId
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
@@ -30,7 +30,7 @@ class GeoLocationEnrichmentKafkaConsumer(
     private val cityRepository: ICityRepositoryPort,
     private val districtRepository: IDistrictRepositoryPort,
     private val aiService: GetGeoLocationBoundaryViaAIService,
-    @Lazy private val activities: GeoLocationIngestionActivities,
+    @Lazy private val artifactsLauncher: GeoLocationArtifactsLauncher,
     @Value("\${application.domain-settings.geolocation.update-boundary-via-ia.feature-enabled:false}")
     private val shouldUpdateBoundaryViaIA: Boolean = false
 ) {
@@ -84,10 +84,12 @@ class GeoLocationEnrichmentKafkaConsumer(
             }
 
             try {
-                logger.info("Kafka Consumer: Triggering SVG artifacts and JSReport generation for GeoLocation #${request.id}...")
-                activities.generateGeoLocationArtifactsAndReport(request.id)
+                // Asynchronous: the per-GeoLocation Temporal workflow does the work (ADR-0014). An id that is
+                // already running, or that just finished for this same import, is not started again.
+                val started = artifactsLauncher.start(request.id)
+                logger.info("Kafka Consumer: Artifacts workflow for GeoLocation #${request.id} ${if (started) "started" else "already running or just finished"}.")
             } catch (e: Exception) {
-                logger.warn("Kafka Consumer: Automatic artifact/report generation for GeoLocation #${request.id} finished with notice: ${e.message}")
+                logger.warn("Kafka Consumer: Could not start the artifacts workflow for GeoLocation #${request.id}: ${e.message}")
             }
         }
     }

@@ -240,6 +240,15 @@ temporal:
     service-address: "${TEMPORAL_SERVICE_ADDRESS:10.152.183.189:7233}"
     namespace: "${TEMPORAL_NAMESPACE:corporate-core}"
     task-queue: "${TEMPORAL_TASK_QUEUE:GEOLOCATION_INGESTION_TASK_QUEUE}"
+    # Per-GeoLocation artifacts workflows (ADR-0014)
+    artifacts:
+        task-queue: "${TEMPORAL_ARTIFACTS_TASK_QUEUE:GEOLOCATION_ARTIFACTS_TASK_QUEUE}"
+        # Artifact steps executing at the same time per worker (per Pod)
+        max-concurrent-activities: ${TEMPORAL_ARTIFACTS_MAX_CONCURRENT_ACTIVITIES:4}
+        # A run that closed less than this ago is not started again by the enrichment consumer
+        dedupe-window-seconds: ${TEMPORAL_ARTIFACTS_DEDUPE_WINDOW_SECONDS:300}
+        # Longest wait for one item in the import workflow's ARTIFACTS stage
+        await-timeout-minutes: ${TEMPORAL_ARTIFACTS_AWAIT_TIMEOUT_MINUTES:30}
 
 nifi:
     base-url: "${NIFI_BASE_URL:https://nifi.darueira-corpshared.127.0.0.1.nip.io}"

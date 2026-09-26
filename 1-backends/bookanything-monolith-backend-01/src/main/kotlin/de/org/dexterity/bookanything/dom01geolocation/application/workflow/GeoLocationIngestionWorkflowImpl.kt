@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.workflow
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.ArtifactsBatchSummary
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportSummaryDto
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationBatchImportRequest
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationBatchImportResult
@@ -49,6 +50,16 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
         options(Duration.ofMinutes(30), heartbeat = Duration.ofMinutes(1))
     )
 
+    /**
+     * Waits for the per-GeoLocation artifacts workflows (ADR-0014). Long: it covers every item of a country
+     * while the artifacts worker runs a few at a time; heartbeats detect a dead worker and the retry simply
+     * re-attaches to the same workflows (deterministic ids), so it is idempotent.
+     */
+    private val artifactsActivities = Workflow.newActivityStub(
+        GeoLocationIngestionActivities::class.java,
+        options(Duration.ofMinutes(90), heartbeat = Duration.ofMinutes(2))
+    )
+
     private var progress = ImportProgressDto(
         currentStage = "PENDING",
         percentCompleted = 0,
@@ -93,6 +104,22 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
             summaries.add(summary)
         }
 
+        // Stage added after the first deployments: guarded so workflows already running keep replaying.
+        val artifactsSummaries = mutableListOf<ArtifactsBatchSummary>()
+        if (Workflow.getVersion("artifacts-stage", Workflow.DEFAULT_VERSION, 1) >= 1) {
+            request.items.forEachIndexed { index, item ->
+                progress = ImportProgressDto(
+                    currentStage = "ARTIFACTS_GENERATION",
+                    percentCompleted = 80 + ((index.toDouble() / totalItems.toDouble()) * 8).toInt(),
+                    processedItems = index,
+                    totalItems = totalItems,
+                    status = "RUNNING",
+                    details = "Waiting for the SVG maps and reports of ${item.countrySlug} (level ${item.locationLevel}) [${index + 1}/$totalItems]"
+                )
+                artifactsSummaries.add(artifactsActivities.awaitArtifactWorkflows(item))
+            }
+        }
+
         progress = ImportProgressDto(
             currentStage = "JSREPORT_GENERATION",
             percentCompleted = 85,
@@ -113,6 +140,7 @@ class GeoLocationIngestionWorkflowImpl : GeoLocationIngestionWorkflow {
             totalUpdated = totalUpdated,
             reportPdfUrl = reportPdfUrl,
             countrySummaries = summaries,
+            artifactsSummaries = artifactsSummaries,
             status = "COMPLETED"
         )
 
