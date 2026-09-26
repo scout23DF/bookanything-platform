@@ -7,10 +7,12 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.elasticsearch.ElasticsearchContainer
 import org.testcontainers.junit.jupiter.Container
+import org.springframework.context.annotation.Import
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
 @Testcontainers
+@Import(NoTemporalTestConfig::class)
 abstract class AbstractIntegrationTest {
 
     companion object {
@@ -50,6 +52,8 @@ abstract class AbstractIntegrationTest {
             registry.add("spring.security.oauth2.client.provider.oidc.issuer-uri") { keycloak.authServerUrl + "/realms/dexterity-apps-01" }
 
             registry.add("application.domain-settings.geolocation.update-boundary-via-ia.feature-enabled") { "false" }
+            // Never reach the cluster's Temporal (default address in application.yml): nothing listens here.
+            registry.add("temporal.service-address") { "localhost:1" }
         }
     }
 }
