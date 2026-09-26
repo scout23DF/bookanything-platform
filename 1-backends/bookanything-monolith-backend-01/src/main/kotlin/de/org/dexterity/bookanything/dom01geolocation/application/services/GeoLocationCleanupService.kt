@@ -131,8 +131,8 @@ class GeoLocationCleanupService(
             childProvinceCount = provinceCount,
             jsonFileExists = corporateStorage.exists(geodataBucket, geodataJsonKey(slug, item.locationLevel)),
             xmlFileExists = corporateStorage.exists(geodataBucket, geodataXmlKey(slug, item.locationLevel)),
-            willDeleteJsonFile = item.shouldDeleteJsonFile,
-            willDeleteXmlFile = item.shouldDeleteXmlFile
+            willDeleteJsonFile = item.deleteJson,
+            willDeleteXmlFile = item.deleteXml
         )
     }
 

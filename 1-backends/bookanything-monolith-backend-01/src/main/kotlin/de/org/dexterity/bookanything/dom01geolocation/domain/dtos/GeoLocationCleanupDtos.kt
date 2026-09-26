@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom01geolocation.domain.dtos
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 
@@ -9,17 +10,32 @@ import com.fasterxml.jackson.annotation.JsonInclude
 data class CleanupItem(
     val countrySlug: String = "",
     val locationLevel: Int = 0,
-    val shouldDeleteJsonFile: Boolean = false,
-    val shouldDeleteXmlFile: Boolean = false
-)
+    // Nullable on purpose: in the native image Jackson cannot use the Kotlin default of a missing property and
+    // would pass null to a primitive boolean (the request failed to parse). A missing flag means "do not delete".
+    val shouldDeleteJsonFile: Boolean? = false,
+    val shouldDeleteXmlFile: Boolean? = false
+) {
+    @get:JsonIgnore
+    val deleteJson: Boolean get() = shouldDeleteJsonFile == true
+
+    @get:JsonIgnore
+    val deleteXml: Boolean get() = shouldDeleteXmlFile == true
+}
 
 /** `dryRun` defaults to true: nothing is deleted unless the caller sends `dryRun=false` explicitly. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class GeoLocationCleanupRequest(
     val items: List<CleanupItem> = emptyList(),
-    val dryRun: Boolean = true
-)
+    // Nullable on purpose (see CleanupItem). A missing or null dryRun MUST mean true: only an explicit false deletes.
+    val dryRun: Boolean? = true
+) {
+    /**
+     * A function on purpose: a Kotlin `val isDryRun` compiles to the getter `isDryRun()`, which Jackson reads as the
+     * JSON property `dryRun` (the same as the field) and an @JsonIgnore on it would drop `dryRun` altogether.
+     */
+    fun dryRunEnabled(): Boolean = dryRun != false
+}
 
 /** What a cleanup of one item would delete (read only). */
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -57,7 +57,7 @@ class GeoLocationCleanupWorkflowImpl : GeoLocationCleanupWorkflow {
 
         if (items.isEmpty()) {
             update("BLOCKED", 0, 0, "BLOCKED", "No items in the request")
-            return GeoLocationCleanupResult(jobId, request.dryRun, "BLOCKED", blockers = listOf("The request has no items"))
+            return GeoLocationCleanupResult(jobId, request.dryRunEnabled(), "BLOCKED", blockers = listOf("The request has no items"))
         }
 
         // 1. Read-only plan of every item. Nothing is deleted before the whole request is validated.
@@ -65,9 +65,9 @@ class GeoLocationCleanupWorkflowImpl : GeoLocationCleanupWorkflow {
         val blockers = requestBlockers(items, plans)
         if (blockers.isNotEmpty()) {
             update("BLOCKED", 0, items.size, "BLOCKED", blockers.first())
-            return GeoLocationCleanupResult(jobId, request.dryRun, "BLOCKED", plans = plans, blockers = blockers)
+            return GeoLocationCleanupResult(jobId, request.dryRunEnabled(), "BLOCKED", plans = plans, blockers = blockers)
         }
-        if (request.dryRun) {
+        if (request.dryRunEnabled()) {
             update("DRY_RUN", items.size, items.size, "DRY_RUN", "Dry run: nothing was deleted")
             return GeoLocationCleanupResult(jobId, true, "DRY_RUN", plans = plans)
         }
@@ -97,7 +97,7 @@ class GeoLocationCleanupWorkflowImpl : GeoLocationCleanupWorkflow {
             var deletedJson = false
             var deletedXml = false
             var nifiError: String? = null
-            if (item.shouldDeleteJsonFile || item.shouldDeleteXmlFile) {
+            if (item.deleteJson || item.deleteXml) {
                 val nifi = nifiActivities.deleteGeoDataFilesViaNiFi(item)
                 deletedJson = nifi.deletedJson
                 deletedXml = nifi.deletedXml

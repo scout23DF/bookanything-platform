@@ -93,12 +93,12 @@ class GeoLocationCleanupActivitiesImpl(
                 "jobId" to jobId,
                 "countrySlug" to slug,
                 "locationLevel" to item.locationLevel,
-                "shouldDeleteJsonFile" to item.shouldDeleteJsonFile,
-                "shouldDeleteXmlFile" to item.shouldDeleteXmlFile
+                "shouldDeleteJsonFile" to item.deleteJson,
+                "shouldDeleteXmlFile" to item.deleteXml
             )
             kafkaTemplate.send(nifiCleanupRequestedTopic, "${slug}_${item.locationLevel}", payload)
             kafkaTemplate.flush()
-            logger.info("Temporal Activity: Published NiFi cleanup request to $nifiCleanupRequestedTopic for $slug level ${item.locationLevel} (json=${item.shouldDeleteJsonFile}, xml=${item.shouldDeleteXmlFile})")
+            logger.info("Temporal Activity: Published NiFi cleanup request to $nifiCleanupRequestedTopic for $slug level ${item.locationLevel} (json=${item.deleteJson}, xml=${item.deleteXml})")
             return await(future)
         } finally {
             pendingReplies.remove(key)

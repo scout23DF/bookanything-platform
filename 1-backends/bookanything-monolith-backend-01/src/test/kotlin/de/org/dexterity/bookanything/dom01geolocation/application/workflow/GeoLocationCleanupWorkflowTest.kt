@@ -43,7 +43,7 @@ private class FakeCleanupActivities : GeoLocationCleanupActivities {
 
     override fun deleteGeoDataFilesViaNiFi(item: CleanupItem): NiFiCleanupSummaryDto {
         calls += "nifi:${item.countrySlug}:${item.locationLevel}"
-        return NiFiCleanupSummaryDto("job", item.countrySlug, item.locationLevel, item.shouldDeleteJsonFile, item.shouldDeleteXmlFile,
+        return NiFiCleanupSummaryDto("job", item.countrySlug, item.locationLevel, item.deleteJson, item.deleteXml,
             errorMessage = nifiError)
     }
 
@@ -80,8 +80,35 @@ class GeoLocationCleanupWorkflowTest {
 
     @Test
     fun `dryRun defaults to true in the request`() {
-        assertTrue(GeoLocationCleanupRequest().dryRun)
-        assertTrue(GeoLocationCleanupRequest(items = listOf(CleanupItem("BRA", 1))).dryRun)
+        assertTrue(GeoLocationCleanupRequest().dryRunEnabled())
+        assertTrue(GeoLocationCleanupRequest(items = listOf(CleanupItem("BRA", 1))).dryRunEnabled())
+    }
+
+    @Test
+    fun `only an explicit false turns the dry run off`() {
+        assertTrue(GeoLocationCleanupRequest(dryRun = null).dryRunEnabled(), "null must mean dry run")
+        assertTrue(GeoLocationCleanupRequest(dryRun = true).dryRunEnabled())
+        assertEquals(false, GeoLocationCleanupRequest(dryRun = false).dryRunEnabled())
+    }
+
+    @Test
+    fun `a request without dryRun or file flags parses as a dry run that deletes no file`() {
+        // The native image cannot use Kotlin defaults of missing properties through Jackson (it failed with
+        // "Cannot map null into type boolean"); two mappers cover both ways of building the DTO.
+        val body = """{"items":[{"countrySlug":"PRT","locationLevel":1},{"countrySlug":"PRT","locationLevel":0,"shouldDeleteJsonFile":null}]}"""
+        listOf(
+            com.fasterxml.jackson.databind.ObjectMapper()
+                .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES),
+            com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+                .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+        ).forEach { mapper ->
+            val request = mapper.readValue(body, GeoLocationCleanupRequest::class.java)
+            assertTrue(request.dryRunEnabled(), "a missing dryRun must be a dry run")
+            assertEquals(2, request.items.size)
+            assertTrue(request.items.none { it.deleteJson || it.deleteXml })
+            val explicit = mapper.readValue("""{"items":[],"dryRun":false}""", GeoLocationCleanupRequest::class.java)
+            assertEquals(false, explicit.dryRunEnabled())
+        }
     }
 
     @Test

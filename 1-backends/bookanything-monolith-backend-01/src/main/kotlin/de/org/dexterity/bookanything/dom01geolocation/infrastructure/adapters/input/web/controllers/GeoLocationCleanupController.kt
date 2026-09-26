@@ -46,10 +46,10 @@ class GeoLocationCleanupController(
             mapOf(
                 "workflowId" to workflowId,
                 "taskQueue" to taskQueue,
-                "dryRun" to request.dryRun,
+                "dryRun" to request.dryRunEnabled(),
                 "statusUrl" to "/api/v1/geolocations/workflows/cleanup/$workflowId/status",
                 "resultUrl" to "/api/v1/geolocations/workflows/cleanup/$workflowId/result",
-                "message" to if (request.dryRun) "Dry run accepted: the plan is computed and nothing is deleted."
+                "message" to if (request.dryRunEnabled()) "Dry run accepted: the plan is computed and nothing is deleted."
                 else "Cleanup accepted and running asynchronously in Temporal."
             )
         )
