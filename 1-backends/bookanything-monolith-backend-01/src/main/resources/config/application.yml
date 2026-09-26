@@ -253,6 +253,8 @@ temporal:
 nifi:
     base-url: "${NIFI_BASE_URL:https://nifi.darueira-corpshared.127.0.0.1.nip.io}"
     import-timeout-minutes: "${NIFI_IMPORT_TIMEOUT_MINUTES:25}"
+    # Cleanup flow (ADR-0015): topics geolocation.nifi-cleanup.requested / .completed
+    cleanup-timeout-minutes: ${NIFI_CLEANUP_TIMEOUT_MINUTES:5}
 
 jsreport:
     base-url: "${JSREPORT_BASE_URL:http://10.152.183.35:5488}"
@@ -266,4 +268,5 @@ corporate:
         access-key: "${CORPORATE_MINIO_ACCESS_KEY:minioadmin}"
         secret-key: "${CORPORATE_MINIO_SECRET_KEY:Darueira@2026!}"
         reports-bucket: "${CORPORATE_MINIO_REPORTS_BUCKET:darueira-reports}"
+        geodata-bucket: "${CORPORATE_MINIO_GEODATA_BUCKET:darueira-geodata}"
 
