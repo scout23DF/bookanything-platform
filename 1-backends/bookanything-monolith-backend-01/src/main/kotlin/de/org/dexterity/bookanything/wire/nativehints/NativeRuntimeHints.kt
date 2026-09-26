@@ -226,7 +226,9 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
     /**
      * The MinIO client (no native metadata of its own) instantiates every *Args class
      * reflectively from its builder ("class io.minio.BucketExistsArgs must have no argument
-     * constructor") and maps S3 XML responses onto io.minio.messages via reflection.
+     * constructor") and maps S3 XML responses onto io.minio.messages via reflection. That
+     * mapping is done by simple-xml, which in turn builds its own labels reflectively
+     * ("NoSuchMethodException: org.simpleframework.xml.core.TextLabel.<init>").
      */
     private fun registerMinioClient(hints: RuntimeHints, classLoader: ClassLoader) {
         val scanner = object : ClassPathScanningCandidateComponentProvider(false) {
@@ -235,7 +237,7 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
             setResourceLoader(org.springframework.core.io.DefaultResourceLoader(classLoader))
             addIncludeFilter { _, _ -> true }
         }
-        scanner.findCandidateComponents(MINIO_PACKAGE).forEach { bd ->
+        MINIO_PACKAGES.flatMap { scanner.findCandidateComponents(it) }.forEach { bd ->
             try {
                 val clazz = Class.forName(bd.beanClassName, false, classLoader)
                 hints.reflection().registerType(
@@ -262,6 +264,6 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         const val TEMPORAL_STUB_MARKER = "io.temporal.internal.sync.StubMarker"
         const val TEMPORAL_ASYNC_MARKER = "io.temporal.internal.sync.AsyncInternal\$AsyncMarker"
         const val TEMPORAL_ERROR_DETAILS_PACKAGE = "io.temporal.api.errordetails.v1"
-        const val MINIO_PACKAGE = "io.minio"
+        val MINIO_PACKAGES = listOf("io.minio", "org.simpleframework.xml")
     }
 }
