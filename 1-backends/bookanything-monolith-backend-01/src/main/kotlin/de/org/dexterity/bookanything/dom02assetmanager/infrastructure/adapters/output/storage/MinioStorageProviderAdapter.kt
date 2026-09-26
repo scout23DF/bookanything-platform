@@ -115,6 +115,21 @@ class MinioStorageProviderAdapter(private val minioClient: MinioClient) : Storag
         }
     }
 
+    override suspend fun readBytes(bucketName: String, key: String): ByteArray {
+        return withContext(Dispatchers.IO) {
+            try {
+                minioClient.getObject(
+                    GetObjectArgs.builder().bucket(bucketName).`object`(key).build()
+                ).use { it.readAllBytes() }
+            } catch (e: ErrorResponseException) {
+                if (e.errorResponse().code() == "NoSuchKey") {
+                    throw java.io.FileNotFoundException("Object not found: bucket='$bucketName', key='$key'")
+                }
+                throw e
+            }
+        }
+    }
+
     /**
      * CORRIGIDO: Deletes an object, handling exceptions gracefully.
      */

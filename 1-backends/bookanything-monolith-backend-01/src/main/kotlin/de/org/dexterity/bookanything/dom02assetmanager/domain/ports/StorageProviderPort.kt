@@ -32,6 +32,13 @@ interface StorageProviderPort {
     suspend fun download(bucketName: String, key: String): ResponseEntity<StreamingResponseBody>
 
     /**
+     * Reads a whole object into memory. Meant for small artifacts (SVGs, flags, PDFs), not for large files:
+     * use [download] to stream those.
+     * @throws java.io.FileNotFoundException when the object does not exist.
+     */
+    suspend fun readBytes(bucketName: String, key: String): ByteArray
+
+    /**
      * Deletes a file from the specified bucket.
      * @param bucketName The name of the bucket.
      * @param key The key of the file to delete.

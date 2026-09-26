@@ -1,25 +1,25 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.workflow
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationAIEnrichmentService
-import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationAssetIntegrationService
 import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationCRUDService
-import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationFlagService
-import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLocationSvgGeneratorService
+import de.org.dexterity.bookanything.dom01geolocation.application.services.MapSvgGeneratorMechanismHolder
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsLauncher
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
+import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.ArtifactsBatchSummary
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportItem
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportSummaryDto
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationBatchImportResult
-import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationDetailReportResultDto
-import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationMapsRequestDto
-import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.output.rest.GeoLocationPythonMapsClient
 import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.temporal.activity.Activity
+import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import io.temporal.client.ActivityCompletionException
-import kotlinx.coroutines.runBlocking
+import io.temporal.client.WorkflowFailedException
+import org.springframework.data.domain.PageRequest
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
@@ -35,16 +35,16 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.time.Duration
 
 @Component
 class GeoLocationIngestionActivitiesImpl(
     private val kafkaTemplate: KafkaTemplate<String, Any>,
     private val objectMapper: ObjectMapper,
     private val geoLocationCRUDService: GeoLocationCRUDService,
-    private val svgGeneratorService: GeoLocationSvgGeneratorService,
-    private val assetIntegrationService: GeoLocationAssetIntegrationService,
-    private val aiEnrichmentService: GeoLocationAIEnrichmentService,
-    private val flagService: GeoLocationFlagService,
+    private val artifactsLauncher: GeoLocationArtifactsLauncher,
+    private val mechanismHolder: MapSvgGeneratorMechanismHolder,
+    transactionManager: PlatformTransactionManager,
     @Value("\${topics.geolocation.nifi-import.requested:geolocation.nifi-import.requested}")
     private val nifiImportRequestedTopic: String,
     @Value("\${topics.geolocation.nifi-import.completed:geolocation.nifi-import.completed}")
@@ -63,8 +63,6 @@ class GeoLocationIngestionActivitiesImpl(
     private val jsreportPassword: String,
     @Value("\${jsreport.template-name:geolocation-batch-summary}")
     private val jsreportTemplateName: String,
-    @Value("\${jsreport.detail-template-name:geolocation-detail-report}")
-    private val jsreportDetailTemplateName: String = "geolocation-detail-report",
     @Value("\${corporate.minio.endpoint:http://central-minio.drr-corpshared-plat.svc.cluster.local:9000}")
     private val corporateMinioEndpoint: String,
     @Value("\${corporate.minio.access-key:minioadmin}")
@@ -73,20 +71,19 @@ class GeoLocationIngestionActivitiesImpl(
     private val corporateMinioSecretKey: String,
     @Value("\${corporate.minio.reports-bucket:darueira-reports}")
     private val corporateMinioReportsBucket: String,
-    private val pythonMapsClient: GeoLocationPythonMapsClient,
-    @Value("\${application.domain-settings.geolocation.map-svg-generator-mechanism:KOTLIN}")
-    private val configuredMapMechanism: String = "KOTLIN"
+    @Value("\${temporal.artifacts.await-timeout-minutes:30}")
+    private val artifactsAwaitTimeoutMinutes: Long = 30
 ) : GeoLocationIngestionActivities {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val pendingReplies = ConcurrentHashMap<String, CompletableFuture<CountryImportSummaryDto>>()
 
-    @Volatile
-    var currentMapSvgGeneratorMechanism: String = configuredMapMechanism
+    // Worker threads have no Hibernate session and the JPA mappers read lazy collections: read in a short transaction.
+    private val readTx = TransactionTemplate(transactionManager).apply { isReadOnly = true }
 
     override fun configureMapSvgGeneratorMechanism(mechanism: String) {
         logger.info("Temporal Activity: Configured map SVG generator mechanism to: $mechanism")
-        this.currentMapSvgGeneratorMechanism = mechanism
+        mechanismHolder.current = mechanism
     }
 
     @KafkaListener(
@@ -259,261 +256,93 @@ class GeoLocationIngestionActivitiesImpl(
         logger.info("Temporal Activity: Batch import completed event published to $batchImportCompletedTopic")
     }
 
-    override fun generateGeoLocationArtifactsAndReport(geoLocationId: Long): GeoLocationDetailReportResultDto {
-        logger.info("Activity: Starting artifact and report generation for GeoLocation #$geoLocationId...")
+    override fun awaitArtifactWorkflows(item: CountryImportItem): ArtifactsBatchSummary {
+        val ids = geoLocationIdsOf(item)
+        logger.info("Temporal Activity: Waiting for the artifacts of ${ids.size} GeoLocation(s) of ${item.countrySlug} level ${item.locationLevel}...")
 
-        // 1. Retrieve GeoLocation across hierarchy levels
-        val geoLocation = geoLocationCRUDService.findAnyById(geoLocationId)
-        if (geoLocation == null) {
-            logger.error("Activity: GeoLocation #$geoLocationId not found across any hierarchy level.")
-            return GeoLocationDetailReportResultDto(
-                geoLocationId = geoLocationId,
-                status = "ERROR",
-                errorMessage = "GeoLocation not found for ID: $geoLocationId"
-            )
+        // Make sure every item has a workflow. Running or just-finished ones are kept (no duplicates).
+        ids.forEach { artifactsLauncher.start(it) }
+
+        var succeeded = 0
+        var skipped = 0
+        val failedIds = mutableListOf<Long>()
+        val context = Activity.getExecutionContext()
+        ids.forEachIndexed { index, id ->
+            context.heartbeat("${index}/${ids.size}")
+            when (awaitArtifacts(id)) {
+                "SUCCESS" -> succeeded++
+                "SKIPPED_NO_GEOMETRY" -> skipped++
+                else -> failedIds += id
+            }
         }
+        logger.info("Temporal Activity: Artifacts of ${item.countrySlug} level ${item.locationLevel}: total=${ids.size}, succeeded=$succeeded, skipped=$skipped, failed=${failedIds.size}")
+        return ArtifactsBatchSummary(
+            countrySlug = item.countrySlug,
+            locationLevel = item.locationLevel,
+            total = ids.size,
+            succeeded = succeeded,
+            skipped = skipped,
+            failed = failedIds.size,
+            failedIds = failedIds
+        )
+    }
 
-        val name = geoLocation.name
-        val type = geoLocation.type.name
-        val friendlyId = geoLocation.friendlyId
-        val alias = geoLocation.alias
-
-        // 2. Check boundary geometry
-        val boundary = geoLocation.boundaryRepresentation
-        if (boundary == null || boundary.isEmpty) {
-            logger.warn("Activity: GeoLocation #$geoLocationId ($name) has no boundary geometry. Skipping artifacts and report.")
-            return GeoLocationDetailReportResultDto(
-                geoLocationId = geoLocationId,
-                name = name,
-                type = type,
-                friendlyId = friendlyId,
-                status = "SKIPPED_NO_GEOMETRY",
-                errorMessage = "No geographic boundary geometry found (ge_geographic_boundary is null or empty)."
-            )
+    /** Waits for one item in slices of 30 s (heartbeating) up to [artifactsAwaitTimeoutMinutes]. */
+    private fun awaitArtifacts(geoLocationId: Long): String {
+        val context = Activity.getExecutionContext()
+        val deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(artifactsAwaitTimeoutMinutes)
+        while (true) {
+            try {
+                return artifactsLauncher.awaitResult(geoLocationId, Duration.ofSeconds(30)).status
+            } catch (e: TimeoutException) {
+                context.heartbeat("waiting #$geoLocationId")
+                if (System.nanoTime() > deadline) {
+                    logger.warn("Temporal Activity: Gave up waiting for the artifacts of GeoLocation #$geoLocationId")
+                    return "TIMED_OUT"
+                }
+            } catch (e: WorkflowFailedException) {
+                logger.warn("Temporal Activity: Artifacts workflow of GeoLocation #$geoLocationId failed: ${e.cause?.message ?: e.message}")
+                return "FAILED"
+            }
         }
+    }
 
-        try {
-            // 3. Generate SVGs using selected mechanism (GEOPANDAS via Python vs KOTLIN native)
-            val mechanism = currentMapSvgGeneratorMechanism
-            logger.info("Activity: Map SVG generation mechanism: '$mechanism' for #$geoLocationId ($name)...")
-
-            val (localMapSvg, worldHighlightSvg) = if (mechanism.equals("GEOPANDAS", ignoreCase = true)) {
-                try {
-                    logger.info("Activity: Invoking Python Maps Generator (GeoPandas) for #$geoLocationId...")
-                    val pyRequest = GeoLocationMapsRequestDto(
-                        geoLocationId = geoLocationId,
-                        name = name,
-                        type = type,
-                        friendlyId = friendlyId,
-                        alias = alias,
-                        boundaryWkt = boundary.toText(),
-                        saveToMinio = true,
-                        minioBucket = "bookanything-images"
-                    )
-                    val pyResponse = pythonMapsClient.generateMaps(pyRequest)
-                    if (pyResponse.status == "SUCCESS" && pyResponse.localMapSvg.isNotBlank()) {
-                        logger.info("Activity: Successfully received high-fidelity GeoPandas SVGs for #$geoLocationId")
-                        Pair(pyResponse.localMapSvg, pyResponse.worldHighlightSvg)
-                    } else {
-                        logger.warn("Activity: Python Maps Generator returned non-success (${pyResponse.errorMessage}). Falling back to Kotlin SVG generator.")
-                        Pair(
-                            svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
-                            svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
-                        )
-                    }
-                } catch (e: Exception) {
-                    logger.error("Activity: Error calling Python Maps Generator (${e.message}). Falling back to Kotlin SVG generator.")
-                    Pair(
-                        svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
-                        svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
-                    )
-                }
-            } else {
-                Pair(
-                    svgGeneratorService.generateLocalMapSvg(boundary, name, alias ?: friendlyId),
-                    svgGeneratorService.generateWorldHighlightMapSvg(boundary, name, alias ?: friendlyId)
-                )
+    /**
+     * GeoLocation ids of the country/level, read from the database (the NiFi counters proved unreliable:
+     * the USA level 1 summary said 36 created while all 51 states were persisted).
+     */
+    private fun geoLocationIdsOf(item: CountryImportItem): List<Long> {
+        val slug = item.countrySlug
+        val country = readTx.execute {
+            geoLocationCRUDService
+                .findByFriendlyId(GeoLocationType.COUNTRY, slug, PageRequest.of(0, 20))
+                .content.firstOrNull { it.friendlyId.equals(slug, ignoreCase = true) }
+        }
+        if (country == null) {
+            logger.warn("Temporal Activity: Country '$slug' not found; no artifacts to wait for")
+            return emptyList()
+        }
+        val countryId = country.id.id
+        return when (item.locationLevel) {
+            0 -> listOf(countryId)
+            1 -> {
+                val ids = mutableListOf<Long>()
+                var page = 0
+                do {
+                    val result = readTx.execute {
+                        geoLocationCRUDService.searchByParentIdAndNameStartingWith(
+                            GeoLocationType.PROVINCE, countryId, "", PageRequest.of(page, 200)
+                        ).let { Pair(it.content.map { model -> model.id.id }, it.hasNext()) }
+                    }!!
+                    ids += result.first
+                    page++
+                } while (result.second)
+                ids
             }
-
-            // 4. Save SVGs into Tenant MinIO using Asset Management Domain
-            logger.info("Activity: Uploading SVG maps to Tenant MinIO for #$geoLocationId...")
-            val (localAsset, worldAsset) = runBlocking {
-                assetIntegrationService.saveGeoLocationMapSvgs(geoLocation, localMapSvg, worldHighlightSvg)
+            else -> {
+                logger.warn("Temporal Activity: Location level ${item.locationLevel} of '$slug' is not supported for artifacts; skipping")
+                emptyList()
             }
-            val localMapUrl = "s3://${localAsset.bucket.name}/${localAsset.storageKey}"
-            val worldMapUrl = "s3://${worldAsset.bucket.name}/${worldAsset.storageKey}"
-            logger.info("Activity: Both SVGs successfully persisted in Tenant MinIO (Local: Asset #${localAsset.id}, World: Asset #${worldAsset.id})")
-
-            val parentModel = geoLocationCRUDService.findParentModel(geoLocation)
-            val parentName = parentModel?.name
-
-            // 5. Flag Resolution & Tenant MinIO Asset Persistence
-            logger.info("Activity: Resolving official flag for #$geoLocationId ($name)...")
-            val flagResult = flagService.obtainFlag(geoLocation, parentName)
-            val flagAsset = runBlocking {
-                assetIntegrationService.saveGeoLocationFlag(geoLocation, flagResult.rawBytes, flagResult.isSvg)
-            }
-            val flagAssetUrl = "s3://${flagAsset.bucket.name}/${flagAsset.storageKey}"
-            logger.info("Activity: Flag successfully persisted in Tenant MinIO as Asset #${flagAsset.id} (key: ${flagAsset.storageKey})")
-
-            // 6. Spring AI Enrichment
-            logger.info("Activity: Requesting Spring AI synthesis for #$geoLocationId ($name) [Parent: $parentName]...")
-            val aiSummary = aiEnrichmentService.enrichGeoLocation(geoLocation, parentName)
-
-            try {
-                val updatedDetails = (geoLocation.additionalDetailsMap ?: emptyMap()).toMutableMap()
-                updatedDetails["ai_enrichment_summary"] = aiSummary
-                geoLocationCRUDService.updateAdditionalDetails(geoLocation.type, geoLocationId, updatedDetails)
-                logger.info("Activity: Persisted AI summary in additional details for GeoLocation #$geoLocationId")
-            } catch (e: Exception) {
-                logger.warn("Activity: Could not persist AI summary in entity details: ${e.message}")
-            }
-
-            // 7. Generate PDF via JSReport
-            logger.info("Activity: Calling JSReport '$jsreportDetailTemplateName' for #$geoLocationId ($name)...")
-            val env = boundary.envelopeInternal
-            val envelopeStr = String.format(Locale.US, "[%.3f, %.3f] to [%.3f, %.3f]", env.minX, env.minY, env.maxX, env.maxY)
-
-            val renderData = mapOf(
-                "geoLocation" to mapOf(
-                    "id" to geoLocation.id.id,
-                    "name" to name,
-                    "type" to type,
-                    "alias" to (alias ?: "N/A"),
-                    "friendlyId" to friendlyId,
-                    "parentName" to (parentName ?: ""),
-                    "parentId" to (geoLocation.parentId ?: ""),
-                    "geometryType" to boundary.geometryType,
-                    "pointsCount" to boundary.numPoints,
-                    "envelope" to envelopeStr
-                ),
-                "localMapSvg" to localMapSvg,
-                "localMapAssetId" to localAsset.id,
-                "localMapAssetUrl" to localMapUrl,
-                "worldHighlightSvg" to worldHighlightSvg,
-                "worldHighlightAssetId" to worldAsset.id,
-                "worldHighlightAssetUrl" to worldMapUrl,
-                "flagName" to flagResult.flagName,
-                "flagDescription" to flagResult.flagDescription,
-                "flagImage" to flagResult.flagImageContent,
-                "isFlagSvg" to flagResult.isSvg,
-                "flagAssetId" to flagAsset.id,
-                "flagAssetUrl" to flagAssetUrl,
-                "aiEnrichment" to aiSummary,
-                "generatedAt" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
-            )
-
-            val renderPayload = mapOf(
-                "template" to mapOf("name" to jsreportDetailTemplateName),
-                "data" to renderData
-            )
-
-            val jsonBytes = objectMapper.writeValueAsBytes(renderPayload)
-            val url = URI.create("$jsreportBaseUrl/api/report").toURL()
-            var pdfBytes: ByteArray? = null
-            var lastErr: String? = null
-
-            for (attempt in 1..3) {
-                try {
-                    val conn = url.openConnection() as HttpURLConnection
-                    val basicAuth = "Basic " + Base64.getEncoder().encodeToString("$jsreportUsername:$jsreportPassword".toByteArray())
-                    conn.requestMethod = "POST"
-                    conn.setRequestProperty("Content-Type", "application/json")
-                    conn.setRequestProperty("Authorization", basicAuth)
-                    conn.doOutput = true
-                    conn.connectTimeout = 30000
-                    conn.readTimeout = 60000
-
-                    conn.outputStream.use { it.write(jsonBytes) }
-
-                    val responseCode = conn.responseCode
-                    if (responseCode in 200..299) {
-                        pdfBytes = conn.inputStream.use { it.readBytes() }
-                        break
-                    } else {
-                        lastErr = conn.errorStream?.bufferedReader()?.readText() ?: "HTTP $responseCode"
-                        logger.warn("JSReport render attempt $attempt failed with HTTP $responseCode: $lastErr")
-                        Thread.sleep(1500)
-                    }
-                } catch (e: Exception) {
-                    lastErr = e.message
-                    logger.warn("JSReport render attempt $attempt encountered exception: $lastErr")
-                    Thread.sleep(1500)
-                }
-            }
-
-            if (pdfBytes == null) {
-                logger.error("JSReport detail rendering failed after retries: $lastErr")
-                throw RuntimeException("JSReport detail rendering failed: $lastErr")
-            }
-
-            logger.info("Activity: JSReport rendered detail PDF successfully (Size: ${pdfBytes.size} bytes)")
-
-            // 7. Save PDF in Tenant MinIO
-            val reportAsset = runBlocking {
-                assetIntegrationService.saveGeoLocationReportPdf(geoLocation, pdfBytes)
-            }
-            val tenantReportUrl = "s3://${reportAsset.bucket.name}/${reportAsset.storageKey}"
-
-            // 8. Redundantly store copy in Corporate MinIO reports bucket
-            try {
-                val minioClient = MinioClient.builder()
-                    .endpoint(corporateMinioEndpoint)
-                    .credentials(corporateMinioAccessKey, corporateMinioSecretKey)
-                    .build()
-
-                val bucketExists = minioClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(corporateMinioReportsBucket).build()
-                )
-                if (!bucketExists) {
-                    minioClient.makeBucket(
-                        MakeBucketArgs.builder().bucket(corporateMinioReportsBucket).build()
-                    )
-                }
-                val idOrAlias = (alias ?: friendlyId).replace("/", "-")
-                val corpObjectKey = "geolocations/geolocation-detail-report-$idOrAlias.pdf"
-                ByteArrayInputStream(pdfBytes).use { bais ->
-                    minioClient.putObject(
-                        PutObjectArgs.builder()
-                            .bucket(corporateMinioReportsBucket)
-                            .`object`(corpObjectKey)
-                            .stream(bais, pdfBytes.size.toLong(), -1)
-                            .contentType("application/pdf")
-                            .build()
-                    )
-                }
-                logger.info("Activity: Also stored detail report copy in Corporate MinIO at s3://$corporateMinioReportsBucket/$corpObjectKey")
-            } catch (e: Exception) {
-                logger.warn("Activity: Could not store redundant copy in Corporate MinIO: ${e.message}")
-            }
-
-            logger.info("Activity: Successfully completed artifacts and report for GeoLocation #$geoLocationId ($name)!")
-            return GeoLocationDetailReportResultDto(
-                geoLocationId = geoLocationId,
-                name = name,
-                type = type,
-                friendlyId = friendlyId,
-                localMapAssetId = localAsset.id,
-                localMapAssetUrl = localMapUrl,
-                worldHighlightAssetId = worldAsset.id,
-                worldHighlightAssetUrl = worldMapUrl,
-                flagAssetId = flagAsset.id,
-                flagAssetUrl = flagAssetUrl,
-                flagName = flagResult.flagName,
-                reportPdfUrl = tenantReportUrl,
-                aiEnrichmentSummary = aiSummary,
-                status = "SUCCESS"
-            )
-        } catch (e: Exception) {
-            logger.error("Activity: Failed generating artifacts and report for GeoLocation #$geoLocationId", e)
-            return GeoLocationDetailReportResultDto(
-                geoLocationId = geoLocationId,
-                name = name,
-                type = type,
-                friendlyId = friendlyId,
-                status = "ERROR",
-                errorMessage = e.message ?: "Unknown error generating artifacts and report"
-            )
         }
     }
 }

@@ -1,5 +1,7 @@
 package de.org.dexterity.bookanything.wire.temporal
 
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsActivities
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsWorkflowImpl
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionWorkflowImpl
 import io.temporal.client.WorkflowClient
@@ -7,6 +9,7 @@ import io.temporal.client.WorkflowClientOptions
 import io.temporal.serviceclient.WorkflowServiceStubs
 import io.temporal.serviceclient.WorkflowServiceStubsOptions
 import io.temporal.worker.WorkerFactory
+import io.temporal.worker.WorkerOptions
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.SmartLifecycle
@@ -24,6 +27,12 @@ class TemporalConfig(
     private val namespace: String,
     @Value("\${temporal.task-queue:GEOLOCATION_INGESTION_TASK_QUEUE}")
     private val taskQueue: String,
+    @Value("\${temporal.artifacts.task-queue:GEOLOCATION_ARTIFACTS_TASK_QUEUE}")
+    private val artifactsTaskQueue: String,
+    // Window of concurrent artifact steps per worker (ADR-0014): the GeoPandas subprocess and JSReport are
+    // heavy, and NiFi keeps posting GeoLocations to the same Pod meanwhile.
+    @Value("\${temporal.artifacts.max-concurrent-activities:4}")
+    private val artifactsMaxConcurrentActivities: Int,
     @Value("\${temporal.worker-start.initial-backoff-seconds:5}")
     private val initialBackoffSeconds: Long,
     @Value("\${temporal.worker-start.max-backoff-seconds:60}")
@@ -65,7 +74,8 @@ class TemporalConfig(
     @Bean
     fun temporalWorkerManager(
         workflowClient: WorkflowClient,
-        geoLocationIngestionActivities: GeoLocationIngestionActivities
+        geoLocationIngestionActivities: GeoLocationIngestionActivities,
+        geoLocationArtifactsActivities: GeoLocationArtifactsActivities
     ): SmartLifecycle {
         return object : SmartLifecycle {
             @Volatile
@@ -91,6 +101,16 @@ class TemporalConfig(
                 val worker = factory.newWorker(taskQueue)
                 worker.registerWorkflowImplementationTypes(GeoLocationIngestionWorkflowImpl::class.java)
                 worker.registerActivitiesImplementations(geoLocationIngestionActivities)
+
+                // Per-GeoLocation artifacts: own queue, and at most N steps executing at the same time.
+                val artifactsWorker = factory.newWorker(
+                    artifactsTaskQueue,
+                    WorkerOptions.newBuilder()
+                        .setMaxConcurrentActivityExecutionSize(artifactsMaxConcurrentActivities)
+                        .build()
+                )
+                artifactsWorker.registerWorkflowImplementationTypes(GeoLocationArtifactsWorkflowImpl::class.java)
+                artifactsWorker.registerActivitiesImplementations(geoLocationArtifactsActivities)
                 return factory
             }
 
