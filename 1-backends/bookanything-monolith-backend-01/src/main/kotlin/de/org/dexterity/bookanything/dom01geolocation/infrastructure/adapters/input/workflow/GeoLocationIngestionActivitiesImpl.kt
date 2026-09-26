@@ -18,6 +18,8 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationT
 import io.temporal.client.ActivityCompletionException
 import io.temporal.client.WorkflowFailedException
 import org.springframework.data.domain.PageRequest
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
@@ -42,6 +44,7 @@ class GeoLocationIngestionActivitiesImpl(
     private val geoLocationCRUDService: GeoLocationCRUDService,
     private val artifactsLauncher: GeoLocationArtifactsLauncher,
     private val mechanismHolder: MapSvgGeneratorMechanismHolder,
+    transactionManager: PlatformTransactionManager,
     @Value("\${topics.geolocation.nifi-import.requested:geolocation.nifi-import.requested}")
     private val nifiImportRequestedTopic: String,
     @Value("\${topics.geolocation.nifi-import.completed:geolocation.nifi-import.completed}")
@@ -74,6 +77,9 @@ class GeoLocationIngestionActivitiesImpl(
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val pendingReplies = ConcurrentHashMap<String, CompletableFuture<CountryImportSummaryDto>>()
+
+    // Worker threads have no Hibernate session and the JPA mappers read lazy collections: read in a short transaction.
+    private val readTx = TransactionTemplate(transactionManager).apply { isReadOnly = true }
 
     override fun configureMapSvgGeneratorMechanism(mechanism: String) {
         logger.info("Temporal Activity: Configured map SVG generator mechanism to: $mechanism")
@@ -307,9 +313,11 @@ class GeoLocationIngestionActivitiesImpl(
      */
     private fun geoLocationIdsOf(item: CountryImportItem): List<Long> {
         val slug = item.countrySlug
-        val country = geoLocationCRUDService
-            .findByFriendlyId(GeoLocationType.COUNTRY, slug, PageRequest.of(0, 20))
-            .content.firstOrNull { it.friendlyId.equals(slug, ignoreCase = true) }
+        val country = readTx.execute {
+            geoLocationCRUDService
+                .findByFriendlyId(GeoLocationType.COUNTRY, slug, PageRequest.of(0, 20))
+                .content.firstOrNull { it.friendlyId.equals(slug, ignoreCase = true) }
+        }
         if (country == null) {
             logger.warn("Temporal Activity: Country '$slug' not found; no artifacts to wait for")
             return emptyList()
@@ -321,12 +329,14 @@ class GeoLocationIngestionActivitiesImpl(
                 val ids = mutableListOf<Long>()
                 var page = 0
                 do {
-                    val result = geoLocationCRUDService.searchByParentIdAndNameStartingWith(
-                        GeoLocationType.PROVINCE, countryId, "", PageRequest.of(page, 200)
-                    )
-                    ids += result.content.map { it.id.id }
+                    val result = readTx.execute {
+                        geoLocationCRUDService.searchByParentIdAndNameStartingWith(
+                            GeoLocationType.PROVINCE, countryId, "", PageRequest.of(page, 200)
+                        ).let { Pair(it.content.map { model -> model.id.id }, it.hasNext()) }
+                    }!!
+                    ids += result.first
                     page++
-                } while (result.hasNext())
+                } while (result.second)
                 ids
             }
             else -> {

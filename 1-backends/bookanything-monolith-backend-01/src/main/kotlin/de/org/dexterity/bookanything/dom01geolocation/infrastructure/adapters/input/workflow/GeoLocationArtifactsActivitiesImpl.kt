@@ -24,6 +24,8 @@ import org.locationtech.jts.geom.Geometry
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URI
@@ -48,6 +50,7 @@ class GeoLocationArtifactsActivitiesImpl(
     private val flagService: GeoLocationFlagService,
     private val pythonMapsClient: GeoLocationPythonMapsClient,
     private val mechanismHolder: MapSvgGeneratorMechanismHolder,
+    transactionManager: PlatformTransactionManager,
     @Value("\${jsreport.base-url:http://10.152.183.35:5488}")
     private val jsreportBaseUrl: String,
     @Value("\${jsreport.username:admin}")
@@ -68,11 +71,20 @@ class GeoLocationArtifactsActivitiesImpl(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    // Activities run on Temporal worker threads, which have no Hibernate session (unlike a web request or the
+    // former @Transactional Kafka consumer). The JPA mappers read lazy collections (e.g. a province's cities),
+    // so every load runs in its own short transaction: it ends before the slow calls (GeoPandas, JSReport, MinIO).
+    private val readTx = TransactionTemplate(transactionManager).apply { isReadOnly = true }
+    private val writeTx = TransactionTemplate(transactionManager)
+
     private fun load(geoLocationId: Long): IGeoLocationModel =
-        geoLocationCRUDService.findAnyById(geoLocationId)
+        readTx.execute { geoLocationCRUDService.findAnyById(geoLocationId) }
             ?: throw ApplicationFailure.newNonRetryableFailure(
                 "GeoLocation not found for ID: $geoLocationId", "GEOLOCATION_NOT_FOUND"
             )
+
+    private fun parentNameOf(geoLocation: IGeoLocationModel): String? =
+        readTx.execute { geoLocationCRUDService.findParentModel(geoLocation)?.name }
 
     private fun s3Url(bucket: String, key: String) = "s3://$bucket/$key"
 
@@ -147,7 +159,7 @@ class GeoLocationArtifactsActivitiesImpl(
 
     override fun resolveAndStoreFlag(geoLocationId: Long): FlagStepResult {
         val geoLocation = load(geoLocationId)
-        val parentName = geoLocationCRUDService.findParentModel(geoLocation)?.name
+        val parentName = parentNameOf(geoLocation)
         logger.info("Activity: Resolving official flag for #$geoLocationId (${geoLocation.name})...")
         val flagResult = flagService.obtainFlag(geoLocation, parentName)
         val flagAsset = runBlocking {
@@ -165,13 +177,13 @@ class GeoLocationArtifactsActivitiesImpl(
 
     override fun enrichWithAi(geoLocationId: Long): String {
         val geoLocation = load(geoLocationId)
-        val parentName = geoLocationCRUDService.findParentModel(geoLocation)?.name
+        val parentName = parentNameOf(geoLocation)
         logger.info("Activity: Requesting Spring AI synthesis for #$geoLocationId (${geoLocation.name}) [Parent: $parentName]...")
         val aiSummary = aiEnrichmentService.enrichGeoLocation(geoLocation, parentName)
         try {
             val updatedDetails = (geoLocation.additionalDetailsMap ?: emptyMap()).toMutableMap()
             updatedDetails["ai_enrichment_summary"] = aiSummary
-            geoLocationCRUDService.updateAdditionalDetails(geoLocation.type, geoLocationId, updatedDetails)
+            writeTx.execute { geoLocationCRUDService.updateAdditionalDetails(geoLocation.type, geoLocationId, updatedDetails) }
             logger.info("Activity: Persisted AI summary in additional details for GeoLocation #$geoLocationId")
         } catch (e: Exception) {
             logger.warn("Activity: Could not persist AI summary in entity details: ${e.message}")
@@ -191,7 +203,7 @@ class GeoLocationArtifactsActivitiesImpl(
             ?: throw ApplicationFailure.newNonRetryableFailure(
                 "GeoLocation #$geoLocationId lost its boundary geometry", "GEOLOCATION_NO_GEOMETRY"
             )
-        val parentModel = geoLocationCRUDService.findParentModel(geoLocation)
+        val parentName = parentNameOf(geoLocation)
 
         // The previous steps stored the content; load it here instead of receiving it through the history.
         val localMapSvg = runBlocking { assetIntegrationService.readAssetText(maps.localMapAssetId!!) }
@@ -212,7 +224,7 @@ class GeoLocationArtifactsActivitiesImpl(
                 "type" to geoLocation.type.name,
                 "alias" to (geoLocation.alias ?: "N/A"),
                 "friendlyId" to geoLocation.friendlyId,
-                "parentName" to (parentModel?.name ?: ""),
+                "parentName" to (parentName ?: ""),
                 "parentId" to (geoLocation.parentId ?: ""),
                 "geometryType" to boundary.geometryType,
                 "pointsCount" to boundary.numPoints,
