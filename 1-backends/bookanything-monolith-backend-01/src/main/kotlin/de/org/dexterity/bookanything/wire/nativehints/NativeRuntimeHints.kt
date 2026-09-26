@@ -14,6 +14,7 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
         registerApplicationTypes(hints, classLoader ?: javaClass.classLoader)
         registerTemporalErrorDetails(hints, classLoader ?: javaClass.classLoader)
+        registerMinioClient(hints, classLoader ?: javaClass.classLoader)
 
         val reflectionClasses = listOf(
             "org.hibernate.spatial.HSMessageLogger_\$logger",
@@ -222,6 +223,35 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         }
     }
 
+    /**
+     * The MinIO client (no native metadata of its own) instantiates every *Args class
+     * reflectively from its builder ("class io.minio.BucketExistsArgs must have no argument
+     * constructor") and maps S3 XML responses onto io.minio.messages via reflection. That
+     * mapping is done by simple-xml, which in turn builds its own labels reflectively
+     * ("NoSuchMethodException: org.simpleframework.xml.core.TextLabel.<init>").
+     */
+    private fun registerMinioClient(hints: RuntimeHints, classLoader: ClassLoader) {
+        val scanner = object : ClassPathScanningCandidateComponentProvider(false) {
+            override fun isCandidateComponent(beanDefinition: AnnotatedBeanDefinition) = true
+        }.apply {
+            setResourceLoader(org.springframework.core.io.DefaultResourceLoader(classLoader))
+            addIncludeFilter { _, _ -> true }
+        }
+        MINIO_PACKAGES.flatMap { scanner.findCandidateComponents(it) }.forEach { bd ->
+            try {
+                val clazz = Class.forName(bd.beanClassName, false, classLoader)
+                hints.reflection().registerType(
+                    clazz,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_DECLARED_METHODS,
+                    MemberCategory.ACCESS_DECLARED_FIELDS
+                )
+            } catch (_: Throwable) {
+                // Not loadable at build time: skip
+            }
+        }
+    }
+
     private fun isKotlinDataClass(clazz: Class<*>): Boolean =
         try {
             clazz.getAnnotation(Metadata::class.java) != null && clazz.kotlin.isData
@@ -234,5 +264,6 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         const val TEMPORAL_STUB_MARKER = "io.temporal.internal.sync.StubMarker"
         const val TEMPORAL_ASYNC_MARKER = "io.temporal.internal.sync.AsyncInternal\$AsyncMarker"
         const val TEMPORAL_ERROR_DETAILS_PACKAGE = "io.temporal.api.errordetails.v1"
+        val MINIO_PACKAGES = listOf("io.minio", "org.simpleframework.xml")
     }
 }
