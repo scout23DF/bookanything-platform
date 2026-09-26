@@ -15,7 +15,6 @@ import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Lazy
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -30,7 +29,7 @@ class GeoLocationEnrichmentKafkaConsumer(
     private val cityRepository: ICityRepositoryPort,
     private val districtRepository: IDistrictRepositoryPort,
     private val aiService: GetGeoLocationBoundaryViaAIService,
-    @Lazy private val artifactsLauncher: GeoLocationArtifactsLauncher,
+    private val artifactsLauncher: GeoLocationArtifactsLauncher,
     @Value("\${application.domain-settings.geolocation.update-boundary-via-ia.feature-enabled:false}")
     private val shouldUpdateBoundaryViaIA: Boolean = false
 ) {
