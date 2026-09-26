@@ -1,7 +1,13 @@
 # ==============================================================================
 # Build Stage - GraalVM 25 Native Image Multi-Stage Builder (Spring Boot 4 / Kotlin 2.4)
+#
+# Native variant of the backend image. The Tekton pipeline builds it when the subject of the
+# merge commit contains "[native]" (i.e. the PR title); otherwise it builds Dockerfile.jvm.
+# Slow (~26 min, ~12 GiB RAM) but ~3x lighter at runtime: use it for releases and to validate
+# native-only problems (reflection hints), not to iterate on features.
 # ==============================================================================
-FROM container-registry.oracle.com/graalvm/native-image:latest AS builder
+# GraalVM CE, pinned to the JDK 25 line (same distribution as the local sdkman build).
+FROM ghcr.io/graalvm/native-image-community:25 AS builder
 
 # Inject Maven 3.9 from official image
 COPY --from=maven:3.9-eclipse-temurin-25 /usr/share/maven /usr/share/maven
@@ -14,9 +20,13 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B -Pnative || true
 
-# 2. Source compilation & GraalVM Native Image generation
+# 2. Source compilation & GraalVM Native Image generation.
+# Spring AOT fixes the bean graph at build time (profile-specific beans and
+# @ConditionalOnProperty auto-configurations included), so it must run with the
+# same profile the Pod uses at runtime.
 COPY src ./src
-RUN mvn -Pnative native:compile -DskipTests -B
+RUN mvn -Pnative native:compile -DskipTests -B \
+      "-Dspring-boot.aot.jvmArguments=-Dspring.profiles.active=darueira-k8s"
 
 # ==============================================================================
 # Runtime Stage (Non-root Minimal Debian Slim)

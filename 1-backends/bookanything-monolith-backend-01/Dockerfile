@@ -1,3 +1,5 @@
+# TRANSITIONAL: identical to Dockerfile.native. Kept only while the Tekton trigger still points
+# to "Dockerfile"; remove it after the image-variant trigger is applied to the cluster.
 # ==============================================================================
 # Build Stage - GraalVM 25 Native Image Multi-Stage Builder (Spring Boot 4 / Kotlin 2.4)
 #

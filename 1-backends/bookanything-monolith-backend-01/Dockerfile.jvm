@@ -1,5 +1,8 @@
 # ==============================================================================
-# Build Stage - Spring Boot 3.5 Kotlin Maven Multi-Stage Builder (Java 21)
+# Build Stage - Spring Boot 4 Kotlin Maven Multi-Stage Builder (Java 25)
+#
+# JVM variant of the backend image: the default one the Tekton pipeline builds (fast). The
+# native variant is Dockerfile.native, selected with "[native]" in the PR title.
 # ==============================================================================
 FROM maven:3.9-eclipse-temurin-25 AS builder
 
