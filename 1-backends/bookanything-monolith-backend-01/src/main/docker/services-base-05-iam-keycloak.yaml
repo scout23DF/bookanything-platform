@@ -27,6 +27,7 @@ services:
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
+      KC_CACHE: "local"
 
       KC_HTTP_PORT: ${ENV_KC_MAIN0_HTTP_PORT}
       KC_HTTPS_PORT: ${ENV_KC_MAIN0_HTTPS_PORT}
@@ -42,8 +43,8 @@ services:
       # JAVA_TOOL_OPTIONS: ${ENV_KC_MAIN0_JAVA_TOOL_OPTIONS}
       # JAVA_OPTS: ${ENV_KC_MAIN0_JAVA_OPTS}
       # JAVA_OPTS_APPEND: ${ENV_KC_MAIN0_JAVA_OPTS_APPEND}
-    command: 'start-dev --import-realm --verbose'
-    # command: start --import-realm --verbose
+    command: 'start --import-realm --verbose'
+    # command: start-dev --import-realm --verbose
     ports:
       - '127.0.0.1:9080:9080'
       - '127.0.0.1:9443:9443'
