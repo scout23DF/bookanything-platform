@@ -25,7 +25,7 @@ class WikipediaSummaryProvider(
     override val providerId: String = "WIKIPEDIA"
     override val order: Int = 10
 
-    override fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
+    override suspend fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
         val name = geoLocation.name.trim()
         val parent = parentName?.trim()
 
@@ -97,8 +97,8 @@ class WikipediaSummaryProvider(
         return titles.distinct()
     }
 
-    private fun fetchWikipediaExtract(lang: String, encodedTitle: String): String? {
-        val json = http.getString("https://$lang.wikipedia.org/api/rest_v1/page/summary/$encodedTitle") ?: return null
+    private suspend fun fetchWikipediaExtract(lang: String, encodedTitle: String): String? {
+        val json = http.getStringSuspend("https://$lang.wikipedia.org/api/rest_v1/page/summary/$encodedTitle") ?: return null
         return try {
             val node: JsonNode = objectMapper.readTree(json)
             if (node.path("type").asText() == "disambiguation") return null

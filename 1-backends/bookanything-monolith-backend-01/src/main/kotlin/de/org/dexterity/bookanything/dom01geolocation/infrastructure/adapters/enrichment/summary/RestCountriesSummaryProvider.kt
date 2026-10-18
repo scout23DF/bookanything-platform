@@ -1,6 +1,7 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.summary
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.CancellationException
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
@@ -27,7 +28,7 @@ class RestCountriesSummaryProvider(
         return geoLocation.type == GeoLocationType.COUNTRY
     }
 
-    override fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
+    override suspend fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
         val code = geoLocation.alias ?: geoLocation.friendlyId
         val cleanCode = code.trim().lowercase(Locale.ROOT)
         if (cleanCode.length !in 2..3 || !cleanCode.all { it.isLetter() }) {
@@ -36,7 +37,7 @@ class RestCountriesSummaryProvider(
 
         val url = "https://restcountries.com/v3.1/alpha/$cleanCode"
         return try {
-            val json = http.getString(url) ?: return null
+            val json = http.getStringSuspend(url) ?: return null
 
             val root: JsonNode = objectMapper.readTree(json)
             val countryNode = if (root.isArray && root.size() > 0) root[0] else root
@@ -74,6 +75,8 @@ class RestCountriesSummaryProvider(
 
             logger.info("RestCountriesSummaryProvider: Successfully compiled demographic summary for '$commonName'")
             summary.take(2000)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.debug("RestCountriesSummaryProvider: Error fetching country data for '$code': ${e.message}")
             null

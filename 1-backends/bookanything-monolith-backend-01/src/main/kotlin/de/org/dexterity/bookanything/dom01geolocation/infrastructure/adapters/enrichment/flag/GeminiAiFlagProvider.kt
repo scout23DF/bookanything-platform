@@ -4,6 +4,9 @@ import de.org.dexterity.bookanything.dom01geolocation.application.services.GeoLo
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.SearchEngineInIAProxyPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationFlagProvider
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.core.annotation.Order
@@ -21,7 +24,10 @@ class GeminiAiFlagProvider(
     override val providerId: String = "GEMINI_IA"
     override val order: Int = 50
 
-    override fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
+    // Costs quota: only asked after the free providers came up empty, never in parallel with them.
+    override val hedgeable: Boolean = false
+
+    override suspend fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
         val name = geoLocation.name
         val type = geoLocation.type
         val code = geoLocation.alias ?: geoLocation.friendlyId
@@ -46,7 +52,7 @@ class GeminiAiFlagProvider(
 
         return try {
             logger.info("GeminiAiFlagProvider: Requesting AI vexillological synthesis for '$name' ($type)...")
-            val raw = searchEngineInIAProxyPort.simpleSearchByPrompt(prompt) ?: return null
+            val raw = withContext(Dispatchers.IO) { searchEngineInIAProxyPort.simpleSearchByPrompt(prompt) } ?: return null
             val svg = extractSvg(raw)
             if (svg == null) {
                 logger.warn("GeminiAiFlagProvider: response for '$name' had no complete <svg>...</svg> block (${raw.length} chars)")
@@ -63,6 +69,8 @@ class GeminiAiFlagProvider(
                 mimeType = "image/svg+xml",
                 sourceUrl = "ai://gemini/vector-flag"
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             val rootCause = NestedExceptionUtils.getMostSpecificCause(e)
             logger.warn("GeminiAiFlagProvider: AI flag generation failed for '$name': [${rootCause.javaClass.simpleName}] ${rootCause.message}")

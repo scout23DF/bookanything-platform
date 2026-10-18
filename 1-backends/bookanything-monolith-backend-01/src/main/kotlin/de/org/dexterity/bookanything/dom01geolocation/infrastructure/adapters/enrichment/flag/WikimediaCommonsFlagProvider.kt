@@ -79,7 +79,7 @@ class WikimediaCommonsFlagProvider(
         "DE-TH" to "Flag_of_Thuringia.svg"
     )
 
-    override fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
+    override suspend fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
         val name = geoLocation.name
         val code = (geoLocation.alias ?: geoLocation.friendlyId).trim().uppercase(Locale.ROOT)
         val type = geoLocation.type
@@ -111,8 +111,8 @@ class WikimediaCommonsFlagProvider(
         return brazilStateFlagFiles[key] ?: germanyStateFlagFiles[key]
     }
 
-    private fun download(name: String, code: String, type: GeoLocationType, svgUrl: String): GeoLocationFlagResult? {
-        val bytes = http.getBytes(svgUrl) ?: return null
+    private suspend fun download(name: String, code: String, type: GeoLocationType, svgUrl: String): GeoLocationFlagResult? {
+        val bytes = http.getBytesSuspend(svgUrl) ?: return null
         val content = String(bytes, StandardCharsets.UTF_8)
         if (!content.contains("<svg", ignoreCase = true)) {
             logger.warn("WikimediaCommonsFlagProvider: payload from $svgUrl is not an SVG")
@@ -130,9 +130,9 @@ class WikimediaCommonsFlagProvider(
         )
     }
 
-    private fun findSvgFromWikipediaSummary(title: String): String? {
+    private suspend fun findSvgFromWikipediaSummary(title: String): String? {
         val encoded = URLEncoder.encode(title.replace(" ", "_"), StandardCharsets.UTF_8)
-        val json = http.getString("https://en.wikipedia.org/api/rest_v1/page/summary/$encoded") ?: return null
+        val json = http.getStringSuspend("https://en.wikipedia.org/api/rest_v1/page/summary/$encoded") ?: return null
         val thumbSrc = runCatching { objectMapper.readTree(json).path("thumbnail").path("source").asText("") }.getOrDefault("")
         if (!thumbSrc.contains(".svg", ignoreCase = true)) return null
         // ".../commons/thumb/5/5c/Flag.svg/500px-Flag.svg.png" -> ".../commons/5/5c/Flag.svg"

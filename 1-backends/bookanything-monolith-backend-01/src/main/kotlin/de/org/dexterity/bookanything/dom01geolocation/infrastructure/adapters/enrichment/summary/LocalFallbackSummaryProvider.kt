@@ -15,7 +15,7 @@ class LocalFallbackSummaryProvider : IGeoLocationSummaryProvider {
     override val providerId: String = "LOCAL_FALLBACK"
     override val order: Int = 999
 
-    override fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String {
+    override suspend fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String {
         val name = geoLocation.name
         val type = geoLocation.type.name
         val code = geoLocation.alias ?: geoLocation.friendlyId

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.GeoLocationType
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http.ResilientHttpFetcher
+import kotlinx.coroutines.CancellationException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URLEncoder
@@ -46,12 +47,14 @@ class WikidataGeoResolver(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val cache = ConcurrentHashMap<String, Optional<WikidataGeoInfo>>()
 
-    fun resolve(geoLocation: IGeoLocationModel): WikidataGeoInfo? {
+    suspend fun resolve(geoLocation: IGeoLocationModel): WikidataGeoInfo? {
         val (property, code) = isoStatementFor(geoLocation) ?: return null
         val key = "$property=$code"
         cache[key]?.let { return it.orElse(null) }
         return try {
             lookup(property, code).also { cache[key] = Optional.ofNullable(it) }
+        } catch (e: CancellationException) {
+            throw e // a cancelled lookup is not a failed one
         } catch (e: Exception) {
             // Transient (HTTP error, timeout, bad payload): not cached, retried on next call.
             logger.warn("Wikidata lookup failed for $key: [${e.javaClass.simpleName}] ${e.message}")
@@ -60,8 +63,8 @@ class WikidataGeoResolver(
     }
 
     /** Returns null when Wikidata has no such item; throws when Wikidata couldn't be reached. */
-    private fun lookup(property: String, code: String): WikidataGeoInfo? {
-        val search = http.getString(api(mapOf(
+    private suspend fun lookup(property: String, code: String): WikidataGeoInfo? {
+        val search = http.getStringSuspend(api(mapOf(
             "action" to "query", "list" to "search", "srlimit" to "1",
             "srsearch" to "haswbstatement:$property=$code"
         ))) ?: throw IllegalStateException("search request failed")
@@ -71,7 +74,7 @@ class WikidataGeoResolver(
             return null
         }
 
-        val entityJson = http.getString(api(mapOf(
+        val entityJson = http.getStringSuspend(api(mapOf(
             "action" to "wbgetentities", "ids" to qid,
             "props" to "claims|sitelinks", "sitefilter" to "ptwiki|enwiki"
         ))) ?: throw IllegalStateException("wbgetentities request failed")

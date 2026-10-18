@@ -26,7 +26,7 @@ class FlagCdnProvider(
         return geoLocation.type == GeoLocationType.COUNTRY
     }
 
-    override fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
+    override suspend fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult? {
         val name = geoLocation.name
         val code = geoLocation.alias ?: geoLocation.friendlyId
         val directIso = resolveIso2(code) ?: return null
@@ -64,7 +64,7 @@ class FlagCdnProvider(
         return iso2?.lowercase(Locale.ROOT)
     }
 
-    private fun downloadBytes(url: String): ByteArray? = http.getBytes(url)
+    private suspend fun downloadBytes(url: String): ByteArray? = http.getBytesSuspend(url)
 
     companion object {
         // Full ISO 3166-1 alpha-3 -> alpha-2 table from the JDK (was a hand-written 17-country list).

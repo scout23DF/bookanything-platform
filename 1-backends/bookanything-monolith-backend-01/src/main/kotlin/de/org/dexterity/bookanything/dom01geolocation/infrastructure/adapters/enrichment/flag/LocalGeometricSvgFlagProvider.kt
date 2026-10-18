@@ -18,7 +18,7 @@ class LocalGeometricSvgFlagProvider : IGeoLocationFlagProvider {
     override val providerId: String = "LOCAL_FALLBACK"
     override val order: Int = 999
 
-    override fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult {
+    override suspend fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult {
         val name = geoLocation.name
         val type = geoLocation.type
         val code = geoLocation.alias ?: geoLocation.friendlyId
