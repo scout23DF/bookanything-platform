@@ -21,15 +21,21 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
 import org.springframework.transaction.PlatformTransactionManager
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GeoLocationCleanupServiceTest {
 
     private val crud = mockk<GeoLocationCRUDService>(relaxed = true)
@@ -37,7 +43,7 @@ class GeoLocationCleanupServiceTest {
     private val assetCrud = mockk<AssetCRUDService>(relaxed = true)
     private val corporate = mockk<CorporateStoragePort>(relaxed = true)
     private val service = GeoLocationCleanupService(
-        crud, assets, assetCrud, corporate, mockk<PlatformTransactionManager>(relaxed = true), "geodata", "reports"
+        crud, assets, assetCrud, corporate, mockk<PlatformTransactionManager>(relaxed = true), "geodata", "reports", 4
     )
 
     private val continent = ContinentModel(GeoLocationId(1), "SA", "Americas")
@@ -175,5 +181,30 @@ class GeoLocationCleanupServiceTest {
     fun `remaining counts what is still in the database`() {
         every { assets.findByStorageKeyStartingWith("images/geolocations/177/", any()) } returns PageImpl(listOf(asset(1, "images/geolocations/177/m.svg")))
         assertEquals(Pair(2, 1), service.remaining(CleanupItem("BRA", 1)))
+    }
+
+    @Test
+    fun `deleteAssetsConcurrently deletes assets in parallel waves bounded by Semaphore`() = runTest {
+        val inFlight = AtomicInteger(0)
+        val peakInFlight = AtomicInteger(0)
+
+        coEvery { assetCrud.deleteAsset(any()) } coAnswers {
+            val current = inFlight.incrementAndGet()
+            peakInFlight.updateAndGet { maxOf(it, current) }
+            try {
+                delay(1_000)
+                true
+            } finally {
+                inFlight.decrementAndGet()
+            }
+        }
+
+        // 8 assets, each taking 1,000ms virtual time, with Semaphore(4) -> 2 waves = 2,000ms virtual time (not 8,000ms)
+        val eightAssets = (1L..8L).map { asset(it, "images/geolocations/177/file-$it.svg") }
+        val deletedCount = service.deleteAssetsConcurrently(eightAssets)
+
+        assertEquals(8, deletedCount)
+        assertEquals(2_000L, currentTime, "8 deletes of 1,000ms with Semaphore(4) must complete in 2 waves (2,000ms virtual time)")
+        assertEquals(4, peakInFlight.get(), "Concurrency must be capped at 4 by Semaphore")
     }
 }

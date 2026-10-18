@@ -13,6 +13,10 @@ spring:
         name: BookAnythingBackendApplication
     main:
         allow-bean-definition-overriding: true
+    mvc:
+        async:
+            # the Companion's SSE progress stream outlives Tomcat's default 30 s async timeout
+            request-timeout: 900000
     servlet:
         multipart:
             max-file-size: 50MB

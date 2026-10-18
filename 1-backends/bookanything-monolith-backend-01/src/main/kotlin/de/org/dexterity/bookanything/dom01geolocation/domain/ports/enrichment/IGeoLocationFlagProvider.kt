@@ -10,5 +10,11 @@ interface IGeoLocationFlagProvider {
     val providerId: String
     val order: Int
     fun supports(geoLocation: IGeoLocationModel): Boolean = true
-    fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult?
+    /**
+     * False for providers with a cost or a hard quota (Gemini): the chain only asks them after the
+     * free ones came up empty, never in parallel with them.
+     */
+    val hedgeable: Boolean get() = true
+
+    suspend fun getFlag(geoLocation: IGeoLocationModel, parentName: String?): GeoLocationFlagResult?
 }

@@ -10,6 +10,8 @@ import de.org.dexterity.bookanything.dom02assetmanager.domain.models.*
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -26,7 +28,6 @@ class AssetCRUDService(
     private val eventPublisher: EventPublisherPort
 ) {
 
-    @Transactional
     suspend fun uploadAssetFromMultipartFile(
         uploadedMultipartFile: MultipartFile,
         bucketName: String?,
@@ -74,13 +75,26 @@ class AssetCRUDService(
         return assetRepository.save(asset)
     }
 
-    @Transactional
+    /**
+     * Deletes an asset from object storage (MinIO) and then removes its catalog row.
+     *
+     * Intentionally NOT annotated with `@Transactional`: with an imperative `JpaTransactionManager`,
+     * `@Transactional` on a `suspend` function commits before the coroutine body executes (see
+     * `TransactionalSuspendBehaviorTest`), and holding a database transaction open across remote S3/MinIO
+     * I/O would starve the JDBC connection pool. Instead, the read and the delete each run in their own
+     * short adapter-level transaction on [Dispatchers.IO], separated from the suspending storage call.
+     */
     suspend fun deleteAsset(id: Long): Boolean {
-        val asset = assetRepository.findById(id).orElse(null) ?: return false
+        val asset = withContext(Dispatchers.IO) {
+            assetRepository.findById(id).orElse(null)
+        } ?: return false
 
         storageProvider.delete(asset.bucket.name, asset.storageKey)
-        assetRepository.delete(asset)
-        
+
+        withContext(Dispatchers.IO) {
+            assetRepository.delete(asset)
+        }
+
         return true
     }
 

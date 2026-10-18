@@ -19,6 +19,9 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.temporal.failure.ApplicationFailure
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.LoggerFactory
@@ -110,7 +113,7 @@ class GeoLocationArtifactsActivitiesImpl(
         val (localMapSvg, worldHighlightSvg) = generateSvgs(geoLocationId, mechanism, name, type, friendlyId, alias, boundary)
 
         logger.info("Activity: Uploading SVG maps to Tenant MinIO for #$geoLocationId...")
-        val (localAsset, worldAsset) = runBlocking {
+        val (localAsset, worldAsset) = runBlocking(Dispatchers.IO) {
             assetIntegrationService.saveGeoLocationMapSvgs(geoLocation, localMapSvg, worldHighlightSvg)
         }
         logger.info("Activity: Both SVGs successfully persisted in Tenant MinIO (Local: Asset #${localAsset.id}, World: Asset #${worldAsset.id})")
@@ -162,7 +165,7 @@ class GeoLocationArtifactsActivitiesImpl(
         val parentName = parentNameOf(geoLocation)
         logger.info("Activity: Resolving official flag for #$geoLocationId (${geoLocation.name})...")
         val flagResult = flagService.obtainFlag(geoLocation, parentName)
-        val flagAsset = runBlocking {
+        val flagAsset = runBlocking(Dispatchers.IO) {
             assetIntegrationService.saveGeoLocationFlag(geoLocation, flagResult.rawBytes, flagResult.isSvg)
         }
         logger.info("Activity: Flag successfully persisted in Tenant MinIO as Asset #${flagAsset.id} (key: ${flagAsset.storageKey})")
@@ -205,10 +208,16 @@ class GeoLocationArtifactsActivitiesImpl(
             )
         val parentName = parentNameOf(geoLocation)
 
-        // The previous steps stored the content; load it here instead of receiving it through the history.
-        val localMapSvg = runBlocking { assetIntegrationService.readAssetText(maps.localMapAssetId!!) }
-        val worldHighlightSvg = runBlocking { assetIntegrationService.readAssetText(maps.worldHighlightAssetId!!) }
-        val flagBytes = runBlocking { assetIntegrationService.readAssetBytes(flag.flagAssetId) }
+        // The previous steps stored the content; load all three concurrently via a single runBlocking bridge
+        // at the Temporal activity boundary (if any read fails, coroutineScope cancels the sibling reads).
+        val (localMapSvg, worldHighlightSvg, flagBytes) = runBlocking(Dispatchers.IO) {
+            coroutineScope {
+                val localDeferred = async { assetIntegrationService.readAssetText(maps.localMapAssetId!!) }
+                val worldDeferred = async { assetIntegrationService.readAssetText(maps.worldHighlightAssetId!!) }
+                val flagDeferred = async { assetIntegrationService.readAssetBytes(flag.flagAssetId) }
+                Triple(localDeferred.await(), worldDeferred.await(), flagDeferred.await())
+            }
+        }
         val flagImageContent =
             if (flag.isSvg) String(flagBytes, Charsets.UTF_8)
             else "data:image/png;base64," + Base64.getEncoder().encodeToString(flagBytes)
@@ -248,7 +257,7 @@ class GeoLocationArtifactsActivitiesImpl(
         val pdfBytes = renderPdf(mapOf("template" to mapOf("name" to jsreportDetailTemplateName), "data" to renderData))
         logger.info("Activity: JSReport rendered detail PDF successfully (Size: ${pdfBytes.size} bytes)")
 
-        val reportAsset = runBlocking { assetIntegrationService.saveGeoLocationReportPdf(geoLocation, pdfBytes) }
+        val reportAsset = runBlocking(Dispatchers.IO) { assetIntegrationService.saveGeoLocationReportPdf(geoLocation, pdfBytes) }
         return ReportStepResult(
             reportAssetId = reportAsset.id!!,
             reportUrl = s3Url(reportAsset.bucket.name, reportAsset.storageKey)
@@ -280,7 +289,7 @@ class GeoLocationArtifactsActivitiesImpl(
 
     override fun copyReportToCorporateStorage(geoLocationId: Long, reportAssetId: Long): String {
         val geoLocation = load(geoLocationId)
-        val pdfBytes = runBlocking { assetIntegrationService.readAssetBytes(reportAssetId) }
+        val pdfBytes = runBlocking(Dispatchers.IO) { assetIntegrationService.readAssetBytes(reportAssetId) }
         val minioClient = MinioClient.builder()
             .endpoint(corporateMinioEndpoint)
             .credentials(corporateMinioAccessKey, corporateMinioSecretKey)

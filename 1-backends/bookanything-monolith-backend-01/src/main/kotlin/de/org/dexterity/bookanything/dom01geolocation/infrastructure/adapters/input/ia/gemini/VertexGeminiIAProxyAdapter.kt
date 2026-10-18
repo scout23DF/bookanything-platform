@@ -1,17 +1,19 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.ia.gemini
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.SearchEngineInIAProxyPort
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -22,15 +24,18 @@ import java.util.concurrent.atomic.AtomicInteger
  * internally with backoff, and this adapter then slept and retried up to 3 more times on
  * top of that, per GeoLocation, per prompt (flag + summary).
  *
- * Now:
- * - Every call gets [callTimeout]; on expiry the caller gets null and moves on.
- * - At most [maxConcurrentCalls] calls in flight; extra callers fail fast instead of queueing
+ * Now implemented with Kotlin Coroutines:
+ * - Every call gets [callTimeout] via [withTimeoutOrNull]; on expiry the caller gets null and moves on,
+ *   while [runInterruptible] bridges coroutine timeout/cancellation to thread interruption on the blocking SDK call.
+ * - At most [maxConcurrentCalls] calls in flight via a non-blocking [Semaphore] (`tryAcquire`) and
+ *   `Dispatchers.IO.limitedParallelism(maxConcurrentCalls)`; extra callers fail fast instead of queueing
  *   behind hung calls.
+ * - External [CancellationException] from parent scopes is always rethrown to preserve structured concurrency.
  * - Circuit breaker: a rate limit opens it for the server's suggested retry delay (bounded by
  *   [minCooldown]..[maxCooldown]), daily-quota exhaustion for [dailyQuotaCooldown], and
  *   [timeoutsToOpen] consecutive timeouts for [maxCooldown]. While open, calls return null
  *   immediately, so the rest of a batch doesn't pay the same wait again.
- * - Returns null on any failure (never throws): all callers already treat null as "no answer".
+ * - Returns null on any non-cancellation failure (never throws): all callers already treat null as "no answer".
  */
 class VertexGeminiIAProxyAdapter(
     private val chatClient: ChatClient,
@@ -39,55 +44,70 @@ class VertexGeminiIAProxyAdapter(
     private val maxCooldown: Duration = Duration.ofMinutes(5),
     private val dailyQuotaCooldown: Duration = Duration.ofHours(1),
     private val maxConcurrentCalls: Int = 2,
-    private val timeoutsToOpen: Int = 2
+    private val timeoutsToOpen: Int = 2,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val clock: Clock = Clock.systemUTC(),
+    private val callExecutor: (suspend (String) -> String?)? = null
 ) : SearchEngineInIAProxyPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val executor = ThreadPoolExecutor(
-        maxConcurrentCalls, maxConcurrentCalls, 60, TimeUnit.SECONDS, SynchronousQueue()
-    ) { runnable -> Thread(runnable, "gemini-call").apply { isDaemon = true } }
+    private val bulkhead = Semaphore(maxConcurrentCalls)
+    private val geminiDispatcher = ioDispatcher.limitedParallelism(maxConcurrentCalls)
 
     @Volatile
     private var openUntil: Instant = Instant.EPOCH
     private val consecutiveTimeouts = AtomicInteger()
 
-    override fun simpleSearchByPrompt(promptToSearch: String): String? {
-        val now = Instant.now()
+    private data class CallOutcome(val content: String?)
+
+    override fun simpleSearchByPrompt(promptToSearch: String): String? =
+        runBlocking { simpleSearchByPromptSuspend(promptToSearch) }
+
+    override suspend fun simpleSearchByPromptSuspend(promptToSearch: String): String? {
+        val now = clock.instant()
         if (now.isBefore(openUntil)) {
             logger.info("Gemini circuit open for another ${Duration.between(now, openUntil).seconds}s, skipping call")
             return null
         }
 
-        val startTime = System.currentTimeMillis()
-        val future = try {
-            CompletableFuture.supplyAsync({
-                chatClient.prompt().user(promptToSearch).call().content()
-            }, executor)
-        } catch (e: RejectedExecutionException) {
+        if (!bulkhead.tryAcquire()) {
             logger.warn("Gemini: $maxConcurrentCalls calls already in flight, skipping call")
             return null
         }
 
+        val startTime = clock.millis()
         return try {
-            val response = future.get(callTimeout.toMillis(), TimeUnit.MILLISECONDS)
+            val outcome = withTimeoutOrNull(callTimeout.toMillis()) {
+                val response = if (callExecutor != null) {
+                    withContext(geminiDispatcher) { callExecutor.invoke(promptToSearch) }
+                } else {
+                    runInterruptible(geminiDispatcher) {
+                        chatClient.prompt().user(promptToSearch).call().content()
+                    }
+                }
+                CallOutcome(response)
+            }
+
+            if (outcome == null) {
+                val timeouts = consecutiveTimeouts.incrementAndGet()
+                logger.warn("Gemini call exceeded ${callTimeout.seconds}s budget ($timeouts consecutive)")
+                if (timeouts >= timeoutsToOpen) open(maxCooldown, "$timeouts consecutive timeouts")
+                null
+            } else {
+                consecutiveTimeouts.set(0)
+                val response = outcome.content
+                logger.info("Gemini call succeeded in ${clock.millis() - startTime}ms (${response?.length ?: 0} chars)")
+                response
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
             consecutiveTimeouts.set(0)
-            logger.info("Gemini call succeeded in ${System.currentTimeMillis() - startTime}ms (${response?.length ?: 0} chars)")
-            response
-        } catch (e: TimeoutException) {
-            future.cancel(true)
-            val timeouts = consecutiveTimeouts.incrementAndGet()
-            logger.warn("Gemini call exceeded ${callTimeout.seconds}s budget ($timeouts consecutive)")
-            if (timeouts >= timeoutsToOpen) open(maxCooldown, "$timeouts consecutive timeouts")
+            handleFailure(e, clock.millis() - startTime)
             null
-        } catch (e: ExecutionException) {
-            consecutiveTimeouts.set(0)
-            handleFailure(e.cause ?: e, System.currentTimeMillis() - startTime)
-            null
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
-            future.cancel(true)
-            null
+        } finally {
+            bulkhead.release()
         }
     }
 
@@ -117,7 +137,7 @@ class VertexGeminiIAProxyAdapter(
     }
 
     private fun open(cooldown: Duration, reason: String) {
-        openUntil = Instant.now().plus(cooldown)
+        openUntil = clock.instant().plus(cooldown)
         logger.warn("Gemini circuit opened for ${cooldown.seconds}s: $reason. Enrichment falls back to other providers meanwhile.")
     }
 }

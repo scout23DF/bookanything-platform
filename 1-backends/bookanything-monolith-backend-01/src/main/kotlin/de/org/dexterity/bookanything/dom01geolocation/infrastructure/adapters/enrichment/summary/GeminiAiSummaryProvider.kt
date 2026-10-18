@@ -3,6 +3,9 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.e
 import de.org.dexterity.bookanything.dom01geolocation.domain.models.IGeoLocationModel
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.SearchEngineInIAProxyPort
 import de.org.dexterity.bookanything.dom01geolocation.domain.ports.enrichment.IGeoLocationSummaryProvider
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.core.annotation.Order
@@ -19,7 +22,10 @@ class GeminiAiSummaryProvider(
     override val providerId: String = "GEMINI_IA"
     override val order: Int = 50
 
-    override fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
+    // Costs quota: only asked after the free providers came up empty, never in parallel with them.
+    override val hedgeable: Boolean = false
+
+    override suspend fun getSummary(geoLocation: IGeoLocationModel, parentName: String?): String? {
         val name = geoLocation.name
         val type = geoLocation.type.name
         val code = geoLocation.alias ?: geoLocation.friendlyId
@@ -46,7 +52,7 @@ class GeminiAiSummaryProvider(
 
         return try {
             logger.info("GeminiAiSummaryProvider: Requesting AI synthesis for '$name' ($type)...")
-            val aiResponse = searchEngineInIAProxyPort.simpleSearchByPrompt(prompt)
+            val aiResponse = withContext(Dispatchers.IO) { searchEngineInIAProxyPort.simpleSearchByPrompt(prompt) }
 
             // Drop markdown code fences the model sometimes wraps plain text in.
             val summary = aiResponse
@@ -58,6 +64,8 @@ class GeminiAiSummaryProvider(
             } else {
                 null
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             val rootCause = NestedExceptionUtils.getMostSpecificCause(e)
             logger.warn("GeminiAiSummaryProvider: AI call failed for '$name': [${rootCause.javaClass.simpleName}] ${rootCause.message}")
