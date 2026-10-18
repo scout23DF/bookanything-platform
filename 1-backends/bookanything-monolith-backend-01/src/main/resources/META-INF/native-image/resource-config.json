@@ -15,6 +15,9 @@
       },
       {
         "pattern": "spatial_ref_sys\\.txt"
+      },
+      {
+        "pattern": "public/.*"
       }
     ]
   },

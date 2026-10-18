@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookAnything — AI Voice Companion (GeoLocation Batch Import)</title>
+  <!-- Vendorized HTMX + SSE Extension (zero CDN dependency, native-image safe) -->
+  <script src="/companion/htmx.min.js"></script>
+  <script src="/companion/sse.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #334155;
+      --border: #475569;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 {
+      font-size: 1.45rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 6px 0 0 0;
+    }
+    .arch-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .pill {
+      font-size: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+    .card h2 {
+      font-size: 1.05rem;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .presets-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .presets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .btn-preset {
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-preset:hover {
+      border-color: var(--primary);
+      background: #1e293b;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .transcript-input {
+      flex: 1;
+      min-width: 260px;
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+    }
+    .transcript-input:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+    select.lang-select {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 0.85rem;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #0f172a;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #7dd3fc;
+    }
+    .btn-mic {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-mic.recording {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: pulse-rec 1.2s infinite;
+    }
+    .btn-confirm {
+      background: var(--success);
+      color: #052e16;
+    }
+    .btn-confirm:hover:not(:disabled) {
+      background: #4ade80;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+    @keyframes pulse-rec {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+    .status-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .status-note.warn {
+      color: var(--warning);
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .badge-gemini { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #a855f7; }
+    .badge-rules  { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid #38bdf8; }
+    .badge-none   { background: rgba(239, 68, 68, 0.2);  color: #fca5a5; border: 1px solid #ef4444; }
+
+    .warnings-list {
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 3px solid var(--warning);
+      padding: 8px 12px;
+      margin: 10px 0;
+      font-size: 0.85rem;
+      color: #fde68a;
+      list-style: inside disc;
+    }
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    /* Styles for server-rendered SSE HTML fragment (CompanionProgressHtml.kt) */
+    .companion-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .companion-progress progress {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      accent-color: var(--primary);
+    }
+    .companion-progress > span {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: #0f172a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+    th {
+      background: #1e293b;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    /* Row states emitted by CompanionProgressHtml.render() */
+    tr.st-pending td:last-child { color: var(--muted); }
+    tr.st-ingesting td:last-child {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    tr.st-ingested td:last-child { color: #93c5fd; }
+    tr.st-generating_artifacts td:last-child {
+      color: #d8b4fe;
+      font-weight: 600;
+    }
+    tr.st-artifacts_ready td:last-child { color: #86efac; }
+    tr.st-completed td:last-child {
+      color: var(--success);
+      font-weight: 700;
+    }
+    tr.st-failed td:last-child {
+      color: var(--danger);
+      font-weight: 700;
+    }
+    .companion-progress p.done {
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid var(--success);
+      color: #bbf7d0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 4px 0 0 0;
+      font-weight: 600;
+    }
+    .companion-progress p.done a {
+      color: #38bdf8;
+      margin-left: 8px;
+      text-decoration: underline;
+    }
+    .companion-progress p.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--danger);
+      color: #fecaca;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 4px 0 0 0;
+    }
+    .hidden { display: none !important; }
+    .workflow-meta {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-row">
+        <h1>🎙️ BookAnything — AI Voice Companion</h1>
+        <span class="pill">Kotlin Coroutines + Flow SSE + HTMX</span>
+      </div>
+      <p class="subtitle">
+        Speak or select a command to extract a typed <code>ImportIntent</code>, review the guardrail confirmation, and stream live Temporal workflow progress over Server-Sent Events.
+      </p>
+      <div class="arch-pills">
+        <span class="pill">1. Web Speech API / Preset</span>
+        <span class="pill">2. POST /companion/interpret (suspend + 5s Gemini Timeout + Rules Fallback)</span>
+        <span class="pill">3. Human Confirmation Guardrail</span>
+        <span class="pill">4. GET /workflows/{id}/stream (Flow + conflate + distinctUntilChanged)</span>
+      </div>
+    </header>
+
+    <!-- STEP 1: VOICE / TEXT COMMAND INPUT -->
+    <section class="card" aria-labelledby="step1-heading">
+      <h2 id="step1-heading">
+        <span>1. Voice or Text Command</span>
+        <span id="mic-support-badge" class="pill">Checking Web Speech API...</span>
+      </h2>
+
+      <span class="presets-label">
+        ⚡ One-Click Voice Presets (instant fallback when browser microphone is busy with Google Meet):
+      </span>
+      <div class="presets-row">
+        <button type="button" class="btn-preset"
+                data-transcript="Import Luxembourg levels 0 and 1">
+          🗣️ EN (Fast): "Import Luxembourg levels 0 and 1"
+        </button>
+        <button type="button" class="btn-preset"
+                data-transcript="Import Germany and Luxembourg level 0 and 1">
+          🗣️ EN (2 Countries): "Import Germany and Luxembourg level 0 and 1"
+        </button>
+        <button type="button" class="btn-preset"
+                data-transcript="Importiere Deutschland und Luxemburg bis Stufe 1">
+          🗣️ DE: "Importiere Deutschland und Luxemburg bis Stufe 1"
+        </button>
+        <button type="button" class="btn-preset"
+                data-transcript="Importar Portugal e Luxemburgo até o nível 1">
+          🗣️ PT: "Importar Portugal e Luxemburgo até o nível 1"
+        </button>
+      </div>
+
+      <form id="interpret-form" class="input-row">
+        <input id="transcript-input"
+               class="transcript-input"
+               type="text"
+               name="transcript"
+               placeholder="e.g. Import Germany and Luxembourg level 0 and 1"
+               value="Import Luxembourg levels 0 and 1"
+               autocomplete="off"
+               required />
+        <select id="speech-lang" class="lang-select" title="Speech recognition language">
+          <option value="en-US">🎙️ EN (en-US)</option>
+          <option value="de-DE">🎙️ DE (de-DE)</option>
+          <option value="pt-BR">🎙️ PT (pt-BR)</option>
+        </select>
+        <button id="mic-btn" type="button" class="btn btn-mic" title="Dictate command via Web Speech API">
+          🎙️ Speak
+        </button>
+        <button id="interpret-btn" type="submit" class="btn btn-primary">
+          ✨ Interpret Command
+        </button>
+      </form>
+      <div id="speech-status" class="status-note">
+        Tip: Click a preset above, type a sentence, or use <strong>🎙️ Speak</strong> (Chrome on <code>localhost</code>).
+      </div>
+    </section>
+
+    <!-- STEP 2: GUARDRAIL CONFIRMATION -->
+    <section id="confirm-card" class="card hidden" aria-labelledby="step2-heading">
+      <h2 id="step2-heading">
+        <span>2. Guardrail Review &amp; Confirmation</span>
+        <span id="interpreter-source-badge" class="badge badge-rules">RULES</span>
+      </h2>
+      <p id="intent-summary" class="subtitle" style="margin-bottom: 10px;"></p>
+      <ul id="intent-warnings" class="warnings-list hidden"></ul>
+
+      <div id="intent-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ISO3 Country</th>
+              <th>Location Level</th>
+              <th>Scope Description</th>
+            </tr>
+          </thead>
+          <tbody id="intent-items-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="confirm-actions">
+        <button id="confirm-btn" type="button" class="btn btn-confirm">
+          ✓ Confirm &amp; Start Batch Import Workflow
+        </button>
+        <button id="cancel-confirm-btn" type="button" class="btn btn-secondary">
+          ✕ Cancel
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: LIVE WORKFLOW PROGRESS (HTMX SSE) -->
+    <section id="progress-card" class="card hidden" aria-labelledby="step3-heading">
+      <h2 id="step3-heading">
+        <span>3. Live Workflow Progress (Kotlin <code>Flow</code> + HTMX SSE)</span>
+        <button id="disconnect-sse-btn" type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;">
+          ⏹ Disconnect SSE (Cancel Server Flow)
+        </button>
+      </h2>
+      <div class="workflow-meta">
+        <span id="workflow-id-label">Workflow ID: —</span>
+        <span id="stream-url-label">SSE Stream: —</span>
+      </div>
+
+      <!-- HTMX swaps server-rendered HTML fragments from CompanionProgressHtml.kt right here -->
+      <div id="sse-mount-root"></div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      const LEVEL_NAMES = {
+        0: 'Level 0 — Country Boundary',
+        1: 'Level 1 — States / Provinces',
+        2: 'Level 2 — Cities / Municipalities',
+        3: 'Level 3 — Districts / Sub-divisions'
+      };
+
+      const form = document.getElementById('interpret-form');
+      const transcriptInput = document.getElementById('transcript-input');
+      const interpretBtn = document.getElementById('interpret-btn');
+      const micBtn = document.getElementById('mic-btn');
+      const speechLang = document.getElementById('speech-lang');
+      const speechStatus = document.getElementById('speech-status');
+      const micBadge = document.getElementById('mic-support-badge');
+
+      const confirmCard = document.getElementById('confirm-card');
+      const sourceBadge = document.getElementById('interpreter-source-badge');
+      const intentSummary = document.getElementById('intent-summary');
+      const intentWarnings = document.getElementById('intent-warnings');
+      const intentTbody = document.getElementById('intent-items-tbody');
+      const confirmBtn = document.getElementById('confirm-btn');
+      const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+
+      const progressCard = document.getElementById('progress-card');
+      const workflowIdLabel = document.getElementById('workflow-id-label');
+      const streamUrlLabel = document.getElementById('stream-url-label');
+      const sseMountRoot = document.getElementById('sse-mount-root');
+      const disconnectSseBtn = document.getElementById('disconnect-sse-btn');
+
+      let currentItems = [];
+
+      // 1. One-click preset buttons
+      document.querySelectorAll('.btn-preset').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          transcriptInput.value = btn.getAttribute('data-transcript') || '';
+          interpretCommand(transcriptInput.value);
+        });
+      });
+
+      // 2. Interpret form submission -> POST /api/v1/geolocations/companion/interpret
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        interpretCommand(transcriptInput.value);
+      });
+
+      async function interpretCommand(transcript) {
+        const clean = (transcript || '').trim();
+        if (!clean) return;
+
+        interpretBtn.disabled = true;
+        speechStatus.className = 'status-note';
+        speechStatus.textContent = 'Interpreting command via VoiceCommandInterpreterPort (Gemini 5s budget -> Rule-based fallback)...';
+
+        try {
+          const resp = await fetch('/api/v1/geolocations/companion/interpret', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ transcript: clean })
+          });
+          if (!resp.ok) {
+            throw new Error('HTTP ' + resp.status);
+          }
+          const data = await resp.json();
+          renderConfirmation(data);
+          speechStatus.textContent = 'Interpretation complete. Review the validated items below and click Confirm to start the workflow.';
+        } catch (err) {
+          speechStatus.className = 'status-note warn';
+          speechStatus.textContent = 'Failed to interpret command: ' + err.message;
+        } finally {
+          interpretBtn.disabled = false;
+        }
+      }
+
+      function renderConfirmation(data) {
+        currentItems = Array.isArray(data.items) ? data.items : [];
+        confirmCard.classList.remove('hidden');
+
+        const src = data.source || 'NONE';
+        sourceBadge.textContent = 'SOURCE: ' + src;
+        sourceBadge.className = 'badge ' + (
+          src === 'GEMINI' ? 'badge-gemini' : src === 'RULES' ? 'badge-rules' : 'badge-none'
+        );
+
+        intentSummary.textContent = data.summary
+          ? 'Validated summary: ' + data.summary
+          : 'No valid countries/levels recognized in transcript.';
+
+        const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+        intentWarnings.innerHTML = '';
+        if (warnings.length > 0) {
+          warnings.forEach((w) => {
+            const li = document.createElement('li');
+            li.textContent = w;
+            intentWarnings.appendChild(li);
+          });
+          intentWarnings.classList.remove('hidden');
+        } else {
+          intentWarnings.classList.add('hidden');
+        }
+
+        intentTbody.innerHTML = '';
+        if (currentItems.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 3;
+          td.style.color = '#fca5a5';
+          td.textContent = 'Nothing valid to import. Try another preset or specify a valid country and level (0–3).';
+          tr.appendChild(td);
+          intentTbody.appendChild(tr);
+          confirmBtn.disabled = true;
+        } else {
+          currentItems.forEach((item) => {
+            const tr = document.createElement('tr');
+            const tdCountry = document.createElement('td');
+            tdCountry.innerHTML = '<strong>' + escapeHtml(item.countrySlug) + '</strong>';
+            const tdLevel = document.createElement('td');
+            tdLevel.textContent = String(item.locationLevel);
+            const tdDesc = document.createElement('td');
+            tdDesc.textContent = LEVEL_NAMES[item.locationLevel] || ('Level ' + item.locationLevel);
+            tr.appendChild(tdCountry);
+            tr.appendChild(tdLevel);
+            tr.appendChild(tdDesc);
+            intentTbody.appendChild(tr);
+          });
+          confirmBtn.disabled = false;
+        }
+      }
+
+      cancelConfirmBtn.addEventListener('click', () => {
+        currentItems = [];
+        confirmCard.classList.add('hidden');
+      });
+
+      // 3. Confirm -> POST /api/v1/geolocations/companion/confirm -> mount HTMX SSE stream
+      confirmBtn.addEventListener('click', async () => {
+        if (currentItems.length === 0) return;
+        confirmBtn.disabled = true;
+        try {
+          const resp = await fetch('/api/v1/geolocations/companion/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ items: currentItems })
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data.error || ('HTTP ' + resp.status));
+          }
+          mountHtmxSseStream(data.workflowId, data.streamUrl);
+        } catch (err) {
+          speechStatus.className = 'status-note warn';
+          speechStatus.textContent = 'Could not start workflow: ' + err.message;
+          confirmBtn.disabled = false;
+        }
+      });
+
+      function mountHtmxSseStream(workflowId, streamUrl) {
+        progressCard.classList.remove('hidden');
+        workflowIdLabel.textContent = 'Workflow ID: ' + workflowId;
+        streamUrlLabel.textContent = 'SSE Stream: ' + streamUrl;
+        disconnectSseBtn.disabled = false;
+
+        // Replace mount node with an HTMX SSE container; htmx-ext-sse swaps in the server HTML fragments
+        sseMountRoot.innerHTML =
+          '<div id="active-sse-stream" ' +
+          '     hx-ext="sse" ' +
+          '     sse-connect="' + escapeAttr(streamUrl) + '" ' +
+          '     sse-swap="progress,done" ' +
+          '     sse-close="done">' +
+          '  <div class="companion-progress">' +
+          '    <progress max="100" value="2"></progress>' +
+          '    <span>CONNECTING TO TEMPORAL WORKFLOW &middot; 0%</span>' +
+          '  </div>' +
+          '</div>';
+
+        if (window.htmx) {
+          window.htmx.process(sseMountRoot);
+        }
+      }
+
+      // 4. Cooperative Cancellation Demo: removing the HTMX SSE node closes EventSource and cancels the server Flow
+      disconnectSseBtn.addEventListener('click', () => {
+        sseMountRoot.innerHTML =
+          '<div class="companion-progress">' +
+          '  <span>SSE STREAM DISCONNECTED BY USER (Server-side Kotlin Flow collector cooperatively cancelled)</span>' +
+          '</div>';
+        disconnectSseBtn.disabled = true;
+      });
+
+      // 5. Browser Web Speech API integration (last layer, progressive enhancement)
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        micBadge.textContent = 'Web Speech API: Not available in this browser (use Presets/Text)';
+        micBtn.disabled = true;
+      } else {
+        micBadge.textContent = 'Web Speech API: Ready';
+        let recognition = null;
+        let isRecording = false;
+
+        micBtn.addEventListener('click', () => {
+          if (isRecording && recognition) {
+            recognition.stop();
+            return;
+          }
+          try {
+            recognition = new SpeechRecognition();
+            recognition.lang = speechLang.value || 'en-US';
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+              isRecording = true;
+              micBtn.classList.add('recording');
+              micBtn.textContent = '⏹ Stop';
+              speechStatus.className = 'status-note';
+              speechStatus.textContent = 'Listening (' + recognition.lang + ')... Speak your import command now.';
+            };
+
+            recognition.onresult = (event) => {
+              let transcript = '';
+              for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+              }
+              transcriptInput.value = transcript.trim();
+            };
+
+            recognition.onerror = (event) => {
+              speechStatus.className = 'status-note warn';
+              speechStatus.textContent =
+                'Microphone notice (' + event.error + '): If Google Meet is holding the mic, click any One-Click Voice Preset above!';
+            };
+
+            recognition.onend = () => {
+              const wasRecording = isRecording;
+              isRecording = false;
+              micBtn.classList.remove('recording');
+              micBtn.textContent = '🎙️ Speak';
+              if (wasRecording && transcriptInput.value.trim()) {
+                interpretCommand(transcriptInput.value);
+              }
+            };
+
+            recognition.start();
+          } catch (e) {
+            speechStatus.className = 'status-note warn';
+            speechStatus.textContent = 'Could not start speech recognition: ' + e.message;
+          }
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+      function escapeAttr(str) {
+        return escapeHtml(str).replace(/'/g, '&#39;');
+      }
+    })();
+  </script>
+</body>
+</html>
