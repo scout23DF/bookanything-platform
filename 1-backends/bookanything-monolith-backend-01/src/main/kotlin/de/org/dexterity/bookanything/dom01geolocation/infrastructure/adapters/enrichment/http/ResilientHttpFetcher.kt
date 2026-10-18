@@ -1,12 +1,21 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.enrichment.http
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.net.URI
-import java.time.Duration
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,12 +30,18 @@ import java.util.concurrent.ConcurrentHashMap
  * - re-downloaded the same resources on every import.
  *
  * Behaviour:
- * - Per-host pacing: at most one request per [minIntervalMs] to the same host.
+ * - Per-host pacing: at most one request *start* per [minIntervalMs] to the same host.
+ * - Per-host concurrency: at most [maxConcurrentPerHost] requests in flight to the same host.
  * - 429/503: honours Retry-After (capped at [maxRetryWaitMs]), up to [maxRetries] retries.
  *   Other 5xx and network errors: one quick retry. 4xx (404 etc.): no retry.
  * - Successful responses up to [maxCacheableBytes] are cached (bounded LRU), as are 404s
  *   (negative cache), so re-imports and repeated lookups cost nothing.
  * - Every non-success is logged once at WARN (404 at DEBUG) with the HTTP status.
+ *
+ * Coroutines: [getBytesSuspend]/[getStringSuspend] never block a thread. Waiting for a pacing slot
+ * or a Retry-After is a `delay`, the request timeout is a `withTimeout` and cancelling the caller
+ * cancels the in-flight HTTP call (the reactor subscription). [getBytes]/[getString] are bridges for
+ * the providers that are still blocking; they run the same code under `runBlocking`.
  */
 @Component
 class ResilientHttpFetcher(
@@ -40,13 +55,19 @@ class ResilientHttpFetcher(
     @Value("\${application.domain-settings.geolocation.enrichment.http.max-retry-wait-ms:5000}")
     private val maxRetryWaitMs: Long,
     @Value("\${application.domain-settings.geolocation.enrichment.http.cache-entries:500}")
-    private val cacheEntries: Int
+    private val cacheEntries: Int,
+    @Value("\${application.domain-settings.geolocation.enrichment.http.max-concurrent-per-host:4}")
+    private val maxConcurrentPerHost: Int
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val maxCacheableBytes = 256 * 1024 // bounds worst-case cache heap to ~cacheEntries * 256 KB
 
+    /** Clock used for pacing; tests replace it with the virtual time of `runTest`. */
+    internal var nowMs: () -> Long = System::currentTimeMillis
+
     private val nextSlotByHost = ConcurrentHashMap<String, Long>()
+    private val inFlightGateByHost = ConcurrentHashMap<String, Semaphore>()
     private val cache: MutableMap<String, CachedResponse> = Collections.synchronizedMap(
         object : LinkedHashMap<String, CachedResponse>(256, 0.75f, true) {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, CachedResponse>?) = size > cacheEntries
@@ -55,7 +76,7 @@ class ResilientHttpFetcher(
 
     private data class CachedResponse(val body: ByteArray?)
 
-    fun getBytes(url: String, accept: String? = null): ByteArray? {
+    suspend fun getBytesSuspend(url: String, accept: String? = null): ByteArray? {
         cache[url]?.let { return it.body }
 
         val uri = URI.create(url)
@@ -64,13 +85,16 @@ class ResilientHttpFetcher(
         while (true) {
             awaitHostSlot(host)
             try {
-                val bytes = webClient.get()
-                    .uri(uri)
-                    .headers { h -> if (accept != null) h.set("Accept", accept) }
-                    .retrieve()
-                    .bodyToMono(ByteArray::class.java)
-                    .timeout(Duration.ofMillis(timeoutMs))
-                    .block()
+                val bytes = gateFor(host).withPermit {
+                    withTimeout(timeoutMs) {
+                        webClient.get()
+                            .uri(uri)
+                            .headers { h -> if (accept != null) h.set("Accept", accept) }
+                            .retrieve()
+                            .bodyToMono(ByteArray::class.java)
+                            .awaitSingleOrNull()
+                    }
+                }
                 if (bytes != null && bytes.size <= maxCacheableBytes) cache[url] = CachedResponse(bytes)
                 return bytes
             } catch (e: WebClientResponseException) {
@@ -88,6 +112,16 @@ class ResilientHttpFetcher(
                 val waitMs = retryAfterMs(e) ?: (500L shl attempt)
                 logger.warn("HTTP $status for $url (attempt ${attempt + 1}), retrying in ${waitMs}ms")
                 pushHostSlot(host, waitMs)
+            } catch (e: TimeoutCancellationException) {
+                // Our own withTimeout is a failed attempt; a timeout/cancellation coming from the caller is not.
+                currentCoroutineContext().ensureActive()
+                if (attempt >= 1) {
+                    logger.warn("Request to $url timed out after ${timeoutMs}ms, giving up")
+                    return null
+                }
+                logger.debug("Request to $url timed out after ${timeoutMs}ms, retrying once")
+            } catch (e: CancellationException) {
+                throw e // never swallow cancellation: structured concurrency depends on it
             } catch (e: Exception) {
                 if (attempt >= 1) {
                     logger.warn("Request to $url failed: [${e.javaClass.simpleName}] ${e.message}")
@@ -99,8 +133,19 @@ class ResilientHttpFetcher(
         }
     }
 
+    suspend fun getStringSuspend(url: String, accept: String? = null): String? =
+        getBytesSuspend(url, accept)?.toString(Charsets.UTF_8)
+
+    /** Blocking bridge for callers that are not `suspend` yet. Prefer [getBytesSuspend]. */
+    fun getBytes(url: String, accept: String? = null): ByteArray? =
+        runBlocking { getBytesSuspend(url, accept) }
+
+    /** Blocking bridge for callers that are not `suspend` yet. Prefer [getStringSuspend]. */
     fun getString(url: String, accept: String? = null): String? =
         getBytes(url, accept)?.toString(Charsets.UTF_8)
+
+    private fun gateFor(host: String): Semaphore =
+        inFlightGateByHost.computeIfAbsent(host) { Semaphore(maxConcurrentPerHost) }
 
     private fun retryAfterMs(e: WebClientResponseException): Long? {
         val header = e.headers.getFirst("Retry-After") ?: return null
@@ -108,19 +153,24 @@ class ResilientHttpFetcher(
         return (seconds * 1000).coerceIn(0, maxRetryWaitMs)
     }
 
-    /** Blocks until this host's next request slot, then reserves the following one. */
-    private fun awaitHostSlot(host: String) {
+    /**
+     * Suspends until this host's next request slot, then reserves the following one.
+     *
+     * Reserving the slot is a single atomic `compute`, so no `Mutex` is needed: a lock would serialise
+     * the requests themselves, whereas pacing only has to space out their *starts*.
+     */
+    private suspend fun awaitHostSlot(host: String) {
         var waitMs = 0L
         nextSlotByHost.compute(host) { _, next ->
-            val now = System.currentTimeMillis()
+            val now = nowMs()
             val slot = maxOf(now, next ?: now)
             waitMs = slot - now
             slot + minIntervalMs
         }
-        if (waitMs > 0) Thread.sleep(waitMs)
+        if (waitMs > 0) delay(waitMs)
     }
 
     private fun pushHostSlot(host: String, delayMs: Long) {
-        nextSlotByHost.merge(host, System.currentTimeMillis() + delayMs) { a, b -> maxOf(a, b) }
+        nextSlotByHost.merge(host, nowMs() + delayMs) { a, b -> maxOf(a, b) }
     }
 }
