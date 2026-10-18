@@ -2,4 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.domain.ports
 
 interface SearchEngineInIAProxyPort {
     fun simpleSearchByPrompt(promptToSearch: String): String?
+
+    suspend fun simpleSearchByPromptSuspend(promptToSearch: String): String? =
+        simpleSearchByPrompt(promptToSearch)
 }
