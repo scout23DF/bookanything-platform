@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.input.web.controllers
 
+import de.org.dexterity.bookanything.dom01geolocation.application.workflow.BatchImportStarter
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationArtifactsLauncher
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionActivities
 import de.org.dexterity.bookanything.dom01geolocation.application.workflow.GeoLocationIngestionWorkflow
@@ -9,12 +10,9 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.GeoLocationDet
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.ImportProgressDto
 import io.temporal.client.WorkflowClient
 import io.temporal.client.WorkflowFailedException
-import io.temporal.client.WorkflowOptions
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Duration
-import java.util.UUID
 import java.util.concurrent.TimeoutException
 
 @RestController
@@ -23,30 +21,19 @@ class GeoLocationWorkflowController(
     private val workflowClient: WorkflowClient,
     private val activities: GeoLocationIngestionActivities,
     private val artifactsLauncher: GeoLocationArtifactsLauncher,
-    @Value("\${temporal.task-queue:GEOLOCATION_INGESTION_TASK_QUEUE}")
-    private val taskQueue: String
+    private val starter: BatchImportStarter
 ) {
 
     @PostMapping(value = ["", "/batch-import"])
     fun triggerBatchImportWorkflow(
         @RequestBody request: GeoLocationBatchImportRequest
     ): ResponseEntity<Map<String, Any>> {
-        val workflowId = "geo-import-${UUID.randomUUID()}"
-
-        val options = WorkflowOptions.newBuilder()
-            .setWorkflowId(workflowId)
-            .setTaskQueue(taskQueue)
-            .build()
-
-        val workflowStub = workflowClient.newWorkflowStub(GeoLocationIngestionWorkflow::class.java, options)
-
-        // Asynchronous start of workflow
-        WorkflowClient.start(workflowStub::executeBatchImport, request)
+        val workflowId = starter.start(request)
 
         return ResponseEntity.accepted().body(
             mapOf(
                 "workflowId" to workflowId,
-                "taskQueue" to taskQueue,
+                "taskQueue" to starter.taskQueue,
                 "statusUrl" to "/api/v1/geolocations/workflows/batch-import/$workflowId/status",
                 "message" to "GeoLocation batch import workflow accepted and running asynchronously in Temporal."
             )

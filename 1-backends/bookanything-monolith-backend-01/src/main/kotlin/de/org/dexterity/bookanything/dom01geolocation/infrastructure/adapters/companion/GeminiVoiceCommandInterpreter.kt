@@ -1,0 +1,54 @@
+package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.companion
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryMention
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.RawIntent
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.VoiceCommandInterpreterPort
+import de.org.dexterity.bookanything.dom01geolocation.domain.ports.SearchEngineInIAProxyPort
+import org.slf4j.LoggerFactory
+
+/**
+ * Asks Gemini to turn a free-form sentence (any language) into a small JSON document, and reads it back.
+ *
+ * The model only *proposes*: this class returns a [RawIntent] and nothing it says is trusted until the
+ * validator accepts it. Reading is done on the JSON tree (no reflection on DTOs), which also keeps the
+ * GraalVM native image simple. Any malformed answer is `null`, which makes the caller use the rules.
+ */
+class GeminiVoiceCommandInterpreter(
+    private val gemini: SearchEngineInIAProxyPort,
+    private val objectMapper: ObjectMapper
+) : VoiceCommandInterpreterPort {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    override suspend fun interpret(transcript: String): RawIntent? {
+        val answer = gemini.simpleSearchByPromptSuspend(prompt(transcript)) ?: return null
+        return parse(answer)
+    }
+
+    internal fun parse(answer: String): RawIntent? {
+        val start = answer.indexOf('{')
+        val end = answer.lastIndexOf('}')
+        if (start < 0 || end <= start) return null
+        return try {
+            val items = objectMapper.readTree(answer.substring(start, end + 1)).path("items")
+            if (!items.isArray) return null
+            RawIntent(items.mapNotNull { node ->
+                val country = node.path("country").asText("").ifBlank { return@mapNotNull null }
+                CountryMention(country, node.path("levels").filter { it.canConvertToInt() }.map { it.asInt() })
+            })
+        } catch (e: Exception) {
+            logger.warn("Companion: could not read Gemini's answer as JSON: ${e.message}")
+            null
+        }
+    }
+
+    private fun prompt(transcript: String): String = """
+        You extract data-import commands. The user dictated or typed this sentence (any language):
+        "${transcript.replace("\"", "'")}"
+        Answer with ONLY a JSON object, no markdown, in exactly this shape:
+        {"items":[{"country":"<country name in English>","levels":[<integers>]}]}
+        "levels" are administrative levels from 0 (country) to 3. If the user gave none, use [0].
+        If the sentence names no country, answer {"items":[]}.
+    """.trimIndent()
+}
