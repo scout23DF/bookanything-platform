@@ -483,6 +483,15 @@
 
       let currentItems = [];
 
+      // The vendored SSE extension (htmx 1.9) has no `sse-close`: when the server ends the stream after
+      // `event: done`, EventSource reconnects by itself and the page would restart the progress view
+      // (and the server would poll the finished workflow again, forever). Own the EventSource so `done` closes it.
+      htmx.createEventSource = function (url) {
+        const source = new EventSource(url);
+        source.addEventListener('done', function () { source.close(); });
+        return source;
+      };
+
       // 1. One-click preset buttons
       document.querySelectorAll('.btn-preset').forEach((btn) => {
         btn.addEventListener('click', () => {

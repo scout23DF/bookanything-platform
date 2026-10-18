@@ -2,6 +2,8 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.c
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryCatalog
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryMention
+import de.org.dexterity.bookanything.dom01geolocation.application.companion.ImportIntentValidator
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.InterpretationSource
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -61,6 +63,17 @@ class RuleBasedVoiceCommandInterpreterTest {
     fun `an ISO3 code in capitals is accepted but the lower case word is not a country`() = runTest {
         assertEquals(listOf("DEU", "LUX"), heard("DEU and LUX level 0")!!.map { it.country })
         assertNull(heard("what can you do for me"))
+    }
+
+    @Test
+    fun `the four one-click presets of the UI are understood by the rules (the demo fallback)`() = runTest {
+        suspend fun items(sentence: String) = ImportIntentValidator().validate(interpreter.interpret(sentence)!!, InterpretationSource.RULES).items
+            .map { it.countrySlug to it.locationLevel }
+
+        assertEquals(listOf("LUX" to 0, "LUX" to 1), items("Import Luxembourg levels 0 and 1"))
+        assertEquals(listOf("DEU" to 0, "DEU" to 1, "LUX" to 0, "LUX" to 1), items("Import Germany and Luxembourg level 0 and 1"))
+        assertEquals(listOf("DEU" to 0, "DEU" to 1, "LUX" to 0, "LUX" to 1), items("Importiere Deutschland und Luxemburg bis Stufe 1"))
+        assertEquals(listOf("PRT" to 0, "PRT" to 1, "LUX" to 0, "LUX" to 1), items("Importar Portugal e Luxemburgo até o nível 1"))
     }
 
     @Test
