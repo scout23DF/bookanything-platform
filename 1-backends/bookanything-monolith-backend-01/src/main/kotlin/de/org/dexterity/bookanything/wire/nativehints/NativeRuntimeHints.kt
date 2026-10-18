@@ -137,6 +137,8 @@ class NativeRuntimeHints : RuntimeHintsRegistrar {
         hints.resources().registerPattern("org/postgresql/*")
         hints.resources().registerPattern("org/postgresql/driverconfig.properties")
         hints.resources().registerPattern("net/postgis/*")
+        hints.resources().registerPattern("public/*")
+        hints.resources().registerPattern("public/companion/*")
         try {
             hints.resources().registerResourceBundle("org.hibernate.spatial.HSMessageLogger")
             hints.resources().registerResourceBundle("org.hibernate.spatial.HSMessageLogger.i18n")

@@ -73,6 +73,10 @@ temporal:
 
 application:
   domain-settings:
+    geolocation:
+      enrichment:
+        hedging:
+          enabled: ${GEOLOCATION_ENRICHMENT_HEDGING_ENABLED:true}
     asset-mgmnt:
       storage-providers:
         minio:
