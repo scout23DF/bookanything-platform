@@ -9,7 +9,13 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.ports.CorporateStor
 import de.org.dexterity.bookanything.dom02assetmanager.application.services.AssetCRUDService
 import de.org.dexterity.bookanything.dom02assetmanager.domain.models.AssetModel
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -34,7 +40,9 @@ class GeoLocationCleanupService(
     @Value("\${corporate.minio.geodata-bucket:darueira-geodata}")
     private val geodataBucket: String,
     @Value("\${corporate.minio.reports-bucket:darueira-reports}")
-    private val reportsBucket: String
+    private val reportsBucket: String,
+    @Value("\${application.domain-settings.geolocation.cleanup.max-concurrent-asset-deletes:4}")
+    private val maxConcurrentAssetDeletes: Int = 4
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -137,6 +145,24 @@ class GeoLocationCleanupService(
     }
 
     /**
+     * Deletes the assets of a GeoLocation concurrently with bounded parallelism ([Semaphore])
+     * instead of calling `runBlocking` sequentially inside a `forEach` loop.
+     */
+    internal suspend fun deleteAssetsConcurrently(targetAssets: List<AssetModel>): Int {
+        if (targetAssets.isEmpty()) return 0
+        val semaphore = Semaphore(maxConcurrentAssetDeletes.coerceAtLeast(1))
+        return coroutineScope {
+            targetAssets.map { asset ->
+                async {
+                    semaphore.withPermit {
+                        assetCRUDService.deleteAsset(asset.id!!)
+                    }
+                }
+            }.awaitAll().count { it }
+        }
+    }
+
+    /**
      * Deletes the assets (tenant objects and rows), the corporate report copies and the GeoLocations of the item.
      * A GeoLocation referenced by other data (addresses, cities) makes the deletion fail: the caller gets the
      * exception and nothing else is deleted for that GeoLocation.
@@ -149,8 +175,9 @@ class GeoLocationCleanupService(
         var reports = 0
         for (target in targets(item.copy(countrySlug = slug))) {
             val id = target.id.id
-            assetsOf(id).forEach { asset ->
-                if (runBlocking { assetCRUDService.deleteAsset(asset.id!!) }) assets++
+            val targetAssets = assetsOf(id)
+            if (targetAssets.isNotEmpty()) {
+                assets += runBlocking(Dispatchers.IO) { deleteAssetsConcurrently(targetAssets) }
             }
             val reportKey = corporateReportKey(target)
             if (corporateStorage.exists(reportsBucket, reportKey)) {

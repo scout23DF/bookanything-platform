@@ -5,6 +5,9 @@ import de.org.dexterity.bookanything.dom02assetmanager.domain.models.*
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.AssetPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.BucketPersistRepositoryPort
 import de.org.dexterity.bookanything.dom02assetmanager.domain.ports.StorageProviderPort
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -29,7 +32,8 @@ class GeoLocationAssetIntegrationService(
 
     /**
      * Stores both the local map and world highlight SVG images into the Tenant MinIO
-     * using the Asset Management framework and registers them in the asset catalog.
+     * using structured concurrency ([coroutineScope] + [async]) so both independent S3/MinIO uploads
+     * execute concurrently before registering metadata in the catalog.
      */
     suspend fun saveGeoLocationMapSvgs(
         geoLocation: IGeoLocationModel,
@@ -53,19 +57,39 @@ class GeoLocationAssetIntegrationService(
             )
         }
 
-        // 2. Upload Local Map SVG
         val localFileName = "map-$friendlyId.svg"
         val localStorageKey = "images/geolocations/$geoId/$localFileName"
         val localBytes = localMapSvg.toByteArray(Charsets.UTF_8)
 
-        storageProvider.upload(
-            bucketName = IMAGES_BUCKET_NAME,
-            key = localStorageKey,
-            inputStream = ByteArrayInputStream(localBytes),
-            size = localBytes.size.toLong(),
-            mimeType = SVG_MIME_TYPE
-        )
+        val worldFileName = "world-$friendlyId.svg"
+        val worldStorageKey = "images/geolocations/$geoId/$worldFileName"
+        val worldBytes = worldHighlightSvg.toByteArray(Charsets.UTF_8)
 
+        // 2. Fan-out both MinIO uploads concurrently under structured concurrency:
+        // if either upload fails, the sibling upload is cancelled immediately before touching DB rows.
+        coroutineScope {
+            val localUpload = async {
+                storageProvider.upload(
+                    bucketName = IMAGES_BUCKET_NAME,
+                    key = localStorageKey,
+                    inputStream = ByteArrayInputStream(localBytes),
+                    size = localBytes.size.toLong(),
+                    mimeType = SVG_MIME_TYPE
+                )
+            }
+            val worldUpload = async {
+                storageProvider.upload(
+                    bucketName = IMAGES_BUCKET_NAME,
+                    key = worldStorageKey,
+                    inputStream = ByteArrayInputStream(worldBytes),
+                    size = worldBytes.size.toLong(),
+                    mimeType = SVG_MIME_TYPE
+                )
+            }
+            awaitAll(localUpload, worldUpload)
+        }
+
+        // 3. Persist catalog metadata after both storage uploads succeeded
         val localAsset = saveOrUpdateAsset(
             bucket = bucket,
             fileName = localFileName,
@@ -82,19 +106,6 @@ class GeoLocationAssetIntegrationService(
             )
         )
         logger.info("Asset Management: Local Map SVG registered as Asset #${localAsset.id} (key: $localStorageKey)")
-
-        // 3. Upload World Highlight Map SVG
-        val worldFileName = "world-$friendlyId.svg"
-        val worldStorageKey = "images/geolocations/$geoId/$worldFileName"
-        val worldBytes = worldHighlightSvg.toByteArray(Charsets.UTF_8)
-
-        storageProvider.upload(
-            bucketName = IMAGES_BUCKET_NAME,
-            key = worldStorageKey,
-            inputStream = ByteArrayInputStream(worldBytes),
-            size = worldBytes.size.toLong(),
-            mimeType = SVG_MIME_TYPE
-        )
 
         val worldAsset = saveOrUpdateAsset(
             bucket = bucket,

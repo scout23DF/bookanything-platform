@@ -34,8 +34,9 @@ class AssetPersistenceJpaAdapter(
         return assetJpaRepository.findAll(pageable).map(assetJpaMapper::toDomain)
     }
 
+    @Transactional
     override fun delete(targetAssetModel: AssetModel) {
-        assetJpaRepository.findById(targetAssetModel.id!!).let { assetJpaRepository.delete(it.get()) }
+        assetJpaRepository.findById(targetAssetModel.id!!).ifPresent { assetJpaRepository.delete(it) }
     }
 
     @Transactional(readOnly = true)
