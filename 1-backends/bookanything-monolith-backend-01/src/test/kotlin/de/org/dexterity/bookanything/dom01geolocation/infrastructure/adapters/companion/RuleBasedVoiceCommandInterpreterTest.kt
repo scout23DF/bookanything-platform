@@ -89,4 +89,35 @@ class RuleBasedVoiceCommandInterpreterTest {
         assertNull(CountryCatalog.resolve("Atlantis"))
         assertNull(CountryCatalog.resolve("ZZZ"))
     }
+
+    private suspend fun mechanism(sentence: String) = interpreter.interpret(sentence)?.mapSvgGeneratorMechanism
+
+    @Test
+    fun `no mention of a map generator says nothing, so the default applies later`() = runTest {
+        assertNull(mechanism("Import Germany level 1"))
+    }
+
+    @Test
+    fun `geopandas is heard in the spellings a dictation produces`() = runTest {
+        assertEquals("GEOPANDAS", mechanism("Import Germany with GeoPandas"))
+        assertEquals("GEOPANDAS", mechanism("importa o Brasil usando geo pandas"))
+        assertEquals("GEOPANDAS", mechanism("Importa Chile com geo-pandas nível 1"))
+    }
+
+    @Test
+    fun `kotlin is heard in any language`() = runTest {
+        assertEquals("KOTLIN", mechanism("Import Germany with Kotlin"))
+        assertEquals("KOTLIN", mechanism("Importa o Brasil usando kotlin no nível 2"))
+        assertEquals("KOTLIN", mechanism("Importiere Österreich mit Kotlin, Stufe 1"))
+    }
+
+    @Test
+    fun `a sentence naming both generators is ambiguous and says nothing`() = runTest {
+        assertNull(mechanism("Import Chile with geopandas instead of kotlin"))
+    }
+
+    @Test
+    fun `the generator word does not disturb countries or levels`() = runTest {
+        assertEquals(listOf(CountryMention("DEU", listOf(0, 1))), heard("Import Germany with kotlin level 0 and 1"))
+    }
 }

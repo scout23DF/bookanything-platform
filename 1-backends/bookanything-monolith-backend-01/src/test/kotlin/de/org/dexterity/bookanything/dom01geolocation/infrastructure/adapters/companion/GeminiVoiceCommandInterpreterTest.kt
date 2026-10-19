@@ -62,4 +62,20 @@ class GeminiVoiceCommandInterpreterTest {
         assertTrue(sent.contains("every level from 0 to N"), "the range rule must be in the prompt")
         assertTrue(sent.contains("até o nível N") && sent.contains("bis Stufe N"))
     }
+
+    @Test
+    fun `reads the map generator the model heard`() = runTest {
+        val answer = "{\"items\":[{\"country\":\"Chile\",\"levels\":[0]}],\"mapSvgGeneratorMechanism\":\"KOTLIN\"}"
+
+        assertEquals("KOTLIN", interpreter(answer).interpret("x")!!.mapSvgGeneratorMechanism)
+    }
+
+    @Test
+    fun `a null or missing map generator is no request`() = runTest {
+        val withNull = "{\"items\":[{\"country\":\"Chile\",\"levels\":[0]}],\"mapSvgGeneratorMechanism\":null}"
+        val missing = "{\"items\":[{\"country\":\"Chile\",\"levels\":[0]}]}"
+
+        assertNull(interpreter(withNull).interpret("x")!!.mapSvgGeneratorMechanism)
+        assertNull(interpreter(missing).interpret("x")!!.mapSvgGeneratorMechanism)
+    }
 }

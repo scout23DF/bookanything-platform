@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 data class InterpretRequest(val transcript: String = "")
-data class ConfirmRequest(val items: List<CountryImportItem> = emptyList())
+/** [mapSvgGeneratorMechanism] is what the user saw on the confirmation (`null` = the Companion default); it is validated again here. */
+data class ConfirmRequest(val items: List<CountryImportItem> = emptyList(), val mapSvgGeneratorMechanism: String? = null)
 
 /**
  * The AI Companion: a sentence in, a confirmed import out, and live progress back.
@@ -50,16 +51,17 @@ class CompanionController(
 
     @PostMapping("/confirm")
     fun confirm(@RequestBody request: ConfirmRequest): ResponseEntity<Map<String, Any>> {
-        val checked = validator.revalidate(request.items)
+        val checked = validator.revalidate(request.items, request.mapSvgGeneratorMechanism)
         if (checked.items.isEmpty()) {
             return ResponseEntity.unprocessableEntity().body(mapOf("error" to "Nothing valid to import", "warnings" to checked.warnings))
         }
-        val workflowId = starter.start(GeoLocationBatchImportRequest(items = checked.items))
+        val workflowId = starter.start(GeoLocationBatchImportRequest(items = checked.items, mapSvgGeneratorMechanism = checked.mapSvgGeneratorMechanism.name))
         registry.remember(workflowId, checked.items)
         return ResponseEntity.accepted().body(
             mapOf(
                 "workflowId" to workflowId,
                 "items" to checked.items,
+                "mapSvgGeneratorMechanism" to checked.mapSvgGeneratorMechanism,
                 "streamUrl" to "/api/v1/geolocations/companion/workflows/$workflowId/stream"
             )
         )
