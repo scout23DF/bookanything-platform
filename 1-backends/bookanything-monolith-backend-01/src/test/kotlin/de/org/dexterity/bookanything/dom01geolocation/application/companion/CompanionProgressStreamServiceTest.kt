@@ -50,7 +50,8 @@ class CompanionProgressStreamServiceTest {
         val s = CompanionProgressStreamService
         assertEquals(listOf(ItemState.INGESTED, ItemState.INGESTING, ItemState.PENDING), (0..2).map { s.stateOf(it, "NIFI_INGESTION", 1) })
         assertEquals(listOf(ItemState.ARTIFACTS_READY, ItemState.GENERATING_ARTIFACTS, ItemState.INGESTED), (0..2).map { s.stateOf(it, "ARTIFACTS_GENERATION", 1) })
-        assertEquals(ItemState.COMPLETED, s.stateOf(0, "JSREPORT_GENERATION", 0))
+        assertEquals(ItemState.ARTIFACTS_READY, s.stateOf(0, "JSREPORT_GENERATION", 0), "the report is still being built")
+        assertEquals(ItemState.COMPLETED, s.stateOf(0, "COMPLETED", 1))
         assertEquals(ItemState.PENDING, s.stateOf(0, "STARTED", 0))
     }
 

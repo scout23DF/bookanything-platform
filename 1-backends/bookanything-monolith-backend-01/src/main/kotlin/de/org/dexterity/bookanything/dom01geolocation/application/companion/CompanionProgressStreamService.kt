@@ -112,7 +112,8 @@ class CompanionProgressStreamService(
                 index == processed -> ItemState.GENERATING_ARTIFACTS
                 else -> ItemState.INGESTED
             }
-            "JSREPORT_GENERATION", "PUBLISHING_EVENT", "COMPLETED" -> ItemState.COMPLETED
+            "JSREPORT_GENERATION", "PUBLISHING_EVENT" -> ItemState.ARTIFACTS_READY // the report is still being built
+            "COMPLETED" -> ItemState.COMPLETED
             else -> ItemState.PENDING
         }
     }

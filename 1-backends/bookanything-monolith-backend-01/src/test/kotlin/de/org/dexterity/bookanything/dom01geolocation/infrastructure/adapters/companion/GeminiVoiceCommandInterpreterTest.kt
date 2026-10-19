@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class GeminiVoiceCommandInterpreterTest {
 
@@ -40,5 +41,25 @@ class GeminiVoiceCommandInterpreterTest {
         val answer = "{\"items\":[{\"levels\":[1]},{\"country\":\"Chile\",\"levels\":[\"a\",2]}]}"
 
         assertEquals(listOf(CountryMention("Chile", listOf(2))), interpreter(answer).interpret("x")!!.mentions)
+    }
+
+    @Test
+    fun `the prompt carries the sentence and spells out that up to level N means 0 to N`() = runTest {
+        var sent = ""
+        val gemini = GeminiVoiceCommandInterpreter(
+            object : SearchEngineInIAProxyPort {
+                override fun simpleSearchByPrompt(promptToSearch: String): String? {
+                    sent = promptToSearch
+                    return null
+                }
+            },
+            ObjectMapper()
+        )
+
+        gemini.interpret("importe a Alemanha até o nível 1")
+
+        assertTrue(sent.contains("importe a Alemanha até o nível 1"))
+        assertTrue(sent.contains("every level from 0 to N"), "the range rule must be in the prompt")
+        assertTrue(sent.contains("até o nível N") && sent.contains("bis Stufe N"))
     }
 }

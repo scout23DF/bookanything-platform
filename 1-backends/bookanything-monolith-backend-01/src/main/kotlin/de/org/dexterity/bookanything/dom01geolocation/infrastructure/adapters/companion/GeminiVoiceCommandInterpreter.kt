@@ -49,6 +49,8 @@ class GeminiVoiceCommandInterpreter(
         Answer with ONLY a JSON object, no markdown, in exactly this shape:
         {"items":[{"country":"<country name in English>","levels":[<integers>]}]}
         "levels" are administrative levels from 0 (country) to 3. If the user gave none, use [0].
+        "Up to level N" (also "até o nível N", "bis Stufe N", "hasta el nivel N") means every level from 0 to N,
+        e.g. up to level 2 is [0,1,2]; "level N" or "only level N" alone is just [N].
         If the sentence names no country, answer {"items":[]}.
     """.trimIndent()
 }
