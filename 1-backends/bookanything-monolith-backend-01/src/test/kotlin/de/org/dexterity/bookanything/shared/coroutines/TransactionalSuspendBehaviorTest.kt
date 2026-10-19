@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.EnableTransactionManagement
@@ -73,7 +73,9 @@ class RecordingTransactionManager : AbstractPlatformTransactionManager() {
     override fun doRollback(status: DefaultTransactionStatus) { timeline += "TX ROLLBACK" }
 }
 
-@Configuration
+// @TestConfiguration, not @Configuration: Boot's component scan skips it, so the @SpringBootTest integration
+// tests (same package tree) do not pick up this probe's transaction manager and CGLIB proxy of a final class.
+@TestConfiguration
 @EnableTransactionManagement
 open class TransactionProbeConfig {
     @Bean
