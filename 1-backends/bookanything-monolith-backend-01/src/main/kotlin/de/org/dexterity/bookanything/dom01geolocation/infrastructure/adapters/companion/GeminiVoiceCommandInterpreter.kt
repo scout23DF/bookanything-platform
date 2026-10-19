@@ -43,10 +43,11 @@ class GeminiVoiceCommandInterpreter(
         }
     }
 
+    // TOFDO: Explain this later
     private fun prompt(transcript: String): String = """
         You extract data-import commands. The user dictated or typed this sentence (any language):
         "${transcript.replace("\"", "'")}"
-        Answer with ONLY a JSON object, no markdown, in exactly this shape :
+        Answer with ONLY a JSON object, no markdown, in exactly this shape:
         {"items":[{"country":"<country name in English>","levels":[<integers>]}]}
         "levels" are administrative levels from 0 (country) to 3. If the user gave none, use [0].
         "Up to level N" (also "até o nível N", "bis Stufe N", "hasta el nivel N") means every level from 0 to N,
