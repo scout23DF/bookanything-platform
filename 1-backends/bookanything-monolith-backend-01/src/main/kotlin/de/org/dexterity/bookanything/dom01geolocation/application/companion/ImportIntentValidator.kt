@@ -4,6 +4,7 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryCa
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryMention
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.InterpretationResult
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.InterpretationSource
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.MapSvgMechanism
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.RawIntent
 import de.org.dexterity.bookanything.dom01geolocation.domain.dtos.CountryImportItem
 
@@ -35,13 +36,21 @@ class ImportIntentValidator(private val maxItems: Int = DEFAULT_MAX_ITEMS) {
 
         val kept = items.take(maxItems)
         if (items.size > maxItems) warnings += "Only the first $maxItems of ${items.size} requested imports were kept"
-        return InterpretationResult(kept, if (kept.isEmpty()) InterpretationSource.NONE else source, warnings)
+        val mechanism = resolveMechanism(raw.mapSvgGeneratorMechanism, warnings)
+        return InterpretationResult(kept, if (kept.isEmpty()) InterpretationSource.NONE else source, warnings, mechanism)
+    }
+
+    /** Nothing said means the default; a name outside [MapSvgMechanism] is ignored (with a warning) and also means the default. */
+    fun resolveMechanism(requested: String?, warnings: MutableList<String> = mutableListOf()): MapSvgMechanism {
+        if (requested.isNullOrBlank()) return MapSvgMechanism.DEFAULT
+        return MapSvgMechanism.parse(requested)
+            ?: MapSvgMechanism.DEFAULT.also { warnings += "Unknown map generator \"${requested.take(40)}\" ignored; using ${it.name}" }
     }
 
     /** Re-validates items sent back by the UI on confirmation: the client is not trusted either. */
-    fun revalidate(items: List<CountryImportItem>): InterpretationResult =
+    fun revalidate(items: List<CountryImportItem>, mapSvgGeneratorMechanism: String? = null): InterpretationResult =
         validate(
-            RawIntent(items.groupBy { it.countrySlug }.map { (slug, list) -> CountryMention(slug, list.map { it.locationLevel }) }),
+            RawIntent(items.groupBy { it.countrySlug }.map { (slug, list) -> CountryMention(slug, list.map { it.locationLevel }) }, mapSvgGeneratorMechanism),
             InterpretationSource.NONE
         ).let { if (it.items.isEmpty()) it else it.copy(source = InterpretationSource.RULES) }
 

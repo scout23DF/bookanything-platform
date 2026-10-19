@@ -2,6 +2,7 @@ package de.org.dexterity.bookanything.dom01geolocation.infrastructure.adapters.c
 
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryCatalog
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryMention
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.MapSvgMechanism
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.RawIntent
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.VoiceCommandInterpreterPort
 
@@ -12,18 +13,34 @@ import de.org.dexterity.bookanything.dom01geolocation.domain.companion.VoiceComm
  *
  * Levels apply to every country in the sentence ("Germany and Luxembourg, levels 0 and 1" = four imports).
  * "up to level 2" / "até o nível 2" / "bis Stufe 2" mean 0..2, and "levels 1 to 3" is a range.
+ *
+ * The map generator is only set when the sentence names exactly one of them ("with GeoPandas", "usa kotlin"); a sentence
+ * naming both is ambiguous, so it says nothing and the Companion default applies.
  */
 class RuleBasedVoiceCommandInterpreter : VoiceCommandInterpreterPort {
 
     private val levelWord = "(?:levels?|niveis|nivel|stufen|stufe|ebenen|ebene)"
     private val upTo = Regex("(?:up to|until|through|ate|bis)\\s+(?:o |the |zur |zum )?$levelWord\\s*(\\d)")
     private val rangeOrList = Regex("$levelWord\\s*((?:\\d|\\s|,|&|and|e|und|y|to|a|ate|bis|-)+)")
+    private val geoPandasWord = Regex("\\b(?:geo|jeo)[ -]?pandas\\b|\\bpandas\\b")
+    private val kotlinWord = Regex("\\b(?:kotlin|cotlin)\\b")
 
     override suspend fun interpret(transcript: String): RawIntent? {
         val countries = CountryCatalog.findIn(transcript)
         if (countries.isEmpty()) return null
-        val levels = levelsIn(CountryCatalog.normalize(transcript))
-        return RawIntent(countries.map { CountryMention(it, levels) })
+        val text = CountryCatalog.normalize(transcript)
+        val levels = levelsIn(text)
+        return RawIntent(countries.map { CountryMention(it, levels) }, mechanismIn(text)?.name)
+    }
+
+    internal fun mechanismIn(text: String): MapSvgMechanism? {
+        val pandas = geoPandasWord.containsMatchIn(text)
+        val kotlin = kotlinWord.containsMatchIn(text)
+        return when {
+            pandas && !kotlin -> MapSvgMechanism.GEOPANDAS
+            kotlin && !pandas -> MapSvgMechanism.KOTLIN
+            else -> null
+        }
     }
 
     internal fun levelsIn(text: String): List<Int> {

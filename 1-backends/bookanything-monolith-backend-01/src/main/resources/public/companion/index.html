@@ -407,6 +407,7 @@
         <span id="interpreter-source-badge" class="badge badge-rules">RULES</span>
       </h2>
       <p id="intent-summary" class="subtitle" style="margin-bottom: 10px;"></p>
+      <p id="intent-mechanism" class="subtitle" style="margin-bottom: 10px;"></p>
       <ul id="intent-warnings" class="warnings-list hidden"></ul>
 
       <div id="intent-table-wrapper">
@@ -470,6 +471,7 @@
       const confirmCard = document.getElementById('confirm-card');
       const sourceBadge = document.getElementById('interpreter-source-badge');
       const intentSummary = document.getElementById('intent-summary');
+      const intentMechanism = document.getElementById('intent-mechanism');
       const intentWarnings = document.getElementById('intent-warnings');
       const intentTbody = document.getElementById('intent-items-tbody');
       const confirmBtn = document.getElementById('confirm-btn');
@@ -482,6 +484,7 @@
       const disconnectSseBtn = document.getElementById('disconnect-sse-btn');
 
       let currentItems = [];
+      let currentMechanism = 'GEOPANDAS';
 
       // The vendored SSE extension (htmx 1.9) has no `sse-close`: when the server ends the stream after
       // `event: done`, EventSource reconnects by itself and the page would restart the progress view
@@ -548,6 +551,9 @@
           ? 'Validated summary: ' + data.summary
           : 'No valid countries/levels recognized in transcript.';
 
+        currentMechanism = data.mapSvgGeneratorMechanism || 'GEOPANDAS';
+        intentMechanism.textContent = 'Map generator: ' + currentMechanism + ' (say "with Kotlin" or "with GeoPandas" to change it)';
+
         const warnings = Array.isArray(data.warnings) ? data.warnings : [];
         intentWarnings.innerHTML = '';
         if (warnings.length > 0) {
@@ -602,7 +608,7 @@
           const resp = await fetch('/api/v1/geolocations/companion/confirm', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ items: currentItems })
+            body: JSON.stringify({ items: currentItems, mapSvgGeneratorMechanism: currentMechanism })
           });
           const data = await resp.json();
           if (!resp.ok) {

@@ -1,5 +1,6 @@
 package de.org.dexterity.bookanything.dom01geolocation.application.companion
 
+import de.org.dexterity.bookanything.dom01geolocation.domain.companion.MapSvgMechanism
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.CountryMention
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.InterpretationSource
 import de.org.dexterity.bookanything.dom01geolocation.domain.companion.RawIntent
@@ -59,5 +60,37 @@ class ImportIntentValidatorTest {
         val r = validator.revalidate(listOf(CountryImportItem("DEU", 0), CountryImportItem("XXX", 0), CountryImportItem("DEU", 7), CountryImportItem("../etc", 1)))
 
         assertEquals(listOf(CountryImportItem("DEU", 0)), r.items)
+    }
+
+    @Test
+    fun `no generator requested - GeoPandas is the default`() {
+        val r = validator.validate(RawIntent(listOf(CountryMention("Chile", listOf(0)))), InterpretationSource.GEMINI)
+
+        assertEquals(MapSvgMechanism.GEOPANDAS, r.mapSvgGeneratorMechanism)
+        assertTrue(r.warnings.isEmpty())
+    }
+
+    @Test
+    fun `a requested generator is used, in any case`() {
+        val kotlin = validator.validate(RawIntent(listOf(CountryMention("Chile", listOf(0))), "kotlin"), InterpretationSource.RULES)
+        val pandas = validator.validate(RawIntent(listOf(CountryMention("Chile", listOf(0))), " GeoPandas "), InterpretationSource.RULES)
+
+        assertEquals(MapSvgMechanism.KOTLIN, kotlin.mapSvgGeneratorMechanism)
+        assertEquals(MapSvgMechanism.GEOPANDAS, pandas.mapSvgGeneratorMechanism)
+    }
+
+    @Test
+    fun `an unknown generator is ignored with a warning, never passed on`() {
+        val r = validator.validate(RawIntent(listOf(CountryMention("Chile", listOf(0))), "rm -rf"), InterpretationSource.GEMINI)
+
+        assertEquals(MapSvgMechanism.GEOPANDAS, r.mapSvgGeneratorMechanism)
+        assertTrue(r.warnings.single().contains("Unknown map generator"))
+    }
+
+    @Test
+    fun `revalidate keeps the generator the user confirmed`() {
+        val r = validator.revalidate(listOf(CountryImportItem("CHL", 0)), "KOTLIN")
+
+        assertEquals(MapSvgMechanism.KOTLIN, r.mapSvgGeneratorMechanism)
     }
 }

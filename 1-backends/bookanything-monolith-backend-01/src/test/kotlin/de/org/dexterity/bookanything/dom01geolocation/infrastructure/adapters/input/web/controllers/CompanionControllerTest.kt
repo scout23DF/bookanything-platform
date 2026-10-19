@@ -104,4 +104,47 @@ class CompanionControllerTest {
         assert(body.contains("Ingesting via NiFi"))
         assert(body.contains("Open the PDF report"))
     }
+
+    private fun confirmedWith(body: String): GeoLocationBatchImportRequest {
+        val sent = slot<GeoLocationBatchImportRequest>()
+        every { starter.start(capture(sent)) } returns "geo-import-2"
+
+        mvc.perform(post("/api/v1/geolocations/companion/confirm").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isAccepted)
+        return sent.captured
+    }
+
+    @Test
+    fun `confirm - without a generator the workflow gets GEOPANDAS`() {
+        assertEquals("GEOPANDAS", confirmedWith("""{"items":[{"countrySlug":"DEU","locationLevel":1}]}""").mapSvgGeneratorMechanism)
+    }
+
+    @Test
+    fun `confirm - the generator the user asked for reaches the workflow`() {
+        assertEquals("KOTLIN", confirmedWith("""{"items":[{"countrySlug":"DEU","locationLevel":1}],"mapSvgGeneratorMechanism":"KOTLIN"}""").mapSvgGeneratorMechanism)
+    }
+
+    @Test
+    fun `confirm - an unknown generator falls back to GEOPANDAS`() {
+        assertEquals("GEOPANDAS", confirmedWith("""{"items":[{"countrySlug":"DEU","locationLevel":1}],"mapSvgGeneratorMechanism":"PERL"}""").mapSvgGeneratorMechanism)
+    }
+
+    @Test
+    fun `interpret - a spoken generator is returned for the confirmation screen`() {
+        val started = mvc.perform(post("/api/v1/geolocations/companion/interpret").contentType(MediaType.APPLICATION_JSON).content("""{"transcript":"Import Chile with Kotlin"}"""))
+            .andExpect(request().asyncStarted()).andReturn()
+
+        mvc.perform(asyncDispatch(started))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.mapSvgGeneratorMechanism").value("KOTLIN"))
+    }
+
+    @Test
+    fun `interpret - saying nothing about the generator returns GEOPANDAS`() {
+        val started = mvc.perform(post("/api/v1/geolocations/companion/interpret").contentType(MediaType.APPLICATION_JSON).content("""{"transcript":"Import Chile level 1"}"""))
+            .andExpect(request().asyncStarted()).andReturn()
+
+        mvc.perform(asyncDispatch(started))
+            .andExpect(jsonPath("$.mapSvgGeneratorMechanism").value("GEOPANDAS"))
+    }
 }
