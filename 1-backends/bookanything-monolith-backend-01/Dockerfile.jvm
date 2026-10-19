@@ -8,13 +8,23 @@ FROM maven:3.9-eclipse-temurin-25 AS builder
 
 WORKDIR /app
 
+# Maven traffic goes through the platform Nexus when the pipeline passes MAVEN_MIRROR_URL (a "*" mirror: it also
+# replaces the third-party repositories declared in the pom). Without it (e.g. a local docker build) the file is an
+# empty settings document and Maven behaves as usual.
+ARG MAVEN_MIRROR_URL=""
+RUN if [ -n "$MAVEN_MIRROR_URL" ]; then \
+      printf '<settings><mirrors><mirror><id>darueira-nexus</id><mirrorOf>*</mirrorOf><url>%s</url></mirror></mirrors></settings>\n' "$MAVEN_MIRROR_URL" > /app/settings-mirror.xml; \
+    else \
+      printf '<settings/>\n' > /app/settings-mirror.xml; \
+    fi
+
 # Copy pom.xml and cache dependencies
 COPY pom.xml .
-RUN mvn dependency:go-offline -B || true
+RUN mvn -s /app/settings-mirror.xml dependency:go-offline -B || true
 
 # Copy source code and build runnable fat jar
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN mvn -s /app/settings-mirror.xml clean package -DskipTests -B
 
 # ==============================================================================
 # Runtime Stage (Non-root, Minimal Temurin 25 JRE)
