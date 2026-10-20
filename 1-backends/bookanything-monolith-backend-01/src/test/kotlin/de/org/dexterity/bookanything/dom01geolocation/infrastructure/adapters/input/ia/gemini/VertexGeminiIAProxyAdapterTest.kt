@@ -193,6 +193,74 @@ class VertexGeminiIAProxyAdapterTest {
     }
 
     @Test
+    fun `free-tier per-minute 429 is a rate limit and not a daily quota`() = runTest {
+        val clock = MutableClock()
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        var invocations = 0
+        var failureToThrow: Throwable? = RuntimeException(
+            """429 RESOURCE_EXHAUSTED: {"error":{"details":[{"violations":[{"quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}]},{"retryDelay":"37s"}]}}"""
+        )
+
+        val adapter = VertexGeminiIAProxyAdapter(
+            chatClient = dummyChatClient,
+            callTimeout = Duration.ofSeconds(40),
+            minCooldown = Duration.ofSeconds(20),
+            maxCooldown = Duration.ofMinutes(5),
+            dailyQuotaCooldown = Duration.ofHours(1),
+            ioDispatcher = testDispatcher,
+            clock = clock,
+            callExecutor = {
+                invocations++
+                failureToThrow?.let { throw it }
+                "ok"
+            }
+        )
+
+        assertNull(adapter.simpleSearchByPromptSuspend("rpm-limited"))
+        assertEquals(1, invocations)
+
+        // Opened for the server's 37s retryDelay, not for the 1 h daily cooldown
+        clock.advance(Duration.ofSeconds(30))
+        assertNull(adapter.simpleSearchByPromptSuspend("still-open"))
+        assertEquals(1, invocations, "Circuit must still be open at +30s")
+
+        clock.advance(Duration.ofSeconds(8))
+        failureToThrow = null
+        assertEquals("ok", adapter.simpleSearchByPromptSuspend("recovered-after-37s"))
+        assertEquals(2, invocations)
+    }
+
+    @Test
+    fun `a bare FreeTier 429 without a per-day marker does not open the daily cooldown`() = runTest {
+        val clock = MutableClock()
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        var invocations = 0
+        var failureToThrow: Throwable? = RuntimeException("429 RESOURCE_EXHAUSTED: FreeTier limit reached")
+
+        val adapter = VertexGeminiIAProxyAdapter(
+            chatClient = dummyChatClient,
+            minCooldown = Duration.ofSeconds(20),
+            maxCooldown = Duration.ofMinutes(5),
+            dailyQuotaCooldown = Duration.ofHours(1),
+            ioDispatcher = testDispatcher,
+            clock = clock,
+            callExecutor = {
+                invocations++
+                failureToThrow?.let { throw it }
+                "ok"
+            }
+        )
+
+        assertNull(adapter.simpleSearchByPromptSuspend("limited"))
+
+        // No retryDelay in the body: falls back to minCooldown (20s), so it recovers well before 1 h
+        clock.advance(Duration.ofSeconds(21))
+        failureToThrow = null
+        assertEquals("ok", adapter.simpleSearchByPromptSuspend("recovered"))
+        assertEquals(2, invocations)
+    }
+
+    @Test
     fun `external CancellationException is rethrown without tripping circuit breaker and releases bulkhead permit`() = runTest {
         val clock = MutableClock()
         val testDispatcher = StandardTestDispatcher(testScheduler)
