@@ -16,6 +16,8 @@ class GeoLocationArtifactsWorkflowImpl : GeoLocationArtifactsWorkflow {
             GeoLocationArtifactsActivities::class.java,
             ActivityOptions.newBuilder()
                 .setStartToCloseTimeout(startToClose)
+                // Beaten by HeartbeatWorkerInterceptor while the activity runs; a task lost in dispatch is retried after this.
+                .setHeartbeatTimeout(Duration.ofSeconds(30))
                 .setRetryOptions(
                     RetryOptions.newBuilder()
                         .setInitialInterval(initialInterval)

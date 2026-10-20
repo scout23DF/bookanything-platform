@@ -19,7 +19,8 @@ class GeoLocationCleanupWorkflowImpl : GeoLocationCleanupWorkflow {
             GeoLocationCleanupActivities::class.java,
             ActivityOptions.newBuilder()
                 .setStartToCloseTimeout(startToClose)
-                .apply { if (heartbeat != null) setHeartbeatTimeout(heartbeat) }
+                // Beaten by HeartbeatWorkerInterceptor while the activity runs; a task lost in dispatch is retried after this.
+                .setHeartbeatTimeout(heartbeat ?: Duration.ofSeconds(30))
                 .setRetryOptions(
                     RetryOptions.newBuilder()
                         .setInitialInterval(Duration.ofSeconds(3))

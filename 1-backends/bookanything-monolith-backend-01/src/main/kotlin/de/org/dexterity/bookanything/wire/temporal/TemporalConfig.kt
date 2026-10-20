@@ -11,6 +11,7 @@ import io.temporal.client.WorkflowClientOptions
 import io.temporal.serviceclient.WorkflowServiceStubs
 import io.temporal.serviceclient.WorkflowServiceStubsOptions
 import io.temporal.worker.WorkerFactory
+import io.temporal.worker.WorkerFactoryOptions
 import io.temporal.worker.WorkerOptions
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -100,7 +101,10 @@ class TemporalConfig(
             }
 
             private fun newWorkerFactory(): WorkerFactory {
-                val factory = WorkerFactory.newInstance(workflowClient)
+                val factory = WorkerFactory.newInstance(
+                    workflowClient,
+                    WorkerFactoryOptions.newBuilder().setWorkerInterceptors(HeartbeatWorkerInterceptor()).build()
+                )
                 val worker = factory.newWorker(taskQueue)
                 worker.registerWorkflowImplementationTypes(
                     GeoLocationIngestionWorkflowImpl::class.java,
