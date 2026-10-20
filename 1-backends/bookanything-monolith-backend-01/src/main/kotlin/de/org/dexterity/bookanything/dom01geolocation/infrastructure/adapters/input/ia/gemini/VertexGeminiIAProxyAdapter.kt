@@ -115,16 +115,18 @@ class VertexGeminiIAProxyAdapter(
         val causeChain = generateSequence(error) { it.cause }
             .joinToString(" <- ") { "[${it.javaClass.simpleName}: ${it.message}]" }
 
-        val isDailyQuota = causeChain.contains("PerDay", ignoreCase = true) ||
-                causeChain.contains("FreeTier", ignoreCase = true)
+        // Only an explicit per-day marker means daily exhaustion. "-FreeTier" alone is not one: it is also
+        // the suffix of the per-minute quota ids, so matching it turned every free-tier RPM 429 into 1 h.
+        val isDailyQuota = DAILY_QUOTA_MARKER.containsMatchIn(causeChain)
         val isRateLimit = causeChain.contains("429") || causeChain.contains("RESOURCE_EXHAUSTED") ||
                 causeChain.contains("quota", ignoreCase = true) || causeChain.contains("rate limit", ignoreCase = true)
+        val violated = quotaIdsFrom(causeChain)
 
         when {
-            isDailyQuota -> open(dailyQuotaCooldown, "daily quota exhausted")
+            isDailyQuota -> open(dailyQuotaCooldown, "daily quota exhausted$violated")
             isRateLimit -> open(
                 (retryDelayFrom(causeChain) ?: minCooldown).coerceIn(minCooldown, maxCooldown),
-                "rate limited"
+                "rate limited$violated"
             )
             else -> logger.warn("Gemini call failed after ${durationMs}ms: $causeChain")
         }
@@ -136,8 +138,19 @@ class VertexGeminiIAProxyAdapter(
         return match?.groupValues?.get(1)?.toDoubleOrNull()?.let { Duration.ofMillis((it * 1000).toLong()) }
     }
 
+    /** The violated quota ids (e.g. GenerateRequestsPerMinutePerProjectPerModel-FreeTier), only to make the log diagnosable. */
+    private fun quotaIdsFrom(text: String): String {
+        val ids = QUOTA_ID.findAll(text).map { it.value }.distinct().toList()
+        return if (ids.isEmpty()) "" else " (violated: ${ids.joinToString()})"
+    }
+
     private fun open(cooldown: Duration, reason: String) {
         openUntil = clock.instant().plus(cooldown)
         logger.warn("Gemini circuit opened for ${cooldown.seconds}s: $reason. Enrichment falls back to other providers meanwhile.")
+    }
+
+    private companion object {
+        val DAILY_QUOTA_MARKER = Regex("""per[\s_-]?day""", RegexOption.IGNORE_CASE)
+        val QUOTA_ID = Regex("""Generate\w*Per(?:Minute|Day|Hour)\w*(?:-\w+)?""")
     }
 }
