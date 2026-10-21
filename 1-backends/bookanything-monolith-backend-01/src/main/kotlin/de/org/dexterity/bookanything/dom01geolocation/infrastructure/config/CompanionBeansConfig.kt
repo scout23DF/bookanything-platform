@@ -26,7 +26,7 @@ class CompanionBeansConfig {
         gemini: SearchEngineInIAProxyPort,
         objectMapper: ObjectMapper,
         validator: ImportIntentValidator,
-        @Value("\${application.domain-settings.geolocation.companion.gemini-budget-ms:5000}") budgetMs: Long
+        @Value("\${application.domain-settings.geolocation.companion.gemini-budget-ms:8000}") budgetMs: Long
     ) = CompanionInterpretationService(
         primary = GeminiVoiceCommandInterpreter(gemini, objectMapper),
         fallback = RuleBasedVoiceCommandInterpreter(),

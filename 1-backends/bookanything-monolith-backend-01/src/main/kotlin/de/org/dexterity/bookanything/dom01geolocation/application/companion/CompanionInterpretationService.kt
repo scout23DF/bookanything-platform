@@ -20,7 +20,7 @@ class CompanionInterpretationService(
     private val primary: VoiceCommandInterpreterPort,
     private val fallback: VoiceCommandInterpreterPort,
     private val validator: ImportIntentValidator,
-    private val primaryBudgetMs: Long = 5_000,
+    private val primaryBudgetMs: Long = 8_000,
     private val maxTranscriptChars: Int = 500
 ) {
 
